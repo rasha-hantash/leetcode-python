@@ -20,9 +20,11 @@ class Solution:
 
 
 '''
-hashmap with contain a k,v pair of ending symbol -> beginning symbol
+a stack that has list of beginning symbols 
 
-stack will only contain a list of ending symbols popped onto the stack 
+hashmap that maps ending symbols to beginning symbols 
 
-the program should compaire to see if the last element in stack is the same has hashmap[c]
+return a statement around if stack is empty -> return not stack 
+
+core logic: if the last element in the stack is the same is Map[c] the pop it and ensure stack is not empty to handle a case of "]"
 '''
