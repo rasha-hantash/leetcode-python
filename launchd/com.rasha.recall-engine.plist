@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Daily snapshot of Recall (10) + New (3). Fires at 8:30 AM in the local timezone.
+  Install:
+    cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
+  Logs:
+    ~/Library/Logs/recall-engine.log
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rasha.recall-engine</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/rashasaadeh/.local/bin/uv</string>
+        <string>run</string>
+        <string>python</string>
+        <string>-m</string>
+        <string>recall_engine</string>
+        <string>recompute</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/rashasaadeh/workspace/personal/leetcode-python</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>8</integer>
+        <key>Minute</key>
+        <integer>30</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/rashasaadeh/Library/Logs/recall-engine.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/rashasaadeh/Library/Logs/recall-engine.log</string>
+</dict>
+</plist>
