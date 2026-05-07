@@ -4,7 +4,7 @@ Tracker for deferred sprint-system work. Strike items through (`~~text~~`) when 
 
 ## Pre-D1 (before Mon May 11)
 
-- [ ] **Push branch to origin.** `gt submit` was blocked because `rasha-hantash/leetcode-python` isn't in Graphite's synced-repos list. Either add it at <https://app.graphite.com/settings/synced-repos> and re-run `gt submit --no-interactive --publish`, or fall back to `git push -u origin <branch>` for the live stack.
+- [x] ~~Push branch to origin.~~ Done 2026-05-07 — 4 PRs created via `gt submit` after repo synced. Stack: <https://app.graphite.com/submit/rasha-hantash/leetcode-python/2>.
 - [ ] **Verify mock dates against actual booking availability.** `prep-plan-daily.md` re-maps mock slots to Tue/Fri pairs (D2, D5, D9, D12, D16, D19, D23, D26, D30, D33, D37, D40, D44, D47, D51, D54). These are tentative — Pramp and Interviewing.io may not have those exact slots open. Book what's actually available; the recall engine doesn't depend on mock dates.
 
 ## Mid-sprint (when relevant)
