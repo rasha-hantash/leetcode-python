@@ -1,0 +1,156 @@
+# Day-0 Setup Guide
+
+Everything you need before D1. Budget 4–5 hours; do it once and never again. Order matters — earlier steps unblock later ones.
+
+## 1. Obsidian (the daily driver)
+
+This is where the Recall (10) / New (3) dashboard lives. Without this, the system doesn't work.
+
+1. **Download Obsidian** → <https://obsidian.md/download> (free for personal use). Install for your OS.
+2. **Open this repo as a vault.** Click "Open folder as vault" → pick `~/workspace/personal/leetcode-python/`. Skip the "create new vault" wizard.
+3. **Install the two required plugins.** Settings (⌘,) → Community plugins → "Turn on community plugins" → Browse:
+   - **Tasks** by Clare Macrae → Install → Enable.
+   - **Dataview** by Michael Brenan → Install → Enable.
+4. **Configure Tasks.** Settings → Tasks:
+   - Toggle on **"Set done date on task completion"** (auto-stamps `✅ YYYY-MM-DD` on every check).
+   - That's the only setting you need. Tasks plugin makes rendered task checkboxes clickable automatically — no separate "interactive" toggle.
+5. **Configure Dataview.** Settings → Dataview:
+   - Toggle on **"Enable JavaScript Queries"**.
+   - Toggle on **"Enable Inline JavaScript Queries"**.
+6. **Verify.** Open `prep-plan-daily.md`. Scroll to `## Today (live)`. You should see two empty tables (Recall and New) — the queries are running, they just have no data yet. The first time you tick a checkbox, items will start populating.
+7. _(Optional)_ **Obsidian Sync** ($10/mo) or iCloud Drive — only if you want to check boxes from your phone. Skippable for D0.
+
+## 2. Anki (templates / Python gotchas / pattern recognition)
+
+For the ~90 cards across 4 decks. NOT for full problem re-solves — those live in Obsidian.
+
+1. **Anki desktop** → <https://apps.ankiweb.org/>. Install for your OS.
+2. **Mobile app** — AnkiMobile ($25 one-time, iOS) or AnkiDroid (free, Android). Sign up for an AnkiWeb account so the two stay in sync.
+3. **Import the shared deck** you already have queued. File → Import → pick the `.apkg`.
+4. **Set up the four local decks** (or stub them — you'll author cards as you go):
+   - `code-templates` — code skeletons for common patterns
+   - `pattern-recognition` — problem statement → pattern smell
+   - `python-gotchas` — language traps you actually hit
+   - `complexity` — big-O lookup
+5. **Mobile review schedule:** 10–25 min/day during downtime (commute, queue, etc). NOT a focused-work block.
+
+## 3. Python toolchain
+
+The `problems/` directory holds your actual solution code.
+
+1. **Python 3.11+.** Check with `python3 --version`. If older, install via Homebrew: `brew install python@3.12`.
+2. **`uv`** — modern Python package manager. Install:
+   ```sh
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+3. **Initialize the project** (from this repo's root):
+   ```sh
+   uv init
+   ```
+   ~30 min skimming the [uv docs](https://docs.astral.sh/uv/) is enough. You won't need most of it.
+4. **Push the existing in-progress solutions** so they're checked in:
+   ```sh
+   git add problems/
+   gt create -m "checkpoint existing in-progress problems"
+   ```
+
+## 4. Notes scaffold
+
+Two append-only logs the sprint relies on:
+
+1. **Create empty files** if they don't exist:
+   ```sh
+   touch notes/mistakes.md notes/python-gotchas.md
+   ```
+2. `python-gotchas.md` already exists at the root level — keep using that one. The `notes/` versions are if you prefer subfoldering. Pick one and stick with it.
+3. **`patterns/` directory** — one markdown file per NC150 pattern (e.g., `patterns/arrays-and-hashing.md`). Each file has Mistakes nested under each problem. You can stub these as you encounter each pattern, no need to pre-create all 25.
+
+## 5. Books and reading material
+
+Three books drive the System Design + behavioral half of the sprint.
+
+1. **DDIA** (Designing Data-Intensive Applications, Kleppmann). Used Ch 5–9. Get the PDF or paper copy.
+2. **Alex Xu Vol 1** (System Design Interview Vol 1) — 16 chapters covered.
+3. **Alex Xu Vol 2** (System Design Interview Vol 2) — Ch 1–7 covered.
+4. **Fluent Python** (2nd ed, Ramalho) — Sunday reading. Buy now so it arrives before D5 (first Sunday).
+5. **Index DDIA + both Alex Xu books** in `technical-rag` MCP for fast lookup later:
+   - Make sure the FastAPI backend is running: `cd ~/workspace/personal/explorations/technical-rag/backend && uv run python main.py`
+   - Drop the PDFs in the indexed folder and re-trigger ingestion. Try PDF text extraction first; OCR via Gemini only if the PDFs are scans.
+
+## 6. Mock interviews — book all 13 on Day 0
+
+Pre-commitment beats willpower. Mock dates are in `prep-plan-overview.md` → "Mock Cadence" section. Book them today, all of them.
+
+1. **Pramp** → <https://www.pramp.com/> — free peer-to-peer. Sign up. Book the early-sprint slots (D7, D10, D14, D17, D21, D24).
+2. **Interviewing.io** → <https://interviewing.io/> — paid + peer. Sign up, add payment. Book the mid/late slots (D24, D28, D31, D35, D38, D42, D45, D49 onwards).
+3. **Calendar block** each mock as it's booked. Mocks land in your 14:00–16:00 slot.
+
+## 7. GCal time blocks (recurring)
+
+Create recurring events on Google Calendar so the day shape is automatic and visible to anyone scheduling with you.
+
+| Block         | Time        | Recurrence |
+| ------------- | ----------- | ---------- |
+| Workout       | 7:00–8:00   | Daily      |
+| DSA New       | 9:00–13:00  | Mon–Sat    |
+| Lunch + walk  | 13:00–14:00 | Mon–Sat    |
+| System Design | 14:00–15:30 | Mon–Sat    |
+| Consolidation | 15:30–19:30 | Mon–Sat    |
+
+Phase shifts (P8 onward) change the afternoon shape — re-create those blocks at the D50 checkpoint, not now.
+
+## 8. Claude Code slash command for hints
+
+When stuck on a problem, you want graduated hints, not the full answer. Create `.claude/commands/hint.md`:
+
+```sh
+mkdir -p .claude/commands
+cat > .claude/commands/hint.md <<'EOF'
+Give me a graduated hint for the problem I describe. Levels:
+
+- **L1**: just name the pattern category (e.g., "two-pointer", "monotonic stack")
+- **L2**: describe the approach in one sentence, no code
+- **L3**: pseudocode of the key insight
+- **L4**: actual code
+
+Default to L1. Only escalate when I ask. Do not jump to L4 unprompted.
+EOF
+```
+
+Then in any Claude Code session: `/hint` followed by the problem you're stuck on.
+
+## 9. Diagnostic re-solve (the only "real work" of D0)
+
+Before D1, calibrate your retention baseline:
+
+1. Pick 3 random problems from the 27 you've already solved on neetcode.io.
+2. Open a blank file. Solve each on a 30-minute clock. No looking at notes.
+3. Record: how many you got cleanly, how many partially, how many you blanked on.
+4. **If you nailed all 3:** stay at 4/day in P1.
+5. **If you got 2/3:** stay at 4/day but expect P1 to be slow.
+6. **If you got 1 or fewer:** drop P1 to 3/day in `prep-plan-daily.md` and re-balance later phases.
+
+This is the only step that informs anything about your actual schedule — don't skip it.
+
+## 10. Final checklist before D1
+
+- [ ] Obsidian opens, dashboard renders empty (no errors).
+- [ ] Anki desktop + mobile installed and synced. At least the shared deck is imported.
+- [ ] `python3 --version` is 3.11+, `uv` is installed.
+- [ ] All 13 mocks are on your calendar.
+- [ ] All recurring time blocks are on GCal.
+- [ ] Books are accessible (PDFs indexed in technical-rag, Fluent Python ordered).
+- [ ] Diagnostic re-solve done; retention baseline noted.
+- [ ] `.claude/commands/hint.md` exists.
+
+Once all checked, close everything, sleep, and start D1 fresh in the morning.
+
+## Daily-loop cheatsheet (after D0)
+
+See `README.md` → "Daily flow." Five steps, ~30 seconds to remember:
+
+1. Open `prep-plan-daily.md` in Obsidian.
+2. Morning: solve DSA New, tick boxes.
+3. Afternoon: SD chapter, tick box.
+4. Cons block: drain Recall (10) from the Today dashboard, tick boxes.
+5. End of day: jot today's hardest into the inline note.
