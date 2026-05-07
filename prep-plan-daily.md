@@ -843,7 +843,7 @@ Light reading: _Fluent Python_ Ch 7.
 
 ---
 
-### Day 53 — Thu Jul 2 (2) — **HARD SPRINT COMPLETE**
+### Day 53 — Thu Jul 2 (3) — **HARD SPRINT COMPLETE**
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -851,9 +851,10 @@ Light reading: _Fluent Python_ Ch 7.
   - [ ] D52 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 8 re-read — distributed system failure modes
-- **15:30–19:30 DSA New (2 Hards):**
+- **15:30–19:30 DSA New (3 Hards):**
   - [ ] [2-D DP] -> Regular Expression Matching (H)
   - [ ] [Intervals] -> Minimum Interval to Include Each Query (H)
+  - [ ] [Intervals] -> Employee Free Time (H) (core) — siro variant (intersection of multi-person availability with min duration)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
