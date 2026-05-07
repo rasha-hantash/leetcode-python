@@ -101,10 +101,10 @@ Create recurring events on Google Calendar so the day shape is automatic and vis
 | Block         | Time        | Recurrence |
 | ------------- | ----------- | ---------- |
 | Workout       | 7:00–8:00   | Daily      |
-| DSA New       | 9:00–13:00  | Mon–Sat    |
+| Recall        | 9:00–13:00  | Mon–Sat    |
 | Lunch + walk  | 13:00–14:00 | Mon–Sat    |
 | System Design | 14:00–15:30 | Mon–Sat    |
-| Consolidation | 15:30–19:30 | Mon–Sat    |
+| DSA New       | 15:30–19:30 | Mon–Sat    |
 
 Phase shifts (P8 onward) change the afternoon shape — re-create those blocks at the D50 checkpoint, not now.
 
@@ -162,7 +162,7 @@ Once all checked, close everything, sleep, and start D1 fresh in the morning.
 See `README.md` → "Daily flow." Five steps, ~30 seconds to remember:
 
 1. Morning: LaunchAgent regenerates `prep-data/today.md` at 8:30 AM. (Or run `uv run python -m recall_engine recompute` manually.)
-2. DSA New (9–13): solve from `prep-plan-daily.md`'s Day section, tick boxes in `prep-data/today.md`'s **New** section.
-3. Afternoon SD: tick the chapter box in `prep-plan-daily.md`.
-4. Cons (15:30–19:30): drain `prep-data/today.md`'s **Recall** section top-down.
+2. Recall (9–13): drain `prep-data/today.md`'s **Recall** section top-down + yesterday's-hardest re-solve.
+3. Afternoon SD (14–15:30): tick the chapter box in `prep-plan-daily.md`.
+4. DSA New (15:30–19:30): solve from `prep-plan-daily.md`'s Day section, tick boxes in `prep-data/today.md`'s **New** section.
 5. End of day: jot today's hardest into the inline note in `prep-plan-daily.md`.
