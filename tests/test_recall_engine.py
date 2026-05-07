@@ -486,3 +486,197 @@ def test_renderer_produces_an_empty_recall_message_when_nothing_is_overdue() -> 
 def test_renderer_includes_a_dated_header_for_orientation() -> None:
     out = render_today(today=date(2026, 5, 6), recall=[], new=[])
     assert "May 6" in out or "2026-05-06" in out
+
+
+# ─── Difficulty + priority tags ────────────────────────────────────────────────
+
+
+_TAGGED_DAILY_MD = """\
+### Day 1 — Mon May 11
+
+- **9:00–13:00 DSA New:**
+  - [ ] [Arrays & Hashing] -> Contains Duplicate (E)
+  - [ ] [Arrays & Hashing] -> Group Anagrams (M)
+
+### Day 40 — Hard sprint
+
+- **9:00–13:00 DSA New:**
+  - [ ] [Two Pointers] -> Trapping Rain Water (H)
+
+### Day 54 — Net-new
+
+- **9:00–13:00 DSA New:**
+  - [ ] [Boyer-Moore] -> Majority Element II (M) (core)
+  - [ ] [Segment Tree] -> Count of Smaller After Self (H) (enrichment)
+  - [ ] [Bit-Trie] -> Maximum XOR (M) (optional)
+"""
+
+
+def test_curriculum_parser_extracts_difficulty_marker() -> None:
+    problems = parse_curriculum(_TAGGED_DAILY_MD)
+    by_text = {p.text: p for p in problems}
+    assert by_text["[Arrays & Hashing] -> Contains Duplicate"].difficulty == "E"
+    assert by_text["[Arrays & Hashing] -> Group Anagrams"].difficulty == "M"
+    assert by_text["[Two Pointers] -> Trapping Rain Water"].difficulty == "H"
+
+
+def test_curriculum_parser_defaults_priority_to_core_when_no_priority_tag() -> None:
+    """NC150 problems carry only a difficulty marker; their priority is implicitly 'core'."""
+    problems = parse_curriculum(_TAGGED_DAILY_MD)
+    by_text = {p.text: p for p in problems}
+    assert by_text["[Arrays & Hashing] -> Contains Duplicate"].priority == "core"
+
+
+def test_curriculum_parser_extracts_explicit_priority_marker() -> None:
+    problems = parse_curriculum(_TAGGED_DAILY_MD)
+    by_text = {p.text: p for p in problems}
+    assert by_text["[Boyer-Moore] -> Majority Element II"].priority == "core"
+    assert by_text["[Segment Tree] -> Count of Smaller After Self"].priority == "enrichment"
+    assert by_text["[Bit-Trie] -> Maximum XOR"].priority == "optional"
+
+
+def test_curriculum_parser_canonical_text_omits_difficulty_and_priority_tags() -> None:
+    """Ledger keys must match across renders, so the canonical text excludes
+    annotations the renderer might add or drop."""
+    problems = parse_curriculum(_TAGGED_DAILY_MD)
+    texts = {p.text for p in problems}
+    # No "(E)", "(M)", "(H)", "(core)", "(enrichment)", "(optional)" anywhere
+    for t in texts:
+        assert "(E)" not in t and "(M)" not in t and "(H)" not in t
+        assert "(core)" not in t and "(enrichment)" not in t and "(optional)" not in t
+
+
+def test_completion_parser_strips_difficulty_tag_from_canonical() -> None:
+    """A checked line in today.md carries `(E) (Day 1)`-style annotations that the
+    parser must strip to produce a ledger key matching the curriculum."""
+    md = "- [x] [Arrays & Hashing] -> Contains Duplicate (E) (Day 1) ✅ 2026-05-11"
+    assert parse_completions(md) == [
+        Touch("[Arrays & Hashing] -> Contains Duplicate", date(2026, 5, 11))
+    ]
+
+
+def test_completion_parser_strips_priority_tag_from_canonical() -> None:
+    md = "- [x] [Segment Tree] -> Count of Smaller After Self (H) (enrichment) (Day 54) ✅ 2026-07-03"
+    assert parse_completions(md) == [
+        Touch("[Segment Tree] -> Count of Smaller After Self", date(2026, 7, 3))
+    ]
+
+
+# ─── compute_new priority tiebreaker ───────────────────────────────────────────
+
+
+def test_compute_new_prefers_core_problems_over_enrichment_in_same_day() -> None:
+    """When falling behind, the engine should never offer an enrichment problem
+    while a core problem of the same day is still untouched."""
+    curriculum = [
+        Problem("[X] enrichment-1", source_day=54, difficulty="H", priority="enrichment"),
+        Problem("[X] core-1", source_day=54, difficulty="M", priority="core"),
+        Problem("[X] enrichment-2", source_day=54, difficulty="H", priority="enrichment"),
+        Problem("[X] core-2", source_day=54, difficulty="M", priority="core"),
+    ]
+    new = compute_new(curriculum, ledger=[], limit=2)
+    assert [p.text for p in new] == ["[X] core-1", "[X] core-2"]
+
+
+def test_compute_new_falls_through_to_optional_then_enrichment_when_core_is_drained() -> None:
+    curriculum = [
+        Problem("[X] core-only", source_day=54, difficulty="M", priority="core"),
+        Problem("[X] optional-thing", source_day=54, difficulty="M", priority="optional"),
+        Problem("[X] enrichment-thing", source_day=54, difficulty="H", priority="enrichment"),
+    ]
+    ledger = [Touch("[X] core-only", date(2026, 7, 3))]
+    new = compute_new(curriculum, ledger, limit=2)
+    assert [p.text for p in new] == ["[X] optional-thing", "[X] enrichment-thing"]
+
+
+def test_compute_new_within_a_priority_tier_preserves_document_order() -> None:
+    curriculum = [
+        Problem("[X] P3", source_day=2, difficulty="M", priority="core"),
+        Problem("[X] P1", source_day=1, difficulty="M", priority="core"),
+        Problem("[X] P2", source_day=1, difficulty="M", priority="core"),
+    ]
+    new = compute_new(curriculum, ledger=[], limit=3)
+    assert [p.text for p in new] == ["[X] P3", "[X] P1", "[X] P2"]
+
+
+# ─── Difficulty surfaced in renderer ───────────────────────────────────────────
+
+
+def test_recall_item_carries_difficulty_when_curriculum_is_provided() -> None:
+    curriculum = [
+        Problem("[A] Two Sum", source_day=1, difficulty="E", priority="core"),
+    ]
+    ledger = [Touch("[A] Two Sum", date(2026, 5, 1))]
+    recall = compute_recall(ledger, today=date(2026, 5, 7), limit=10, curriculum=curriculum)
+    assert recall[0].difficulty == "E"
+
+
+def test_renderer_displays_difficulty_in_recall_lines() -> None:
+    from recall_engine import RecallItem
+
+    out = render_today(
+        today=date(2026, 5, 7),
+        recall=[
+            RecallItem(
+                problem="[A] Two Sum",
+                touches=1,
+                last_touched=date(2026, 5, 1),
+                days_overdue=5,
+                difficulty="E",
+            )
+        ],
+        new=[],
+    )
+    # Difficulty is visible somewhere on the recall line
+    recall_section = out.split("## New")[0]
+    assert "(E)" in recall_section
+
+
+def test_renderer_displays_difficulty_in_new_lines() -> None:
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[Problem("[A] Two Sum", source_day=1, difficulty="E", priority="core")],
+    )
+    new_section = out.split("## New")[1]
+    assert "(E)" in new_section
+
+
+# ─── Saturday "this week's hardest" section ────────────────────────────────────
+
+
+def test_renderer_includes_this_weeks_hardest_section_on_saturdays() -> None:
+    """Saturday is reinforcement day — render an empty checklist where the user
+    writes 2-3 problems they found hardest from this week's daily-hardest notes."""
+    saturday = date(2026, 5, 16)
+    assert saturday.weekday() == 5
+    out = render_today(today=saturday, recall=[], new=[])
+    assert "This week's hardest" in out
+
+
+def test_renderer_omits_this_weeks_hardest_section_on_weekdays() -> None:
+    monday = date(2026, 5, 11)
+    assert monday.weekday() == 0
+    out = render_today(today=monday, recall=[], new=[])
+    assert "This week's hardest" not in out
+
+
+def test_saturday_hardest_section_renders_empty_checkboxes_for_user_to_fill_in() -> None:
+    """User writes problem names into the empty boxes; ticking them logs touches.
+    The empty boxes themselves must be skipped by the completion parser."""
+    saturday = date(2026, 5, 16)
+    out = render_today(today=saturday, recall=[], new=[])
+    # Section has writable bullet lines for the user
+    section = out.split("This week's hardest")[1]
+    assert section.count("- [ ]") >= 2
+
+
+def test_completion_parser_ignores_empty_writable_checkboxes_on_saturday(tmp_path: Path) -> None:
+    """The Saturday `- [ ]` empty bullets should never produce ledger entries
+    even after Tasks plugin auto-stamps them when the user ticks them blank."""
+    md = (
+        "## This week's hardest — your pick\n\n"
+        "- [x]  ✅ 2026-05-16\n"
+        "- [x]  (just whitespace) ✅ 2026-05-16\n"
+    )
+    assert parse_completions(md) == []

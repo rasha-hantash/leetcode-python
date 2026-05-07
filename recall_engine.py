@@ -12,10 +12,10 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Literal
 
 import click
 
@@ -28,16 +28,23 @@ INTERVALS_DAYS: list[int] = [1, 3, 7, 21, 60]
 DEFAULT_RECALL_LIMIT = 10
 DEFAULT_NEW_LIMIT = 3
 
+Difficulty = Literal["E", "M", "H"]
+Priority = Literal["core", "optional", "enrichment"]
+
+_PRIORITY_RANK: dict[str, int] = {"core": 0, "optional": 1, "enrichment": 2}
+
 
 # ─── Data types ──────────────────────────────────────────────────────────────
 
 
 @dataclass(frozen=True)
 class Problem:
-    """A curriculum entry: the canonical problem text and which Day N it lives in."""
+    """A curriculum entry: canonical problem text, source day, and optional tags."""
 
     text: str
     source_day: int
+    difficulty: Difficulty | None = None
+    priority: Priority = "core"
 
 
 @dataclass(frozen=True)
@@ -56,6 +63,7 @@ class RecallItem:
     touches: int
     last_touched: date
     days_overdue: int
+    difficulty: Difficulty | None = None
 
 
 @dataclass(frozen=True)
@@ -105,10 +113,17 @@ def aggregate_touches(ledger: Iterable[Touch]) -> dict[str, tuple[int, date]]:
 
 
 def compute_recall(
-    ledger: list[Touch], today: date, limit: int = DEFAULT_RECALL_LIMIT
+    ledger: list[Touch],
+    today: date,
+    limit: int = DEFAULT_RECALL_LIMIT,
+    curriculum: list[Problem] | None = None,
 ) -> list[RecallItem]:
-    """Items at or past their SM-2 due date, sorted most-overdue first, capped."""
-    items = []
+    """Items at or past their SM-2 due date, sorted most-overdue first, capped.
+    If `curriculum` is given, each RecallItem is annotated with its difficulty."""
+    diff_lookup: dict[str, Difficulty | None] = {
+        p.text: p.difficulty for p in (curriculum or [])
+    }
+    items: list[RecallItem] = []
     for problem, (touches, last) in aggregate_touches(ledger).items():
         overdue = overdue_days(touches, last, today)
         if overdue >= 0:
@@ -118,6 +133,7 @@ def compute_recall(
                     touches=touches,
                     last_touched=last,
                     days_overdue=overdue,
+                    difficulty=diff_lookup.get(problem),
                 )
             )
     items.sort(key=lambda r: r.days_overdue, reverse=True)
@@ -127,9 +143,15 @@ def compute_recall(
 def compute_new(
     curriculum: list[Problem], ledger: list[Touch], limit: int = DEFAULT_NEW_LIMIT
 ) -> list[Problem]:
-    """The first N never-touched problems, in curriculum (document) order."""
+    """The next N never-touched problems, ordered by priority (core > optional >
+    enrichment) then document order. Falling-behind days never offer enrichment
+    while a core problem is still untouched."""
     touched = {t.problem for t in ledger}
-    return [p for p in curriculum if p.text not in touched][:limit]
+    indexed = [
+        (i, p) for i, p in enumerate(curriculum) if p.text not in touched
+    ]
+    indexed.sort(key=lambda item: (_PRIORITY_RANK.get(item[1].priority, 0), item[0]))
+    return [p for _, p in indexed[:limit]]
 
 
 # ─── Parsers ─────────────────────────────────────────────────────────────────
@@ -137,21 +159,40 @@ def compute_new(
 
 _DAY_HEADING = re.compile(r"^###\s+Day\s+(\d+)\b")
 _PROBLEM_LINE = re.compile(r"^\s*-\s+\[[ xX]\]\s+(.*)$")
+_CHECKED_LINE = re.compile(r"^\s*-\s+\[[xX]\]\s+(.*)$")
 _DONE_DATE = re.compile(r"\s*✅\s*(\d{4}-\d{2}-\d{2}).*$")
-_T_MARKER = re.compile(r"\s*`[A-Z]\d?`\s*$")
-_DAY_ANNOTATION = re.compile(r"\s*\(Day\s+\d+\)\s*$")
+_T_MARKER = re.compile(r"\s*`[A-Z]\d?`\s*")
+_DAY_ANNOTATION = re.compile(r"\s*\(Day\s+\d+\)\s*")
 _METADATA_SUFFIX = re.compile(r"\s+—\s+.*$")
+_DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
+_PRIORITY_TAG = re.compile(r"\s*\((core|optional|enrichment)\)\s*")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")
 
 
+def _extract_difficulty(text: str) -> Difficulty | None:
+    match = _DIFFICULTY_TAG.search(text)
+    if match is None:
+        return None
+    return match.group(1)  # type: ignore[return-value]
+
+
+def _extract_priority(text: str) -> Priority:
+    match = _PRIORITY_TAG.search(text)
+    if match is None:
+        return "core"
+    return match.group(1)  # type: ignore[return-value]
+
+
 def _canonicalize(text: str) -> str:
-    """Strip everything that isn't part of the canonical problem identifier:
-    done-date stamp, metadata em-dash suffix, T2/M-style markers, (Day N) annotation."""
+    """Strip every non-canonical annotation: done-date stamp, em-dash metadata
+    suffix, (Day N), (E)/(M)/(H), (core)/(optional)/(enrichment), `T2`/`M`."""
     text = _DONE_DATE.sub("", text)
     text = _METADATA_SUFFIX.sub("", text)
-    text = _DAY_ANNOTATION.sub("", text)
-    text = _T_MARKER.sub("", text)
-    return text.strip()
+    text = _DAY_ANNOTATION.sub(" ", text)
+    text = _DIFFICULTY_TAG.sub(" ", text)
+    text = _PRIORITY_TAG.sub(" ", text)
+    text = _T_MARKER.sub(" ", text)
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def parse_curriculum(daily_md: str) -> list[Problem]:
@@ -170,14 +211,21 @@ def parse_curriculum(daily_md: str) -> list[Problem]:
         problem_match = _PROBLEM_LINE.match(line)
         if not problem_match:
             continue
-        canonical = _canonicalize(problem_match.group(1))
+        raw = problem_match.group(1)
+        difficulty = _extract_difficulty(raw)
+        priority = _extract_priority(raw)
+        canonical = _canonicalize(raw)
         if _PROBLEM_TEXT.match(canonical):
-            problems.append(Problem(text=canonical, source_day=current_day))
+            problems.append(
+                Problem(
+                    text=canonical,
+                    source_day=current_day,
+                    difficulty=difficulty,
+                    priority=priority,
+                )
+            )
 
     return problems
-
-
-_CHECKED_LINE = re.compile(r"^\s*-\s+\[[xX]\]\s+(.*)$")
 
 
 def parse_completions(today_md: str) -> list[Touch]:
@@ -242,18 +290,22 @@ def _format_date(d: date) -> str:
     return d.strftime("%b ").replace(" 0", " ") + str(d.day)
 
 
+def _diff_suffix(d: Difficulty | None) -> str:
+    return f" ({d})" if d else ""
+
+
 def _render_recall_line(item: RecallItem) -> str:
     overdue_text = (
         "due today" if item.days_overdue == 0 else f"{item.days_overdue}d overdue"
     )
     return (
-        f"- [ ] {item.problem} — {overdue_text} · "
+        f"- [ ] {item.problem}{_diff_suffix(item.difficulty)} — {overdue_text} · "
         f"{item.touches}× · last {_format_date(item.last_touched)}"
     )
 
 
 def _render_new_line(problem: Problem) -> str:
-    return f"- [ ] {problem.text} (Day {problem.source_day})"
+    return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)} (Day {problem.source_day})"
 
 
 def render_today(today: date, recall: list[RecallItem], new: list[Problem]) -> str:
@@ -277,7 +329,24 @@ def render_today(today: date, recall: list[RecallItem], new: list[Problem]) -> s
     if new:
         lines.extend(_render_new_line(p) for p in new)
     else:
-        lines.append("_Empty — every curriculum problem has been touched at least once._")
+        lines.append(
+            "_Empty — every curriculum problem has been touched at least once._"
+        )
+
+    if today.weekday() == 5:  # Saturday
+        lines.extend(
+            [
+                "",
+                "## This week's hardest — your pick",
+                "",
+                "_Re-solve 2-3 problems you found hardest this week (from your daily \"today's hardest\" notes Mon–Fri). Write the canonical `[Pattern] -> Name` form between the brackets so ticking logs a real touch._",
+                "",
+                "- [ ] [Pattern] -> Problem Name",
+                "- [ ] [Pattern] -> Problem Name",
+                "- [ ] [Pattern] -> Problem Name",
+            ]
+        )
+
     lines.append("")
     return "\n".join(lines)
 
@@ -302,7 +371,9 @@ def recompute(
     logged = append_to_ledger(ledger_path, new_touches)
 
     ledger = load_ledger(ledger_path)
-    recall = compute_recall(ledger, today=today, limit=recall_limit)
+    recall = compute_recall(
+        ledger, today=today, limit=recall_limit, curriculum=curriculum
+    )
     new = compute_new(curriculum, ledger, limit=new_limit)
 
     today_md_path.write_text(render_today(today=today, recall=recall, new=new))
