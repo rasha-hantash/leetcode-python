@@ -17,7 +17,7 @@ This is where the Recall (10) / New (3) dashboard lives. Without this, the syste
 5. **Configure Dataview.** Settings → Dataview:
    - Toggle on **"Enable JavaScript Queries"**.
    - Toggle on **"Enable Inline JavaScript Queries"**.
-6. **Verify.** Open `prep-plan-daily.md`. Scroll to `## Today (live)`. You should see two empty tables (Recall and New) — the queries are running, they just have no data yet. The first time you tick a checkbox, items will start populating.
+6. **Verify.** Open `prep-plan-daily.md`. Scroll to `## Today (live)`. You should see two empty task lists (Recall and New) — the queries are running, they just have no data yet. The first time you tick a checkbox, items will start populating.
 7. _(Optional)_ **Obsidian Sync** ($10/mo) or iCloud Drive — only if you want to check boxes from your phone. Skippable for D0.
 
 ## 2. Anki (templates / Python gotchas / pattern recognition)

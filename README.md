@@ -56,7 +56,7 @@ So a problem you've solved once is due 1 day later. Solved twice → 3 days. Sol
 2. Install **Dataview** plugin → enable "Enable JavaScript Queries" + "Enable Inline JavaScript Queries."
 3. Open `prep-plan-daily.md`. The Today dashboard at the top should render. The first time, Recall (10) will be empty — it populates after you tick a few boxes.
 
-> **Heads-up:** the **New (3)** query renders as a clickable task list — tick from the dashboard directly. **Recall (10)** renders as a table for the metadata columns (last solved, touches, days overdue) and is **not** clickable from the dashboard; scroll to the source-day section to tick. Ask if you'd prefer Recall as a clickable task list (less metadata, more direct).
+> **Heads-up:** both **Recall (10)** and **New (3)** render as clickable task lists — tick directly from the dashboard. Recall items embed metadata in the line itself (`— Xd overdue · Y× · last May 4`).
 
 ## Files
 
