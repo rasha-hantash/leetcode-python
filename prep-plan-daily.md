@@ -15,29 +15,34 @@ _Day 0 setup + P1–P10 day-by-day execution + 90-Day Sprint Retrospective. For 
 ```dataviewjs
 const intervals = [1, 3, 7, 21, 60]
 const today = dv.date("today")
-const tasks = dv.pages('"prep-plan-daily.md"').file.tasks
-  .where(t => t.completed && t.completion)
+const allTasks = dv.pages('"prep-plan-daily.md"').file.tasks
+const completed = allTasks.where(t => t.completed && t.completion)
+
+// Group by canonical text → count touches, find latest completion, keep one source task to render
+const groups = {}
+for (const t of completed) {
+  const key = t.text
+  if (!groups[key]) groups[key] = { touches: 0, last: null, source: t }
+  groups[key].touches += 1
+  if (!groups[key].last || t.completion > groups[key].last) {
+    groups[key].last = t.completion
+    groups[key].source = t
+  }
+}
+
 const ranked = []
-for (const group of tasks.groupBy(t => t.text).values) {
-  const touches = group.rows.length
-  const last = group.rows.completion.values.reduce(
-    (a, b) => (a > b ? a : b)
-  )
-  const interval = intervals[Math.min(touches - 1, intervals.length - 1)]
-  const due = last.plus({ days: interval })
+for (const key in groups) {
+  const g = groups[key]
+  const interval = intervals[Math.min(g.touches - 1, intervals.length - 1)]
+  const due = g.last.plus({ days: interval })
   const overdue = today.diff(due, "days").days
-  if (overdue > 0) ranked.push({ text: group.key, last, touches, overdue })
+  if (overdue > 0) {
+    g.source.visual = `${key} — ${overdue}d overdue · ${g.touches}× · last ${g.last.toFormat("LLL d")}`
+    ranked.push({ task: g.source, overdue })
+  }
 }
 ranked.sort((a, b) => b.overdue - a.overdue)
-dv.table(
-  ["Problem", "Last solved", "Touches", "Days overdue"],
-  ranked.slice(0, 10).map(r => [
-    r.text,
-    r.last.toFormat("LLL d"),
-    r.touches,
-    r.overdue,
-  ])
-)
+dv.taskList(ranked.slice(0, 10).map(r => r.task), false)
 ```
 
 ### New (3) — first 3 unchecked source-day problems, in document order
