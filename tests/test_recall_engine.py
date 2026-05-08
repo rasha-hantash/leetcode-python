@@ -1217,10 +1217,12 @@ def test_render_coverage_omits_mocks_section_when_mocks_arg_is_none() -> None:
     assert "Mocks" not in out
 
 
-def test_recompute_reads_mocks_file_and_renders_in_coverage(tmp_path: Path) -> None:
-    """Mocks no longer surface in today.md — they live in the dedicated
-    mocks.md view (covered by separate tests). Coverage.md still gets the
-    summary section."""
+def test_recompute_renders_upcoming_mocks_in_today_and_summary_in_coverage(
+    tmp_path: Path,
+) -> None:
+    """today.md gets the next-up Upcoming mocks block (between Readiness and
+    Recall) — daily attention. coverage.md still has the full Mocks section,
+    and mocks.md has the standalone view."""
     daily_md = tmp_path / "prep-plan-daily.md"
     daily_md.write_text(
         "## Phase 1 — X (Days 1–7)\n"
@@ -1243,9 +1245,13 @@ def test_recompute_reads_mocks_file_and_renders_in_coverage(tmp_path: Path) -> N
         coverage_md_path=coverage_md,
         mocks_path=mocks_path,
     )
-    # today.md no longer mentions mocks directly
-    assert "Upcoming mocks" not in today_md.read_text()
-    # but coverage.md does
+    today_text = today_md.read_text()
+    assert "## Upcoming mocks" in today_text
+    # Upcoming mocks sits between Readiness and Recall
+    readiness_pos = today_text.find("## Readiness")
+    upcoming_pos = today_text.find("## Upcoming mocks")
+    recall_pos = today_text.find("## Recall")
+    assert 0 <= readiness_pos < upcoming_pos < recall_pos
     assert "## Mocks" in coverage_md.read_text()
 
 
