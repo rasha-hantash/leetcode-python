@@ -947,7 +947,7 @@ Light reading: _Fluent Python_ Ch 8.
 
 No new problems. Daily structure shifts: 1 weakness re-solve on a 30-min clock + 1 mock + heavy Recall queue + system design depth + behavioral story practice.
 
-### Daily shape D59–D78
+### Daily shape
 
 ```
 9:00–10:30   30-min clocked re-solve from `prep-data/today.md` Recall (most overdue)
@@ -959,27 +959,16 @@ No new problems. Daily structure shifts: 1 weakness re-solve on a 30-min clock +
 17:30–19:30  Recall queue drain + 1 random retention check (problem solved >14d ago)
 ```
 
-Mocks D59-D78 (~10 mocks): aim for 1 mock every other day. Mix Pramp + Interviewing.io + peer.
+Mocks (~10 across the phase): aim for 1 mock every other day. Mix Pramp + Interviewing.io + peer.
 
-### Day 59 — Wed Jul 8 — **FIRST ROUND WINDOW STARTS** (apply +14d for stretch tier)
+### Calendar milestones
 
-- Daily shape above. Recall queue should hold ~30-50 items at this point.
-- [ ] First-round screens may begin landing this week from stretch-tier applications.
+These are calendar anchors tied to your hiring timeline (when first rounds land), not pace markers — they hold even if your DSA pace shifts.
 
----
-
-### Day 65 — Tue Jul 14 — **First-round peak** (target-tier first rounds landing)
-
----
-
-### Day 71 — Mon Jul 20 — **Onsite prep** (first onsites being scheduled from stretch-tier passes)
-
----
-
-### Day 78 — Mon Jul 27 — **Phase 7 wrap**
-
-- 90-min self-eval: which patterns still feel cold? Which mocks went badly and why?
-- Plan Phase 8 mock cadence based on actual interview pipeline.
+- **First round window opens** (~Wed Jul 8 at full-time pace) — apply +14d for stretch tier. Recall queue should hold ~30-50 items by this point. First-round screens may begin landing this week from stretch-tier applications.
+- **First-round peak** (~Tue Jul 14) — target-tier first rounds landing.
+- **Onsite prep** (~Mon Jul 20) — first onsites being scheduled from stretch-tier passes.
+- **Phase 7 wrap** (~Mon Jul 27) — 90-min self-eval: which patterns still feel cold? Which mocks went badly and why? Plan Phase 8 mock cadence based on actual interview pipeline.
 
 ---
 
@@ -987,7 +976,7 @@ Mocks D59-D78 (~10 mocks): aim for 1 mock every other day. Mix Pramp + Interview
 
 Full simulation. Daily mocks, behavioral polish, real interviews intertwined.
 
-### Daily shape D79–D90
+### Daily shape
 
 ```
 9:00–10:30   DSA mock (Pramp/Interviewing.io/friend) — 1 problem timed
@@ -999,25 +988,23 @@ Full simulation. Daily mocks, behavioral polish, real interviews intertwined.
 17:30–19:30  Recall queue drain + random retention check
 ```
 
-Mocks D79-D90 (~8-10 mocks): daily cadence D85-D89 if possible.
+Mocks (~8-10 across the phase): daily cadence in the final week if possible.
 
-### Day 79 — Tue Jul 28 — Interview-mode begins
+### Calendar milestones
+
+- **Interview-mode begins** (~Tue Jul 28) — shift fully into simulation cadence.
+- **Prep window end** (~Sat Aug 8) — retrospective. Whatever real interviews remain happen in real time after this date.
 
 ---
 
-### Day 90 — Sat Aug 8 — **SPRINT END · RETROSPECTIVE**
-
----
-
-## 90-Day Retrospective — Day 90 (Sat Aug 8)
+## End-of-Prep Retrospective (~Sat Aug 8 at full-time pace)
 
 - Total NC150 problems completed: \_\_\_ / 150
 - NC150 Easies fluent (3+ touches): \_\_\_ / 30
 - NC150 Mediums fluent (3+ touches): \_\_\_ / 98
 - NC150 Hards fluent (2+ touches): \_\_\_ / 22
-- Net-new core problems completed: \_\_\_ / 5
-- Net-new optional completed: \_\_\_ / 2
-- Enrichment problems completed (engine-deprioritized): \_\_\_ / 6
+- NC-150+ problems completed: \_\_\_
+- Company-question problems completed: \_\_\_
 - Strongest pattern category: \_\_\_
 - Weakest pattern category (target ongoing review): \_\_\_
 - Mocks at "would hire" level: \_\_\_ / ~24
