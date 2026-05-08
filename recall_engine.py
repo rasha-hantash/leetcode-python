@@ -109,6 +109,19 @@ MockStatus = Literal["pending", "scheduled", "completed"]
 
 
 @dataclass(frozen=True)
+class MockPrereq:
+    """Per-mock readiness threshold the user wants to clear before sitting it.
+    Both fields default to 0, meaning 'no threshold' for that dimension."""
+
+    em_problems: int = 0
+    sd_chapters: int = 0
+
+    @property
+    def has_any(self) -> bool:
+        return self.em_problems > 0 or self.sd_chapters > 0
+
+
+@dataclass(frozen=True)
 class Mock:
     """A planned, scheduled, or completed mock interview. State machine:
     pending → scheduled (with date) → completed (with date)."""
@@ -120,6 +133,7 @@ class Mock:
     scheduled_date: date | None = None
     completed_date: date | None = None
     notes: str | None = None
+    prerequisites: MockPrereq | None = None
 
 
 SDChapterStatus = Literal["pending", "completed"]
@@ -559,6 +573,13 @@ def load_mocks(path: Path) -> list[Mock]:
     for record in raw:
         scheduled = record.get("scheduled_date")
         completed = record.get("completed_date")
+        prereq_data = record.get("prerequisites")
+        prerequisites: MockPrereq | None = None
+        if isinstance(prereq_data, dict):
+            prerequisites = MockPrereq(
+                em_problems=int(prereq_data.get("em_problems", 0)),
+                sd_chapters=int(prereq_data.get("sd_chapters", 0)),
+            )
         mocks.append(
             Mock(
                 id=record["id"],
@@ -568,9 +589,48 @@ def load_mocks(path: Path) -> list[Mock]:
                 scheduled_date=date.fromisoformat(scheduled) if scheduled else None,
                 completed_date=date.fromisoformat(completed) if completed else None,
                 notes=record.get("notes"),
+                prerequisites=prerequisites,
             )
         )
     return mocks
+
+
+def mock_prereq_status(
+    mock: Mock, em_done: int, sd_done: int
+) -> list[tuple[str, bool, int, int]]:
+    """For a mock with prerequisites, return list of (label, met, current, threshold).
+    Empty list if the mock has no prereqs defined."""
+    if mock.prerequisites is None or not mock.prerequisites.has_any:
+        return []
+    rows: list[tuple[str, bool, int, int]] = []
+    if mock.prerequisites.em_problems > 0:
+        rows.append(
+            (
+                "E/M problems",
+                em_done >= mock.prerequisites.em_problems,
+                em_done,
+                mock.prerequisites.em_problems,
+            )
+        )
+    if mock.prerequisites.sd_chapters > 0:
+        rows.append(
+            (
+                "SD chapters",
+                sd_done >= mock.prerequisites.sd_chapters,
+                sd_done,
+                mock.prerequisites.sd_chapters,
+            )
+        )
+    return rows
+
+
+def _format_prereq_line(rows: list[tuple[str, bool, int, int]]) -> str:
+    """Single-line summary of prereq rows for use as a sub-bullet."""
+    parts: list[str] = []
+    for label, met, current, threshold in rows:
+        marker = "✓" if met else "❌"
+        parts.append(f"{marker} {threshold} {label} (have {current})")
+    return f"  - Prereqs: {', '.join(parts)}"
 
 
 def append_to_ledger(path: Path, new_touches: list[Touch]) -> int:
@@ -639,6 +699,8 @@ def render_today(
     sd_next: SDChapter | None = None,
     readiness: Readiness | None = None,
     upcoming: list[Mock] | None = None,
+    em_done: int = 0,
+    sd_done: int = 0,
 ) -> str:
     """Produce the markdown that gets written to today.md.
 
@@ -683,7 +745,7 @@ def render_today(
         lines.extend(render_readiness_block(readiness))
     if upcoming:
         lines.extend(["## Upcoming mocks", ""])
-        lines.extend(_render_upcoming_mocks_block(upcoming, today))
+        lines.extend(_render_upcoming_mocks_block(upcoming, today, em_done, sd_done))
         lines.append("")
     lines.extend(["## Recall — most overdue first", ""])
     if recall:
@@ -770,9 +832,15 @@ def _format_mock_line(mock: Mock) -> str:
     return f"- [ ] {descriptor} · _pending_"
 
 
-def _render_upcoming_mocks_block(mocks: list[Mock], today: date) -> list[str]:
+def _render_upcoming_mocks_block(
+    mocks: list[Mock],
+    today: date,
+    em_done: int = 0,
+    sd_done: int = 0,
+) -> list[str]:
     """The 'Upcoming mocks' block that surfaces in today.md when scheduled
-    mocks are within the look-ahead window."""
+    mocks are within the look-ahead window. Each mock with prerequisites
+    gets a sub-bullet showing whether its thresholds are met."""
     lines: list[str] = []
     for m in mocks:
         assert m.scheduled_date is not None  # filtered by upcoming_mocks
@@ -791,6 +859,9 @@ def _render_upcoming_mocks_block(mocks: list[Mock], today: date) -> list[str]:
             f"- {descriptor} · {m.scheduled_date.strftime('%a %b ').replace(' 0', ' ')}"
             f"{m.scheduled_date.day} ({urgency})"
         )
+        prereqs = mock_prereq_status(m, em_done, sd_done)
+        if prereqs:
+            lines.append(_format_prereq_line(prereqs))
     return lines
 
 
@@ -896,9 +967,15 @@ def render_readiness_block(readiness: Readiness) -> list[str]:
 # ─── Mocks view (dedicated) ──────────────────────────────────────────────────
 
 
-def _render_mocks_section(mocks: list[Mock], today: date) -> list[str]:
-    """The `## Mocks` section that lives at the bottom of coverage.md.
-    Includes a summary line + Upcoming, Completed, and To-schedule sub-sections."""
+def _render_mocks_section(
+    mocks: list[Mock],
+    today: date,
+    em_done: int = 0,
+    sd_done: int = 0,
+) -> list[str]:
+    """The `## Mocks` section in coverage.md. Summary line + Upcoming,
+    Completed, and To-schedule sub-sections. Mocks with prerequisites get
+    a sub-bullet showing whether thresholds are met."""
     completed_count = sum(1 for m in mocks if m.status == "completed")
     scheduled_count = sum(1 for m in mocks if m.status == "scheduled")
     pending_count = sum(1 for m in mocks if m.status == "pending")
@@ -923,7 +1000,9 @@ def _render_mocks_section(mocks: list[Mock], today: date) -> list[str]:
     lines.append("### Upcoming")
     lines.append("")
     if upcoming:
-        lines.extend(_render_upcoming_mocks_block(upcoming, today))
+        lines.extend(
+            _render_upcoming_mocks_block(upcoming, today, em_done, sd_done)
+        )
     else:
         lines.append("_No mocks scheduled within the next 14 days._")
     lines.append("")
@@ -943,6 +1022,9 @@ def _render_mocks_section(mocks: list[Mock], today: date) -> list[str]:
         lines.append("")
         for m in pending_mocks:
             lines.append(_format_mock_line(m))
+            prereqs = mock_prereq_status(m, em_done, sd_done)
+            if prereqs:
+                lines.append(_format_prereq_line(prereqs))
         lines.append("")
 
     return lines
@@ -1052,6 +1134,8 @@ def render_coverage(
     sd_chapters: list[SDChapter] | None = None,
     readiness: Readiness | None = None,
     behavioral: list[BehavioralTopic] | None = None,
+    em_done: int = 0,
+    sd_done: int = 0,
 ) -> str:
     """Render the comprehensive overview file:
     Readiness → Behavioral → Mocks → System Design → DSA-by-pattern.
@@ -1069,7 +1153,11 @@ def render_coverage(
     if behavioral is not None:
         lines.extend(_render_behavioral_section(behavioral))
     if mocks is not None:
-        lines.extend(_render_mocks_section(mocks, today=today or date.today()))
+        lines.extend(
+            _render_mocks_section(
+                mocks, today=today or date.today(), em_done=em_done, sd_done=sd_done
+            )
+        )
     if sd_chapters is not None:
         lines.extend(_render_sd_section(sd_chapters))
     lines.extend(_render_dsa_by_pattern(curriculum, ledger))
@@ -1134,6 +1222,9 @@ def recompute(
 
     readiness = compute_readiness(curriculum, ledger, sd_chapters, mocks)
 
+    em_done_count = readiness.em.done
+    sd_done_count = readiness.sd.done
+
     today_md_path.write_text(
         render_today(
             today=today,
@@ -1147,6 +1238,8 @@ def recompute(
             sd_next=sd_next,
             readiness=readiness,
             upcoming=upcoming,
+            em_done=em_done_count,
+            sd_done=sd_done_count,
         )
     )
 
@@ -1161,6 +1254,8 @@ def recompute(
                 sd_chapters=sd_chapters if sd_chapters_path else None,
                 readiness=readiness,
                 behavioral=behavioral if behavioral_path else None,
+                em_done=em_done_count,
+                sd_done=sd_done_count,
             )
         )
 
