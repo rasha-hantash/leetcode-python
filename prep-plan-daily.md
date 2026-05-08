@@ -55,7 +55,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Valid Anagram (E)
   - [ ] [Arrays & Hashing] -> Two Sum (E)
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
-  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) (company)
+  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) (company question)
   - [ ] [String Transformation] -> Longest Common Prefix (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _** (no warm-up — sprint start)
 
@@ -89,7 +89,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] Grokking SD Fundamentals — sharding + replication basics
 - **15:30–19:30 DSA New (6):**
   - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence (M)
-  - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (core) (company)
+  - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (core) (company question)
   - [ ] [Two Pointers] -> Valid Palindrome (E)
   - [ ] [Two Pointers] -> Two Sum II (M)
   - [ ] [Two Pointers] -> 3Sum (M)
@@ -146,7 +146,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Stack] -> Daily Temperatures (M)
   - [ ] [Stack] -> Car Fleet (M)
   - [ ] [Binary Search] -> Binary Search (E)
-  - [ ] [String Transformation] -> snake_case → camelCase (E) (nc-150+) (company)
+  - [ ] [String Transformation] -> snake_case → camelCase (E) (nc-150+) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -173,7 +173,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Binary Search] -> Koko Eating Bananas (M)
   - [ ] [Binary Search] -> Find Minimum in Rotated Sorted Array (M)
   - [ ] [Binary Search] -> Search in Rotated Sorted Array (M)
-  - [ ] [Arrays & Hashing] -> Referral Bonus Event Correlation (M) (core) (company)
+  - [ ] [Arrays & Hashing] -> Referral Bonus Event Correlation (M) (core) (company question)
   - [ ] [String Transformation] -> String Compression (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -261,7 +261,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Trees] -> Lowest Common Ancestor of a BST (E)
   - [ ] [Trees] -> Binary Tree Level Order Traversal (M)
   - [ ] [Trees] -> Binary Tree Right Side View (M)
-  - [ ] [Trees] -> Build Binary Tree From Char Frequencies (M) (core) (company)
+  - [ ] [Trees] -> Build Binary Tree From Char Frequencies (M) (core) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -392,7 +392,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
   - [ ] [Graphs] -> Clone Graph (M)
   - [ ] [Graphs] -> Walls and Gates (M)
   - [ ] [Graphs] -> Rotting Oranges (M)
-  - [ ] [Graphs] -> Find All Possible Recipes (M) (core) (company)
+  - [ ] [Graphs] -> Find All Possible Recipes (M) (core) (company question)
   - [ ] [Graphs] -> Pacific Atlantic Water Flow (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -411,7 +411,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
   - [ ] [Graphs] -> Course Schedule (M)
   - [ ] [Graphs] -> Course Schedule II (M)
   - [ ] [Graphs] -> Graph Valid Tree (M)
-  - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (core) (company)
+  - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (core) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
@@ -585,7 +585,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
   - [ ] DDIA Ch 8 — finish
 - **15:30–19:30 DSA New (6):**
   - [ ] [Intervals] -> Meeting Rooms II (M)
-  - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (core) (company)
+  - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (core) (company question)
   - [ ] [Difference Array] -> Car Pooling (M) (core) (nc-150+)
   - [ ] [Difference Array] -> Corporate Flight Bookings (M) (core) (nc-150+)
   - [ ] [Math & Geometry] -> Plus One (E)
@@ -664,7 +664,7 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
 - **15:30–19:30 DSA New (4):**
   - [ ] [Bit Manipulation] -> Reverse Integer (M)
   - [ ] [Reservoir Sampling] -> Random Pick with Weight (M) (core) (nc-150+)
-  - [ ] [Reservoir Sampling] -> Wordler Random Get/Remove/Has (M) (core) (nc-150+) (company)
+  - [ ] [Reservoir Sampling] -> Wordler Random Get/Remove/Has (M) (core) (nc-150+) (company question)
   - [ ] [Reservoir Sampling] -> Linked List Random Node (M) (optional) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -861,7 +861,7 @@ Light reading: _Fluent Python_ Ch 7.
 - **15:30–19:30 DSA New (3 Hards):**
   - [ ] [2-D DP] -> Regular Expression Matching (H)
   - [ ] [Intervals] -> Minimum Interval to Include Each Query (H)
-  - [ ] [Intervals] -> Employee Free Time (H) (core) (company)
+  - [ ] [Intervals] -> Employee Free Time (H) (core) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
