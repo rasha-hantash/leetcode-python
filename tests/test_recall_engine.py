@@ -31,6 +31,7 @@ from recall_engine import (
     day_n_for,
     due_date,
     interval_for,
+    apply_mock_updates,
     load_behavioral,
     load_ledger,
     load_mocks,
@@ -38,6 +39,8 @@ from recall_engine import (
     mock_prereq_status,
     next_sd_chapter,
     overdue_days,
+    parse_mock_updates,
+    save_mocks,
     parse_completions,
     parse_curriculum,
     parse_phases,
@@ -1836,3 +1839,204 @@ def test_scheduled_mock_does_not_show_booking_link() -> None:
         mocks=mocks,
     )
     assert "Book:" not in out
+
+
+# ─── today.md → mock_interviews.json wiring ───────────────────────────────────
+
+
+def test_parse_mock_updates_extracts_scheduled_date_from_calendar_emoji() -> None:
+    """User edits today.md to add 📅 after booking. Engine extracts the date
+    on next recompute."""
+    md = (
+        "## Next mock\n\n"
+        "- [ ] [mock-1] Pramp · Trees — _pending_ 📅 2026-05-20\n"
+    )
+    updates = parse_mock_updates(md, known_ids={"mock-1"})
+    assert updates == [("mock-1", "scheduled", date(2026, 5, 20))]
+
+
+def test_parse_mock_updates_extracts_completion_from_done_stamp() -> None:
+    """Tasks plugin auto-stamps ✅ when the user checks the box. Engine treats
+    that as the completion signal."""
+    md = (
+        "## Next mock\n\n"
+        "- [x] [mock-1] Pramp · Trees · 📅 2026-05-20 ✅ 2026-05-22\n"
+    )
+    updates = parse_mock_updates(md, known_ids={"mock-1"})
+    assert updates == [("mock-1", "completed", date(2026, 5, 22))]
+
+
+def test_parse_mock_updates_ignores_unknown_ids() -> None:
+    """Mock-id tag must match a known mock — protects against problem checkboxes
+    or stray tags being parsed as mock state changes."""
+    md = "- [ ] [random-tag] Whatever 📅 2026-05-20\n"
+    assert parse_mock_updates(md, known_ids={"mock-1"}) == []
+
+
+def test_parse_mock_updates_does_not_misread_problem_checkboxes() -> None:
+    """DSA problem lines look like `[Pattern] -> Name` — the `->` distinguishes
+    them from mock-id tags. parse_mock_updates only matches lines whose tag
+    is in known_ids, so problems pass through untouched."""
+    md = (
+        "- [x] [Arrays & Hashing] -> Two Sum (E) ✅ 2026-05-20\n"
+        "- [ ] [mock-1] Pramp · Trees 📅 2026-05-25\n"
+    )
+    updates = parse_mock_updates(md, known_ids={"mock-1"})
+    assert updates == [("mock-1", "scheduled", date(2026, 5, 25))]
+
+
+def test_apply_mock_updates_promotes_pending_to_scheduled_with_date() -> None:
+    mocks = [Mock(id="m1", status="pending", platform="Pramp")]
+    updates = [("m1", "scheduled", date(2026, 5, 20))]
+    new_mocks, changes = apply_mock_updates(mocks, updates)
+    assert changes == 1
+    assert new_mocks[0].status == "scheduled"
+    assert new_mocks[0].scheduled_date == date(2026, 5, 20)
+
+
+def test_apply_mock_updates_promotes_scheduled_to_completed() -> None:
+    mocks = [
+        Mock(
+            id="m1",
+            status="scheduled",
+            scheduled_date=date(2026, 5, 20),
+        )
+    ]
+    new_mocks, changes = apply_mock_updates(
+        mocks, [("m1", "completed", date(2026, 5, 22))]
+    )
+    assert changes == 1
+    assert new_mocks[0].status == "completed"
+    assert new_mocks[0].completed_date == date(2026, 5, 22)
+    # Original scheduled_date is preserved on the completed mock
+    assert new_mocks[0].scheduled_date == date(2026, 5, 20)
+
+
+def test_apply_mock_updates_does_not_downgrade_completed_back_to_scheduled() -> None:
+    """If a stale 📅 lingers on a completed mock's line, it shouldn't reset the
+    completion. Completed is the terminal state."""
+    mocks = [
+        Mock(
+            id="m1",
+            status="completed",
+            completed_date=date(2026, 5, 22),
+        )
+    ]
+    new_mocks, changes = apply_mock_updates(
+        mocks, [("m1", "scheduled", date(2026, 5, 20))]
+    )
+    assert changes == 0
+    assert new_mocks[0].status == "completed"
+
+
+def test_apply_mock_updates_returns_zero_changes_when_state_already_matches() -> None:
+    mocks = [
+        Mock(
+            id="m1",
+            status="scheduled",
+            scheduled_date=date(2026, 5, 20),
+        )
+    ]
+    _, changes = apply_mock_updates(
+        mocks, [("m1", "scheduled", date(2026, 5, 20))]
+    )
+    assert changes == 0
+
+
+def test_save_mocks_round_trips_through_load_mocks(tmp_path: Path) -> None:
+    """save_mocks → load_mocks should preserve every modeled field including
+    prereqs and booking_url."""
+    path = tmp_path / "mock_interviews.json"
+    original = [
+        Mock(
+            id="m1",
+            status="scheduled",
+            platform="Pramp",
+            topic="Trees",
+            scheduled_date=date(2026, 5, 20),
+            prerequisites=MockPrereq(em_problems=15, sd_chapters=2),
+            booking_url="https://my-booking.example/abc",
+        ),
+        Mock(
+            id="m2",
+            status="completed",
+            platform="Interviewing.io",
+            topic="DP",
+            completed_date=date(2026, 5, 8),
+            notes="weak on memo",
+        ),
+    ]
+    save_mocks(path, original)
+    reloaded = load_mocks(path)
+    assert reloaded == original
+
+
+def test_recompute_folds_today_md_calendar_edit_into_mock_interviews_json(
+    tmp_path: Path,
+) -> None:
+    """End-to-end: user adds 📅 to today.md, runs recompute, mock_interviews.json
+    reflects the new scheduled state. This is the editing UX the user asked for."""
+    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md.write_text(
+        "## Phase 1 — X (Days 1–7)\n"
+        "### Day 1\n"
+        "- [ ] [A] -> Foo (E)\n"
+    )
+    today_md = tmp_path / "today.md"
+    # Simulate a today.md the user has edited — added 📅 to the pending mock
+    today_md.write_text(
+        "# Today\n\n"
+        "## Next mock\n\n"
+        "- [ ] [mock-1] Pramp · Trees — _pending_ 📅 2026-05-20\n"
+    )
+    ledger = tmp_path / "completions.jsonl"
+    mocks_path = tmp_path / "mock_interviews.json"
+    mocks_path.write_text(
+        '[{"id": "mock-1", "status": "pending", "platform": "Pramp", "topic": "Trees"}]'
+    )
+    recompute(
+        daily_md,
+        today_md,
+        ledger,
+        today=date(2026, 5, 11),
+        mocks_path=mocks_path,
+    )
+    # mock_interviews.json now has the scheduled state
+    updated = load_mocks(mocks_path)
+    assert updated[0].status == "scheduled"
+    assert updated[0].scheduled_date == date(2026, 5, 20)
+
+
+def test_recompute_folds_today_md_completion_check_into_mock_interviews_json(
+    tmp_path: Path,
+) -> None:
+    """Tasks plugin checks the box and auto-stamps ✅. Recompute folds that
+    completion stamp into mock_interviews.json."""
+    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md.write_text(
+        "## Phase 1 — X (Days 1–7)\n"
+        "### Day 1\n"
+        "- [ ] [A] -> Foo (E)\n"
+    )
+    today_md = tmp_path / "today.md"
+    today_md.write_text(
+        "# Today\n\n"
+        "## Next mock\n\n"
+        "- [x] [mock-1] Pramp · Trees · 📅 2026-05-20 ✅ 2026-05-22\n"
+    )
+    ledger = tmp_path / "completions.jsonl"
+    mocks_path = tmp_path / "mock_interviews.json"
+    mocks_path.write_text(
+        '[{"id": "mock-1", "status": "scheduled", "platform": "Pramp", '
+        '"topic": "Trees", "scheduled_date": "2026-05-20"}]'
+    )
+    recompute(
+        daily_md,
+        today_md,
+        ledger,
+        today=date(2026, 5, 23),
+        mocks_path=mocks_path,
+    )
+    updated = load_mocks(mocks_path)
+    assert updated[0].status == "completed"
+    assert updated[0].completed_date == date(2026, 5, 22)
