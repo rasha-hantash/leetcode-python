@@ -83,6 +83,7 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 | `launchd/com.rasha.recall-engine.plist` | LaunchAgent template that runs `recompute` daily at 8:30 AM.                                                         |
 | `prep-data/today.md`                    | _(generated)_ Today's frozen Recall + New queue. Tick boxes here.                                                    |
 | `prep-data/coverage.md`                 | _(generated)_ All curriculum problems grouped by pattern, variants nested, boxes auto-checked from the ledger.       |
+| `prep-data/mocks.md`                    | _(generated)_ Standalone mock-interview view — upcoming + completed + pending, kept separate from the daily queue.   |
 | `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth.                                                        |
 | `prep-data/mocks.json`                  | _(user-edited)_ Mock interview list — `pending → scheduled (with date) → completed`. Schema in `mocks.example.json`. |
 | `prep-data/mocks.example.json`          | Starter template for `mocks.json`. Copy and edit as you book/complete mocks.                                         |
