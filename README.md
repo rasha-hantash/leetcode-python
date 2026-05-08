@@ -4,7 +4,7 @@ A 90-day NeetCode 150 + system design + behavioral prep system built on top of a
 
 ## Daily flow
 
-1. **Morning (one-time, automatic at 8:30 AM):** the LaunchAgent runs `uv run python -m recall_engine recompute`. This logs yesterday's completions into the ledger, then writes a fresh `prep-data/today.md` with today's **Recall** + **New** sections. _If the cron didn't fire, run the command manually — same result._
+1. **Morning (one-time, automatic at 8:30 AM):** the LaunchAgent runs `uv run prep recompute`. This logs yesterday's completions into the ledger, then writes a fresh `prep-data/today.md` with today's **Recall** + **New** sections. _If the cron didn't fire, run the command manually — same result._
 2. **Morning Recall block (9:00–13:00):** open `prep-data/today.md`. Drain **Recall** top-down — click the checkbox of each problem as you re-solve it. Tasks plugin auto-stamps `✅ DATE`. Recall is the highest-leverage work — protecting it with the morning slot keeps it from getting dropped when the day runs long.
 3. **Afternoon System Design (14:00–15:30):** today's chapter in `prep-plan-daily.md` names what to read. Tick the box there.
 4. **DSA New block (15:30–19:30):** open `prep-plan-daily.md` to find today's `### Day N` curriculum. Solve those problems. _Don't tick the source-day boxes — tick today's New section in `prep-data/today.md` instead._
@@ -14,7 +14,7 @@ That's it. The list you wake up to is the list for the day — it does not reshu
 
 ### Forgot to check things yesterday?
 
-Run `uv run python -m recall_engine recompute` any time. It scans `today.md` for new `✅` stamps, appends them to the ledger, then regenerates `today.md` with a fresh queue.
+Run `uv run prep recompute` any time. It scans `today.md` for new `✅` stamps, appends them to the ledger, then regenerates `today.md` with a fresh queue.
 
 ## How Recall works
 
@@ -62,7 +62,7 @@ A problem you've solved once is due 1 day later. Solved twice → 3 days. Solved
 
 1. `uv sync` from the repo root — installs the recall engine and pytest.
 2. Install Obsidian's **Tasks** plugin → enable "Set done date on task completion." (Rendered checkboxes are clickable by default — no separate toggle.)
-3. `uv run python -m recall_engine recompute` — generates the first `prep-data/today.md`.
+3. `uv run prep recompute` — generates the first `prep-data/today.md`.
 4. (Optional but recommended) Copy `launchd/com.rasha.recall-engine.plist` to `~/Library/LaunchAgents/` and `launchctl load` it. Now `recompute` runs daily at 8:30 AM.
 
 ## Tests
@@ -77,7 +77,7 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 
 | File                                            | What's in it                                                                                                                       |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `recall_engine.py`                              | Snapshot-mode SM-2 lite engine. Run via `uv run python -m recall_engine recompute`.                                                |
+| `recall_engine.py`                              | Snapshot-mode SM-2 lite engine. Run via `uv run prep recompute`.                                                                   |
 | `tests/test_recall_engine.py`                   | Narrative tests — also serve as the spec.                                                                                          |
 | `pyproject.toml`                                | Python project metadata + uv lock. `click` (CLI) + `pytest` (dev).                                                                 |
 | `launchd/com.rasha.recall-engine.plist`         | LaunchAgent template that runs `recompute` daily at 8:30 AM.                                                                       |
@@ -108,7 +108,7 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 - **New (3)** — the next 3 never-touched curriculum problems in `prep-data/today.md`, frozen at recompute time.
 - **Touch** — one successful (re-)solve event. One line in `completions.jsonl`.
 - **Ledger** — `prep-data/completions.jsonl`. Append-only history of every touch.
-- **Recompute** — running `uv run python -m recall_engine recompute`. Logs new touches, regenerates `today.md`.
+- **Recompute** — running `uv run prep recompute`. Logs new touches, regenerates `today.md`.
 - **Snapshot mode** — today's queue is frozen at recompute time. Clicking checkboxes through the day does NOT re-rank. Tomorrow morning's recompute reflects what you did today.
 - **`(mock)`** — mock-interview day. Appears after the date in the day header.
 - **Phases** — three ledger-derived phases that any user (you or a friend) progresses through:

@@ -7,6 +7,12 @@ dependencies = [
     "click>=8.1",
 ]
 
+[project.scripts]
+prep = "recall_engine:cli"
+
+[tool.setuptools]
+py-modules = ["recall_engine"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",
