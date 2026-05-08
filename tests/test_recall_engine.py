@@ -488,7 +488,7 @@ def test_renderer_includes_a_dated_header_for_orientation() -> None:
     assert "May 6" in out or "2026-05-06" in out
 
 
-# ─── Difficulty + priority tags ────────────────────────────────────────────────
+# ─── Difficulty + source tags ─────────────────────────────────────────────────
 
 
 _TAGGED_DAILY_MD = """\
@@ -498,17 +498,17 @@ _TAGGED_DAILY_MD = """\
   - [ ] [Arrays & Hashing] -> Contains Duplicate (E)
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
 
-### Day 40 — Hard sprint
+### Day 40 — Hard problems
 
 - **9:00–13:00 DSA New:**
   - [ ] [Two Pointers] -> Trapping Rain Water (H)
 
-### Day 54 — Net-new
+### Day 54 — Beyond-NC150 patterns
 
 - **9:00–13:00 DSA New:**
-  - [ ] [Boyer-Moore] -> Majority Element II (M) (core)
-  - [ ] [Segment Tree] -> Count of Smaller After Self (H) (enrichment)
-  - [ ] [Bit-Trie] -> Maximum XOR (M) (optional)
+  - [ ] [Boyer-Moore] -> Majority Element II (M) (nc-150+)
+  - [ ] [Segment Tree] -> Count of Smaller After Self (H) (nc-150+)
+  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (company question)
 """
 
 
@@ -520,30 +520,32 @@ def test_curriculum_parser_extracts_difficulty_marker() -> None:
     assert by_text["[Two Pointers] -> Trapping Rain Water"].difficulty == "H"
 
 
-def test_curriculum_parser_defaults_priority_to_core_when_no_priority_tag() -> None:
-    """NC150 problems carry only a difficulty marker; their priority is implicitly 'core'."""
+def test_curriculum_parser_defaults_source_to_nc_150_when_no_source_tag() -> None:
+    """NC150 problems carry only a difficulty marker; their source is implicitly 'nc-150'."""
     problems = parse_curriculum(_TAGGED_DAILY_MD)
     by_text = {p.text: p for p in problems}
-    assert by_text["[Arrays & Hashing] -> Contains Duplicate"].priority == "core"
+    assert by_text["[Arrays & Hashing] -> Contains Duplicate"].source == "nc-150"
 
 
-def test_curriculum_parser_extracts_explicit_priority_marker() -> None:
+def test_curriculum_parser_extracts_explicit_source_marker() -> None:
     problems = parse_curriculum(_TAGGED_DAILY_MD)
     by_text = {p.text: p for p in problems}
-    assert by_text["[Boyer-Moore] -> Majority Element II"].priority == "core"
-    assert by_text["[Segment Tree] -> Count of Smaller After Self"].priority == "enrichment"
-    assert by_text["[Bit-Trie] -> Maximum XOR"].priority == "optional"
+    assert by_text["[Boyer-Moore] -> Majority Element II"].source == "nc-150+"
+    assert by_text["[Segment Tree] -> Count of Smaller After Self"].source == "nc-150+"
+    assert (
+        by_text["[Arrays & Hashing] -> Customers With 2-Day 2-Page Visits"].source
+        == "company question"
+    )
 
 
-def test_curriculum_parser_canonical_text_omits_difficulty_and_priority_tags() -> None:
+def test_curriculum_parser_canonical_text_omits_difficulty_and_source_tags() -> None:
     """Ledger keys must match across renders, so the canonical text excludes
     annotations the renderer might add or drop."""
     problems = parse_curriculum(_TAGGED_DAILY_MD)
     texts = {p.text for p in problems}
-    # No "(E)", "(M)", "(H)", "(core)", "(enrichment)", "(optional)" anywhere
     for t in texts:
         assert "(E)" not in t and "(M)" not in t and "(H)" not in t
-        assert "(core)" not in t and "(enrichment)" not in t and "(optional)" not in t
+        assert "(nc-150+)" not in t and "(company question)" not in t
 
 
 def test_completion_parser_strips_difficulty_tag_from_canonical() -> None:
@@ -555,45 +557,45 @@ def test_completion_parser_strips_difficulty_tag_from_canonical() -> None:
     ]
 
 
-def test_completion_parser_strips_priority_tag_from_canonical() -> None:
-    md = "- [x] [Segment Tree] -> Count of Smaller After Self (H) (enrichment) (Day 54) ✅ 2026-07-03"
+def test_completion_parser_strips_source_tag_from_canonical() -> None:
+    md = "- [x] [Segment Tree] -> Count of Smaller After Self (H) (nc-150+) (Day 54) ✅ 2026-07-03"
     assert parse_completions(md) == [
         Touch("[Segment Tree] -> Count of Smaller After Self", date(2026, 7, 3))
     ]
 
 
-# ─── compute_new priority tiebreaker ───────────────────────────────────────────
+# ─── compute_new source-tier ordering ─────────────────────────────────────────
 
 
-def test_compute_new_prefers_core_problems_over_enrichment_in_same_day() -> None:
-    """When falling behind, the engine should never offer an enrichment problem
-    while a core problem of the same day is still untouched."""
+def test_compute_new_prefers_nc_150_over_nc_150_plus_in_same_day() -> None:
+    """The engine surfaces NC150 problems before non-NC150 patterns regardless
+    of document position within a day."""
     curriculum = [
-        Problem("[X] enrichment-1", source_day=54, difficulty="H", priority="enrichment"),
-        Problem("[X] core-1", source_day=54, difficulty="M", priority="core"),
-        Problem("[X] enrichment-2", source_day=54, difficulty="H", priority="enrichment"),
-        Problem("[X] core-2", source_day=54, difficulty="M", priority="core"),
+        Problem("[X] beyond-1", source_day=54, difficulty="M", source="nc-150+"),
+        Problem("[X] core-nc-1", source_day=54, difficulty="M", source="nc-150"),
+        Problem("[X] beyond-2", source_day=54, difficulty="H", source="nc-150+"),
+        Problem("[X] core-nc-2", source_day=54, difficulty="M", source="nc-150"),
     ]
     new = compute_new(curriculum, ledger=[], limit=2)
-    assert [p.text for p in new] == ["[X] core-1", "[X] core-2"]
+    assert [p.text for p in new] == ["[X] core-nc-1", "[X] core-nc-2"]
 
 
-def test_compute_new_falls_through_to_optional_then_enrichment_when_core_is_drained() -> None:
+def test_compute_new_falls_through_to_nc_150_plus_then_company_when_nc_150_is_drained() -> None:
     curriculum = [
-        Problem("[X] core-only", source_day=54, difficulty="M", priority="core"),
-        Problem("[X] optional-thing", source_day=54, difficulty="M", priority="optional"),
-        Problem("[X] enrichment-thing", source_day=54, difficulty="H", priority="enrichment"),
+        Problem("[X] nc-only", source_day=54, difficulty="M", source="nc-150"),
+        Problem("[X] beyond-thing", source_day=54, difficulty="M", source="nc-150+"),
+        Problem("[X] company-thing", source_day=54, difficulty="H", source="company question"),
     ]
-    ledger = [Touch("[X] core-only", date(2026, 7, 3))]
+    ledger = [Touch("[X] nc-only", date(2026, 7, 3))]
     new = compute_new(curriculum, ledger, limit=2)
-    assert [p.text for p in new] == ["[X] optional-thing", "[X] enrichment-thing"]
+    assert [p.text for p in new] == ["[X] beyond-thing", "[X] company-thing"]
 
 
-def test_compute_new_within_a_priority_tier_preserves_document_order() -> None:
+def test_compute_new_within_a_source_tier_preserves_document_order() -> None:
     curriculum = [
-        Problem("[X] P3", source_day=2, difficulty="M", priority="core"),
-        Problem("[X] P1", source_day=1, difficulty="M", priority="core"),
-        Problem("[X] P2", source_day=1, difficulty="M", priority="core"),
+        Problem("[X] P3", source_day=2, difficulty="M", source="nc-150"),
+        Problem("[X] P1", source_day=1, difficulty="M", source="nc-150"),
+        Problem("[X] P2", source_day=1, difficulty="M", source="nc-150"),
     ]
     new = compute_new(curriculum, ledger=[], limit=3)
     assert [p.text for p in new] == ["[X] P3", "[X] P1", "[X] P2"]
@@ -604,7 +606,7 @@ def test_compute_new_within_a_priority_tier_preserves_document_order() -> None:
 
 def test_recall_item_carries_difficulty_when_curriculum_is_provided() -> None:
     curriculum = [
-        Problem("[A] Two Sum", source_day=1, difficulty="E", priority="core"),
+        Problem("[A] Two Sum", source_day=1, difficulty="E", source="nc-150"),
     ]
     ledger = [Touch("[A] Two Sum", date(2026, 5, 1))]
     recall = compute_recall(ledger, today=date(2026, 5, 7), limit=10, curriculum=curriculum)
@@ -636,7 +638,7 @@ def test_renderer_displays_difficulty_in_new_lines() -> None:
     out = render_today(
         today=date(2026, 5, 11),
         recall=[],
-        new=[Problem("[A] Two Sum", source_day=1, difficulty="E", priority="core")],
+        new=[Problem("[A] Two Sum", source_day=1, difficulty="E", source="nc-150")],
     )
     new_section = out.split("## New")[1]
     assert "(E)" in new_section

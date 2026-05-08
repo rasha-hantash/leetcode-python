@@ -1,4 +1,4 @@
-"""Recall engine: snapshot-mode SM-2 lite scheduler for the NeetCode 150 sprint.
+"""Recall engine: snapshot-mode SM-2 lite scheduler for the NeetCode 150 curriculum.
 
 Reads `prep-plan-daily.md` (curriculum) and the previous `today.md` (yesterday's
 checked-off items), folds new completions into an append-only JSONL ledger, then
@@ -29,9 +29,9 @@ DEFAULT_RECALL_LIMIT = 10
 DEFAULT_NEW_LIMIT = 3
 
 Difficulty = Literal["E", "M", "H"]
-Priority = Literal["core", "optional", "enrichment"]
+Source = Literal["nc-150", "nc-150+", "company question"]
 
-_PRIORITY_RANK: dict[str, int] = {"core": 0, "optional": 1, "enrichment": 2}
+_SOURCE_RANK: dict[str, int] = {"nc-150": 0, "nc-150+": 1, "company question": 2}
 
 
 # ─── Data types ──────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ class Problem:
     text: str
     source_day: int
     difficulty: Difficulty | None = None
-    priority: Priority = "core"
+    source: Source = "nc-150"
 
 
 @dataclass(frozen=True)
@@ -143,14 +143,15 @@ def compute_recall(
 def compute_new(
     curriculum: list[Problem], ledger: list[Touch], limit: int = DEFAULT_NEW_LIMIT
 ) -> list[Problem]:
-    """The next N never-touched problems, ordered by priority (core > optional >
-    enrichment) then document order. Falling-behind days never offer enrichment
-    while a core problem is still untouched."""
+    """The next N never-touched problems, ordered by source provenance
+    (nc-150 > nc-150+ > company question) then document order. NC150 problems
+    always surface before non-NC150 patterns, and both before company-specific
+    variants."""
     touched = {t.problem for t in ledger}
     indexed = [
         (i, p) for i, p in enumerate(curriculum) if p.text not in touched
     ]
-    indexed.sort(key=lambda item: (_PRIORITY_RANK.get(item[1].priority, 0), item[0]))
+    indexed.sort(key=lambda item: (_SOURCE_RANK.get(item[1].source, 0), item[0]))
     return [p for _, p in indexed[:limit]]
 
 
@@ -165,7 +166,6 @@ _T_MARKER = re.compile(r"\s*`[A-Z]\d?`\s*")
 _DAY_ANNOTATION = re.compile(r"\s*\(Day\s+\d+\)\s*")
 _METADATA_SUFFIX = re.compile(r"\s+—\s+.*$")
 _DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
-_PRIORITY_TAG = re.compile(r"\s*\((core|optional|enrichment)\)\s*")
 _SOURCE_TAG = re.compile(r"\s*\((nc-150\+|company question)\)\s*")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")
 
@@ -177,22 +177,20 @@ def _extract_difficulty(text: str) -> Difficulty | None:
     return match.group(1)  # type: ignore[return-value]
 
 
-def _extract_priority(text: str) -> Priority:
-    match = _PRIORITY_TAG.search(text)
+def _extract_source(text: str) -> Source:
+    match = _SOURCE_TAG.search(text)
     if match is None:
-        return "core"
+        return "nc-150"
     return match.group(1)  # type: ignore[return-value]
 
 
 def _canonicalize(text: str) -> str:
     """Strip every non-canonical annotation: done-date stamp, em-dash metadata
-    suffix, (Day N), (E)/(M)/(H), (core)/(optional)/(enrichment),
-    (nc-150+)/(company question), `T2`/`M`."""
+    suffix, (Day N), (E)/(M)/(H), (nc-150+)/(company question), `T2`/`M`."""
     text = _DONE_DATE.sub("", text)
     text = _METADATA_SUFFIX.sub("", text)
     text = _DAY_ANNOTATION.sub(" ", text)
     text = _DIFFICULTY_TAG.sub(" ", text)
-    text = _PRIORITY_TAG.sub(" ", text)
     text = _SOURCE_TAG.sub(" ", text)
     text = _T_MARKER.sub(" ", text)
     return re.sub(r"\s+", " ", text).strip()
@@ -216,7 +214,7 @@ def parse_curriculum(daily_md: str) -> list[Problem]:
             continue
         raw = problem_match.group(1)
         difficulty = _extract_difficulty(raw)
-        priority = _extract_priority(raw)
+        source = _extract_source(raw)
         canonical = _canonicalize(raw)
         if _PROBLEM_TEXT.match(canonical):
             problems.append(
@@ -224,7 +222,7 @@ def parse_curriculum(daily_md: str) -> list[Problem]:
                     text=canonical,
                     source_day=current_day,
                     difficulty=difficulty,
-                    priority=priority,
+                    source=source,
                 )
             )
 
@@ -391,7 +389,7 @@ def recompute(
 
 @click.group()
 def cli() -> None:
-    """Snapshot-mode recall engine for the NeetCode 150 sprint."""
+    """Snapshot-mode recall engine for the NeetCode 150 curriculum."""
 
 
 @cli.command(name="recompute")

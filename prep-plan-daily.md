@@ -10,14 +10,16 @@ This file is the **curriculum reference** — what each Day's New problems are. 
 
 > Skipped a day? Run `uv run python -m recall_engine recompute` — yesterday's untouched problems surface in today's New automatically.
 
-> **Difficulty-first sequencing:** within each pattern, all Easies before any Mediums. Across all patterns, all E+M before any Hard. The Hard sprint runs D40–D53. The 13 net-new problems are tagged `(core)` (drill always), `(optional)` (drill if ahead), or `(enrichment)` (skip if behind) — the engine respects these when computing today's New.
+> **Difficulty-first sequencing:** within each pattern, all Easies before any Mediums. Across all patterns, all E+M before any Hard. Phase 5 (Hard problems) runs D40–D53. Within the New section the engine surfaces problems in this order: NC150 → NC150+ → company question. An unchecked problem is implicitly deferred — there is no separate "skip if behind" tag.
 
 ---
 
 ## Legend
 
 - `(E)` `(M)` `(H)` — LeetCode difficulty.
-- `(core)` `(optional)` `(enrichment)` — first-round-relevance for the 13 net-new problems. NC150 problems default to `core`.
+- `(nc-150+)` — problem outside the original NeetCode 150 list. Untagged problems are NC150.
+- `(company question)` — problem asked in a real interview at a specific company.
+- `(variant of: X)` — follow-up variant of canonical problem X (e.g., House Robber II is a variant of House Robber).
 - `M` (after the date) — mock-interview day.
 - Each problem prefixed with its NeetCode pattern category in brackets.
 
@@ -55,7 +57,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Valid Anagram (E)
   - [ ] [Arrays & Hashing] -> Two Sum (E)
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
-  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) (company question)
+  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (company question)
   - [ ] [String Transformation] -> Longest Common Prefix (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _** (no warm-up — sprint start)
 
@@ -89,7 +91,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] Grokking SD Fundamentals — sharding + replication basics
 - **15:30–19:30 DSA New (6):**
   - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence (M)
-  - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (core) (company question)
+  - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (company question)
   - [ ] [Two Pointers] -> Valid Palindrome (E)
   - [ ] [Two Pointers] -> Two Sum II (M)
   - [ ] [Two Pointers] -> 3Sum (M)
@@ -173,7 +175,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Binary Search] -> Koko Eating Bananas (M)
   - [ ] [Binary Search] -> Find Minimum in Rotated Sorted Array (M)
   - [ ] [Binary Search] -> Search in Rotated Sorted Array (M)
-  - [ ] [Arrays & Hashing] -> Referral Bonus Event Correlation (M) (core) (company question)
+  - [ ] [Arrays & Hashing] -> Referral Bonus Event Correlation (M) (company question)
   - [ ] [String Transformation] -> String Compression (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -261,7 +263,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Trees] -> Lowest Common Ancestor of a BST (E)
   - [ ] [Trees] -> Binary Tree Level Order Traversal (M)
   - [ ] [Trees] -> Binary Tree Right Side View (M)
-  - [ ] [Trees] -> Build Binary Tree From Char Frequencies (M) (core) (company question)
+  - [ ] [Trees] -> Build Binary Tree From Char Frequencies (M) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -392,7 +394,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
   - [ ] [Graphs] -> Clone Graph (M)
   - [ ] [Graphs] -> Walls and Gates (M)
   - [ ] [Graphs] -> Rotting Oranges (M)
-  - [ ] [Graphs] -> Find All Possible Recipes (M) (core) (company question)
+  - [ ] [Graphs] -> Find All Possible Recipes (M) (company question)
   - [ ] [Graphs] -> Pacific Atlantic Water Flow (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -411,7 +413,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
   - [ ] [Graphs] -> Course Schedule (M)
   - [ ] [Graphs] -> Course Schedule II (M)
   - [ ] [Graphs] -> Graph Valid Tree (M)
-  - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (core) (company question)
+  - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
@@ -585,9 +587,9 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
   - [ ] DDIA Ch 8 — finish
 - **15:30–19:30 DSA New (6):**
   - [ ] [Intervals] -> Meeting Rooms II (M)
-  - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (core) (company question)
-  - [ ] [Difference Array] -> Car Pooling (M) (core) (nc-150+)
-  - [ ] [Difference Array] -> Corporate Flight Bookings (M) (core) (nc-150+)
+  - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (company question)
+  - [ ] [Difference Array] -> Car Pooling (M) (nc-150+)
+  - [ ] [Difference Array] -> Corporate Flight Bookings (M) (nc-150+)
   - [ ] [Math & Geometry] -> Plus One (E)
   - [ ] [Math & Geometry] -> Happy Number (E)
   - [ ] today's hardest: **_ • didn't click: _**
@@ -612,7 +614,7 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
   - [ ] [Math & Geometry] -> Spiral Matrix (M)
   - [ ] [Math & Geometry] -> Set Matrix Zeroes (M)
   - [ ] [Math & Geometry] -> Pow(x, n) (M)
-  - [ ] [Boyer-Moore] -> Majority Element (E) (core) (nc-150+)
+  - [ ] [Boyer-Moore] -> Majority Element (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -647,8 +649,8 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
   - [ ] [Bit Manipulation] -> Reverse Bits (E)
   - [ ] [Bit Manipulation] -> Missing Number (E)
   - [ ] [Bit Manipulation] -> Sum of Two Integers (M)
-  - [ ] [Boyer-Moore] -> Majority Element II (M) (core) (nc-150+)
-  - [ ] [Bit-Trie] -> Maximum XOR (M) (optional) (nc-150+)
+  - [ ] [Boyer-Moore] -> Majority Element II (M) (nc-150+)
+  - [ ] [Bit-Trie] -> Maximum XOR (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -663,9 +665,9 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
   - [ ] Alex Xu Vol 2 Ch 1 (Proximity Service) — start
 - **15:30–19:30 DSA New (4):**
   - [ ] [Bit Manipulation] -> Reverse Integer (M)
-  - [ ] [Reservoir Sampling] -> Random Pick with Weight (M) (core) (nc-150+)
-  - [ ] [Reservoir Sampling] -> Wordler Random Get/Remove/Has (M) (core) (nc-150+) (company question)
-  - [ ] [Reservoir Sampling] -> Linked List Random Node (M) (optional) (nc-150+)
+  - [ ] [Reservoir Sampling] -> Random Pick with Weight (M) (nc-150+)
+  - [ ] [Reservoir Sampling] -> Wordler Random Get/Remove/Has (M) (nc-150+) (company question)
+  - [ ] [Reservoir Sampling] -> Linked List Random Node (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -861,7 +863,7 @@ Light reading: _Fluent Python_ Ch 7.
 - **15:30–19:30 DSA New (3 Hards):**
   - [ ] [2-D DP] -> Regular Expression Matching (H)
   - [ ] [Intervals] -> Minimum Interval to Include Each Query (H)
-  - [ ] [Intervals] -> Employee Free Time (H) (core) (company question)
+  - [ ] [Intervals] -> Employee Free Time (H) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -930,12 +932,12 @@ Light reading: _Fluent Python_ Ch 8.
   - [ ] Alex Xu Vol 2 Ch 5 re-read — metrics monitoring
 - **17:30–19:30 Reinforcement (enrichment if Recall is drained):**
   - **Enrichment (engine deprioritizes — only surface if core+optional is fully drained):**
-    - [ ] [Segment Tree] -> Range Sum Query - Mutable (M) (enrichment) (nc-150+)
-    - [ ] [Segment Tree] -> Count of Smaller Numbers After Self (H) (enrichment) (nc-150+)
-    - [ ] [Bitmask DP] -> Partition K Equal Subsets (M) (enrichment) (nc-150+)
-    - [ ] [Bitmask DP] -> Shortest Path Visiting All Nodes (H) (enrichment) (nc-150+)
-    - [ ] [Sweep Line] -> My Calendar III (H) (enrichment) (nc-150+)
-    - [ ] [Sweep Line] -> Skyline (H) (enrichment) (nc-150+)
+    - [ ] [Segment Tree] -> Range Sum Query - Mutable (M) (nc-150+)
+    - [ ] [Segment Tree] -> Count of Smaller Numbers After Self (H) (nc-150+)
+    - [ ] [Bitmask DP] -> Partition K Equal Subsets (M) (nc-150+)
+    - [ ] [Bitmask DP] -> Shortest Path Visiting All Nodes (H) (nc-150+)
+    - [ ] [Sweep Line] -> My Calendar III (H) (nc-150+)
+    - [ ] [Sweep Line] -> Skyline (H) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: \_\_\_
 
