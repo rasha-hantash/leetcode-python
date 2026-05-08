@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from recall_engine import (
+    BehavioralTopic,
     CategoryProgress,
     CurriculumPhase,
     Mock,
@@ -29,6 +30,7 @@ from recall_engine import (
     day_n_for,
     due_date,
     interval_for,
+    load_behavioral,
     load_ledger,
     load_mocks,
     load_sd_chapters,
@@ -1537,9 +1539,9 @@ def test_render_coverage_mocks_section_has_upcoming_completed_to_schedule_subsec
     assert "Backtracking" in out
 
 
-def test_render_coverage_orders_sections_readiness_then_mocks_then_sd_then_dsa() -> None:
-    """User asked for coverage.md to surface readiness/mocks/SD ABOVE the
-    DSA pattern walk — high-level state first, then drill-down."""
+def test_render_coverage_orders_sections_readiness_behavioral_mocks_sd_dsa() -> None:
+    """coverage.md surfaces high-level state first (Readiness → Behavioral →
+    Mocks → SD), then the DSA pattern drill-down."""
     em = CategoryProgress(name="E+M problems", done=0, total=1)
     sd_progress = CategoryProgress(name="System Design", done=0, total=1)
     mocks_progress = CategoryProgress(name="Mocks", done=0, total=1)
@@ -1558,9 +1560,93 @@ def test_render_coverage_orders_sections_readiness_then_mocks_then_sd_then_dsa()
             SDChapter(id="ch-1", title="T", book="B", status="pending")
         ],
         readiness=readiness,
+        behavioral=[
+            BehavioralTopic(id="b1", prompt="Tell me about yourself", status="pending")
+        ],
     )
     readiness_pos = out.find("## Readiness")
+    behavioral_pos = out.find("## Behavioral")
     mocks_pos = out.find("## Mocks")
     sd_pos = out.find("## System Design")
     dsa_pos = out.find("## DSA — by pattern")
-    assert 0 <= readiness_pos < mocks_pos < sd_pos < dsa_pos
+    assert 0 <= readiness_pos < behavioral_pos < mocks_pos < sd_pos < dsa_pos
+
+
+# ─── Behavioral tracking ──────────────────────────────────────────────────────
+
+
+def test_load_behavioral_returns_empty_list_when_file_does_not_exist(
+    tmp_path: Path,
+) -> None:
+    assert load_behavioral(tmp_path / "nope.json") == []
+
+
+def test_load_behavioral_parses_pending_and_completed_entries(tmp_path: Path) -> None:
+    path = tmp_path / "b.json"
+    path.write_text(
+        '[{"id": "b1", "prompt": "Tell me about yourself", "status": "pending"},'
+        ' {"id": "b2", "prompt": "Conflict story", "status": "completed", '
+        '"completed_date": "2026-05-12", "notes": "use Datadog migration"}]'
+    )
+    topics = load_behavioral(path)
+    assert topics[0].status == "pending"
+    assert topics[1].completed_date == date(2026, 5, 12)
+    assert topics[1].notes == "use Datadog migration"
+
+
+def test_load_behavioral_rejects_non_list_payload(tmp_path: Path) -> None:
+    path = tmp_path / "b.json"
+    path.write_text('{"id": "b1"}')
+    with pytest.raises(ValueError, match="must contain a JSON list"):
+        load_behavioral(path)
+
+
+def test_render_coverage_includes_behavioral_section_with_progress_bar() -> None:
+    topics = [
+        BehavioralTopic(
+            id="b1",
+            prompt="Tell me about yourself",
+            status="completed",
+            completed_date=date(2026, 5, 11),
+        ),
+        BehavioralTopic(id="b2", prompt="Conflict story", status="pending"),
+    ]
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)], ledger=[], behavioral=topics
+    )
+    assert "## Behavioral (1/2 complete)" in out
+    assert "█" in out and "░" in out
+    assert "- [x] Tell me about yourself · ✅ 2026-05-11" in out
+    assert "- [ ] Conflict story" in out
+
+
+def test_render_coverage_omits_behavioral_section_when_arg_is_none() -> None:
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)], ledger=[], behavioral=None
+    )
+    assert "Behavioral" not in out
+
+
+def test_recompute_reads_behavioral_file_and_renders_in_coverage(tmp_path: Path) -> None:
+    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md.write_text(
+        "## Phase 1 — X (Days 1–7)\n"
+        "### Day 1\n"
+        "- [ ] [A] -> Foo (E)\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    coverage_md = tmp_path / "coverage.md"
+    behavioral_path = tmp_path / "b.json"
+    behavioral_path.write_text(
+        '[{"id": "b1", "prompt": "Tell me about yourself", "status": "pending"}]'
+    )
+    recompute(
+        daily_md,
+        today_md,
+        ledger,
+        today=date(2026, 5, 11),
+        coverage_md_path=coverage_md,
+        behavioral_path=behavioral_path,
+    )
+    assert "## Behavioral" in coverage_md.read_text()
