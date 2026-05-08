@@ -13,10 +13,10 @@ from __future__ import annotations
 import json
 import math
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Iterable, Literal
+from typing import Any, Iterable, Literal
 
 import click
 
@@ -613,6 +613,99 @@ def load_mocks(path: Path) -> list[Mock]:
     return mocks
 
 
+_MOCK_LINE = re.compile(r"^\s*-\s+\[([ xX])\]\s+\[([^\]]+)\]\s+(.*)$")
+_BOOKED_DATE = re.compile(r"📅\s*(\d{4}-\d{2}-\d{2})")
+
+
+def parse_mock_updates(
+    today_md: str, known_ids: set[str]
+) -> list[tuple[str, MockStatus, date]]:
+    """Find Next-mock checkbox lines in today.md tagged `[mock-id]` and extract
+    user edits. A `📅 YYYY-MM-DD` stamp signals a scheduled booking; a `✅ YYYY-MM-DD`
+    stamp (auto-added by the Tasks plugin when you check the box) signals completion.
+
+    Returns list of (mock_id, status, date) updates. Lines whose id isn't in
+    `known_ids` are ignored (so problem checkboxes can't accidentally collide)."""
+    updates: list[tuple[str, MockStatus, date]] = []
+    for line in today_md.splitlines():
+        m = _MOCK_LINE.match(line)
+        if not m:
+            continue
+        mock_id = m.group(2)
+        if mock_id not in known_ids:
+            continue
+        body = m.group(3)
+        completed_match = _DONE_DATE.search(body)
+        if completed_match:
+            updates.append(
+                (mock_id, "completed", date.fromisoformat(completed_match.group(1)))
+            )
+            continue
+        scheduled_match = _BOOKED_DATE.search(body)
+        if scheduled_match:
+            updates.append(
+                (mock_id, "scheduled", date.fromisoformat(scheduled_match.group(1)))
+            )
+    return updates
+
+
+def apply_mock_updates(
+    mocks: list[Mock],
+    updates: list[tuple[str, MockStatus, date]],
+) -> tuple[list[Mock], int]:
+    """Fold parsed today.md updates into the mock list. Completed status wins —
+    a mock that's already completed isn't downgraded by a stale 📅. Returns
+    (updated_list, change_count)."""
+    by_id = {m.id: m for m in mocks}
+    changes = 0
+    for mock_id, new_status, dt in updates:
+        if mock_id not in by_id:
+            continue
+        existing = by_id[mock_id]
+        if existing.status == "completed":
+            continue
+        if new_status == "completed" and existing.completed_date != dt:
+            by_id[mock_id] = replace(
+                existing, status="completed", completed_date=dt
+            )
+            changes += 1
+        elif new_status == "scheduled" and (
+            existing.status != "scheduled" or existing.scheduled_date != dt
+        ):
+            by_id[mock_id] = replace(
+                existing, status="scheduled", scheduled_date=dt
+            )
+            changes += 1
+    return list(by_id.values()), changes
+
+
+def save_mocks(path: Path, mocks: list[Mock]) -> None:
+    """Write mocks back to JSON. Used after parse_mock_updates + apply_mock_updates
+    so today.md edits propagate to the source-of-truth file."""
+    records: list[dict[str, Any]] = []
+    for m in mocks:
+        rec: dict[str, Any] = {"id": m.id, "status": m.status}
+        if m.platform:
+            rec["platform"] = m.platform
+        if m.topic:
+            rec["topic"] = m.topic
+        if m.scheduled_date:
+            rec["scheduled_date"] = m.scheduled_date.isoformat()
+        if m.completed_date:
+            rec["completed_date"] = m.completed_date.isoformat()
+        if m.notes:
+            rec["notes"] = m.notes
+        if m.prerequisites is not None and m.prerequisites.has_any:
+            rec["prerequisites"] = {
+                "em_problems": m.prerequisites.em_problems,
+                "sd_chapters": m.prerequisites.sd_chapters,
+            }
+        if m.booking_url:
+            rec["booking_url"] = m.booking_url
+        records.append(rec)
+    path.write_text(json.dumps(records, indent=2) + "\n")
+
+
 def mock_prereq_status(
     mock: Mock, em_done: int, sd_done: int
 ) -> list[tuple[str, bool, int, int]]:
@@ -654,11 +747,18 @@ def _format_prereq_line(rows: list[tuple[str, bool, int, int]]) -> str:
 def _render_next_mock_block(
     mock: Mock, today: date, em_done: int = 0, sd_done: int = 0
 ) -> list[str]:
-    """One-mock display: status descriptor (scheduled date or pending), platform/topic,
-    prereq sub-bullet if defined, and a booking link if pending. Used in today.md
-    and coverage.md to surface the single mock the user should focus on next."""
+    """One-mock display, formatted as an editable checkbox tagged `[mock-id]`.
+    User flow:
+      - Pending: add `📅 YYYY-MM-DD` to the line after booking. Recompute folds
+        the date back into mock_interviews.json (status → scheduled).
+      - Scheduled: tick the box after the mock; the Tasks plugin auto-stamps
+        `✅ DATE`. Recompute marks the mock completed in mock_interviews.json.
+
+    Same mental model as DSA touches: edit today.md, recompute folds the edit
+    into the source-of-truth JSON."""
     bits = [mock.platform or "", mock.topic or ""]
     descriptor = " · ".join(b for b in bits if b) or mock.id
+
     if mock.status == "scheduled" and mock.scheduled_date is not None:
         delta = (mock.scheduled_date - today).days
         if delta < 0:
@@ -673,17 +773,31 @@ def _render_next_mock_block(
             mock.scheduled_date.strftime("%a %b ").replace(" 0", " ")
             + str(mock.scheduled_date.day)
         )
-        line = f"- {descriptor} · {date_str} ({urgency})"
+        line = (
+            f"- [ ] [{mock.id}] {descriptor} · 📅 {mock.scheduled_date.isoformat()} "
+            f"({date_str}, {urgency})"
+        )
     else:
-        line = f"- {descriptor} · _pending — book this next_"
+        line = f"- [ ] [{mock.id}] {descriptor} — _pending_"
+
     lines = [line]
     prereqs = mock_prereq_status(mock, em_done, sd_done)
     if prereqs:
         lines.append(_format_prereq_line(prereqs))
+
     if mock.status == "pending":
         url = mock.effective_booking_url
         if url:
             lines.append(f"  - Book: [{mock.platform or 'link'}]({url})")
+        lines.append(
+            "  - _When booked, append `📅 YYYY-MM-DD` to the line above. "
+            "Recompute folds it into `mock_interviews.json`._"
+        )
+    elif mock.status == "scheduled":
+        lines.append(
+            "  - _When done, check the box above. The Tasks plugin auto-stamps "
+            "`✅ DATE` and recompute marks this completed._"
+        )
     return lines
 
 
@@ -1263,6 +1377,17 @@ def recompute(
     mocks: list[Mock] = []
     if mocks_path is not None and mocks_path.exists():
         mocks = load_mocks(mocks_path)
+        # Fold any 📅/✅ edits in today.md back into mock_interviews.json before
+        # regenerating views. Same pattern as DSA touches → completions.jsonl.
+        if today_md_path.exists() and mocks:
+            known_ids = {m.id for m in mocks}
+            mock_updates = parse_mock_updates(
+                today_md_path.read_text(), known_ids
+            )
+            if mock_updates:
+                mocks, changed = apply_mock_updates(mocks, mock_updates)
+                if changed:
+                    save_mocks(mocks_path, mocks)
     next_up_mock = next_mock(mocks) if mocks else None
 
     sd_chapters: list[SDChapter] = []
