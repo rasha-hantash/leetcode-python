@@ -10,7 +10,7 @@ Tracker for deferred prep-system work. Strike items through (`~~text~~`) when do
 ## Mid-prep (when relevant)
 
 - [ ] **Expand D59–D90 day-by-day.** Phase 7 + Phase 8 in `prep-plan-daily.md` describe daily-shape templates rather than day-by-day. Acceptable until you reach D58 and want to plan the mock-heavy + interview-mode phase in detail. Trigger: hit D55 with a plan to enumerate D59 onward.
-- [ ] **Build interview-coverage tool.** See [`interview-coverage-tool-plan.md`](./interview-coverage-tool-plan.md) for the full design + 4-diff build plan. Trigger: D14 (Sat May 23, 2026) — go/no-go decision based on whether ledger has produced meaningful retention data yet. Deferred from D0 because the tool is useless until ~2 weeks of touch history exists.
+- [x] ~~**Build interview-coverage tool.**~~ Done 2026-05-08 — superseded by `prep-data/coverage.md`, generated alongside `today.md` on every recompute. Same source set as the engine, grouped by pattern, variants nested, boxes auto-checked from ledger. The richer 4-diff plan in `interview-coverage-tool-plan.md` is dropped — the simpler view solves the same "what's left, organized by pattern" question without waiting on retention-data signal.
 
 ## Reference
 
