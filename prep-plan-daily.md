@@ -44,17 +44,18 @@ This file is the **curriculum reference** — what each Day's New problems are. 
 
 Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search start. All Easies then Mediums per pattern. Zero Hards.
 
-### Day 1 — Mon May 11 (5)
+### Day 1 — Mon May 11 (6)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
 - **14:00–15:30 System Design:**
   - [ ] Grokking SD Fundamentals — intro + caching basics
-- **15:30–19:30 DSA New (5):**
+- **15:30–19:30 DSA New (6):**
   - [ ] [Arrays & Hashing] -> Contains Duplicate (E)
   - [ ] [Arrays & Hashing] -> Valid Anagram (E)
   - [ ] [Arrays & Hashing] -> Two Sum (E)
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
+  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) — pageviews variant (chestnut / lightning-ai)
   - [ ] [String Transformation] -> Longest Common Prefix (E)
   - [ ] today's hardest: **_ • didn't click: _** (no warm-up — sprint start)
 
@@ -79,15 +80,16 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
 
 ---
 
-### Day 3 — Wed May 13 (5)
+### Day 3 — Wed May 13 (6)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D2 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Grokking SD Fundamentals — sharding + replication basics
-- **15:30–19:30 DSA New (5):**
+- **15:30–19:30 DSA New (6):**
   - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence (M)
+  - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (core) — traba variant
   - [ ] [Two Pointers] -> Valid Palindrome (E)
   - [ ] [Two Pointers] -> Two Sum II (M)
   - [ ] [Two Pointers] -> 3Sum (M)
@@ -159,18 +161,19 @@ Light reading: _Fluent Python_ Ch 1 (data model) — optional.
 
 Binary Search → Linked List → Trees E+M. Zero Hards.
 
-### Day 8 — Mon May 18 (5)
+### Day 8 — Mon May 18 (6)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D6 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 2 — finish
-- **15:30–19:30 DSA New (5):**
+- **15:30–19:30 DSA New (6):**
   - [ ] [Binary Search] -> Search a 2D Matrix (M)
   - [ ] [Binary Search] -> Koko Eating Bananas (M)
   - [ ] [Binary Search] -> Find Minimum in Rotated Sorted Array (M)
   - [ ] [Binary Search] -> Search in Rotated Sorted Array (M)
+  - [ ] [Arrays & Hashing] -> Referral Bonus Event Correlation (M) (core) — suno variant (event-time correlation by hash)
   - [ ] [String Transformation] -> String Compression (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -247,17 +250,18 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
 
 ---
 
-### Day 13 — Sat May 23 (3)
+### Day 13 — Sat May 23 (4)
 
 - **9:00–13:00 Recall:**
   - **This week's hardest:** open [`prep-data/today.md`](./prep-data/today.md) Saturday section — pick 2-3 from your D8-D12 daily-hardest notes.
   - **Recall queue:** drain.
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 5 (Replication) — start
-- **15:30–19:30 DSA New (3):**
+- **15:30–19:30 DSA New (4):**
   - [ ] [Trees] -> Lowest Common Ancestor of a BST (E)
   - [ ] [Trees] -> Binary Tree Level Order Traversal (M)
   - [ ] [Trees] -> Binary Tree Right Side View (M)
+  - [ ] [Trees] -> Build Binary Tree From Char Frequencies (M) (core) — zingage variant (recursive max-count tree construction)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -377,23 +381,24 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
 
 ---
 
-### Day 22 — Mon Jun 1 (4)
+### Day 22 — Mon Jun 1 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
   - [ ] D20 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 12 (Chat System)
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Graphs] -> Clone Graph (M)
   - [ ] [Graphs] -> Walls and Gates (M)
   - [ ] [Graphs] -> Rotting Oranges (M)
+  - [ ] [Graphs] -> Find All Possible Recipes (M) (core) — chariot variant (LC 2115; topological/DFS)
   - [ ] [Graphs] -> Pacific Atlantic Water Flow (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-### Day 23 — Tue Jun 2 (4) `M`
+### Day 23 — Tue Jun 2 (5) `M`
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -401,11 +406,12 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
 - **14:00–16:00 Mock slot:** Interviewing.io Graphs DSA.
 - **16:00–17:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 13 (Search Autocomplete)
-- **17:30–19:30 DSA New (4):**
+- **17:30–19:30 DSA New (5):**
   - [ ] [Graphs] -> Surrounded Regions (M)
   - [ ] [Graphs] -> Course Schedule (M)
   - [ ] [Graphs] -> Course Schedule II (M)
   - [ ] [Graphs] -> Graph Valid Tree (M)
+  - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (core) — credal variant (BFS grid w/ time budget)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
@@ -570,15 +576,16 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
 
 ---
 
-### Day 34 — Sat Jun 13 (3)
+### Day 34 — Sat Jun 13 (4)
 
 - **9:00–13:00 Recall:**
   - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D29-D33.
   - **Recall queue:** drain.
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 8 — finish
-- **15:30–19:30 DSA New (3):**
+- **15:30–19:30 DSA New (4):**
   - [ ] [Intervals] -> Meeting Rooms II (M)
+  - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (core) — january variant (date-range billing per active user)
   - [ ] [Math & Geometry] -> Plus One (E)
   - [ ] [Math & Geometry] -> Happy Number (E)
   - [ ] today's hardest: **_ • didn't click: _**
@@ -891,15 +898,16 @@ Light reading: _Fluent Python_ Ch 8.
 
 ---
 
-### Day 57 — Mon Jul 6 (2)
+### Day 57 — Mon Jul 6 (3)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
   - [ ] D55 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 4 re-read — distributed message queue
-- **15:30–19:30 DSA New (1 core + 1 optional):**
+- **15:30–19:30 DSA New (2 core + 1 optional):**
   - [ ] [Reservoir Sampling] -> Random Pick with Weight (M) (core)
+  - [ ] [Reservoir Sampling] -> Wordler Random Get/Remove/Has (M) (core) — ngrok variant (random-element data structure with mutation, ~LC 380 flavor)
   - [ ] [Reservoir Sampling] -> Linked List Random Node (M) (optional)
   - [ ] today's hardest: **_ • didn't click: _**
 
