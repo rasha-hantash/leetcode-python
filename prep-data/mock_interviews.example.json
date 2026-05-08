@@ -17,7 +17,7 @@
     "scheduled_date": "2026-05-20",
     "prerequisites": {
       "em_problems": 25,
-      "sd_chapters": 4
+      "sd_chapter_ids": ["axu1-4", "axu1-5", "axu1-6"]
     }
   },
   {

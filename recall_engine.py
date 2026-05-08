@@ -111,14 +111,44 @@ MockStatus = Literal["pending", "scheduled", "completed"]
 @dataclass(frozen=True)
 class MockPrereq:
     """Per-mock readiness threshold the user wants to clear before sitting it.
-    Both fields default to 0, meaning 'no threshold' for that dimension."""
+
+    Two SD shapes are supported:
+      - `sd_chapters` (count): any N chapters complete satisfies the threshold.
+      - `sd_chapter_ids` (specific): the named chapters must all be complete.
+        When set, this overrides `sd_chapters` — the count derives from the list."""
 
     em_problems: int = 0
     sd_chapters: int = 0
+    sd_chapter_ids: tuple[str, ...] = ()
 
     @property
     def has_any(self) -> bool:
-        return self.em_problems > 0 or self.sd_chapters > 0
+        return (
+            self.em_problems > 0
+            or self.sd_chapters > 0
+            or len(self.sd_chapter_ids) > 0
+        )
+
+    @property
+    def sd_threshold(self) -> int:
+        """How many SD chapters are required, regardless of which shape is in use.
+        Specific-id list wins (length); else the count threshold."""
+        if self.sd_chapter_ids:
+            return len(self.sd_chapter_ids)
+        return self.sd_chapters
+
+
+@dataclass(frozen=True)
+class PrereqRow:
+    """One row in the prereq summary line. `detail` is an optional inline
+    breakdown — e.g., `Ch 4 — Rate Limiter ✓, Ch 5 — Consistent Hashing` —
+    used when a mock pins specific items rather than a bulk count."""
+
+    label: str
+    met: bool
+    current: int
+    threshold: int
+    detail: str | None = None
 
 
 _PLATFORM_BOOKING_URLS: dict[str, str] = {
@@ -593,9 +623,14 @@ def load_mocks(path: Path) -> list[Mock]:
         prereq_data = record.get("prerequisites")
         prerequisites: MockPrereq | None = None
         if isinstance(prereq_data, dict):
+            chapter_ids_raw = prereq_data.get("sd_chapter_ids", [])
+            chapter_ids: tuple[str, ...] = ()
+            if isinstance(chapter_ids_raw, list):
+                chapter_ids = tuple(str(cid) for cid in chapter_ids_raw)
             prerequisites = MockPrereq(
                 em_problems=int(prereq_data.get("em_problems", 0)),
                 sd_chapters=int(prereq_data.get("sd_chapters", 0)),
+                sd_chapter_ids=chapter_ids,
             )
         mocks.append(
             Mock(
@@ -696,10 +731,13 @@ def save_mocks(path: Path, mocks: list[Mock]) -> None:
         if m.notes:
             rec["notes"] = m.notes
         if m.prerequisites is not None and m.prerequisites.has_any:
-            rec["prerequisites"] = {
+            prereqs: dict[str, Any] = {
                 "em_problems": m.prerequisites.em_problems,
                 "sd_chapters": m.prerequisites.sd_chapters,
             }
+            if m.prerequisites.sd_chapter_ids:
+                prereqs["sd_chapter_ids"] = list(m.prerequisites.sd_chapter_ids)
+            rec["prerequisites"] = prereqs
         if m.booking_url:
             rec["booking_url"] = m.booking_url
         records.append(rec)
@@ -707,45 +745,95 @@ def save_mocks(path: Path, mocks: list[Mock]) -> None:
 
 
 def mock_prereq_status(
-    mock: Mock, em_done: int, sd_done: int
-) -> list[tuple[str, bool, int, int]]:
-    """For a mock with prerequisites, return list of (label, met, current, threshold).
-    Empty list if the mock has no prereqs defined."""
-    if mock.prerequisites is None or not mock.prerequisites.has_any:
+    mock: Mock,
+    em_done: int,
+    sd_done: int,
+    sd_chapters: list[SDChapter] | None = None,
+) -> list[PrereqRow]:
+    """For a mock with prerequisites, return one `PrereqRow` per dimension.
+    Empty list if the mock has no prereqs defined.
+
+    When the mock pins specific SD chapter ids (`sd_chapter_ids`), the SD row's
+    `current` counts only those required chapters that are completed (not
+    `sd_done` overall) and `detail` lists the chapter titles inline. Falling
+    back to the count-only shape when `sd_chapters` is set instead."""
+    pre = mock.prerequisites
+    if pre is None or not pre.has_any:
         return []
-    rows: list[tuple[str, bool, int, int]] = []
-    if mock.prerequisites.em_problems > 0:
+
+    rows: list[PrereqRow] = []
+    if pre.em_problems > 0:
         rows.append(
-            (
-                "E/M problems",
-                em_done >= mock.prerequisites.em_problems,
-                em_done,
-                mock.prerequisites.em_problems,
+            PrereqRow(
+                label="E/M problems",
+                met=em_done >= pre.em_problems,
+                current=em_done,
+                threshold=pre.em_problems,
             )
         )
-    if mock.prerequisites.sd_chapters > 0:
+
+    if pre.sd_chapter_ids:
+        chapter_lookup: dict[str, SDChapter] = {}
+        if sd_chapters is not None:
+            chapter_lookup = {ch.id: ch for ch in sd_chapters}
+        required_count = len(pre.sd_chapter_ids)
+        done_count = 0
+        detail_parts: list[str] = []
+        for cid in pre.sd_chapter_ids:
+            ch = chapter_lookup.get(cid)
+            label = ch.title if ch else cid
+            is_done = ch is not None and ch.status == "completed"
+            if is_done:
+                done_count += 1
+                detail_parts.append(f"{label} ✓")
+            else:
+                detail_parts.append(label)
         rows.append(
-            (
-                "SD chapters",
-                sd_done >= mock.prerequisites.sd_chapters,
-                sd_done,
-                mock.prerequisites.sd_chapters,
+            PrereqRow(
+                label="SD chapters",
+                met=done_count >= required_count,
+                current=done_count,
+                threshold=required_count,
+                detail=", ".join(detail_parts),
             )
         )
+    elif pre.sd_chapters > 0:
+        rows.append(
+            PrereqRow(
+                label="SD chapters",
+                met=sd_done >= pre.sd_chapters,
+                current=sd_done,
+                threshold=pre.sd_chapters,
+            )
+        )
+
     return rows
 
 
-def _format_prereq_line(rows: list[tuple[str, bool, int, int]]) -> str:
-    """Single-line summary of prereq rows for use as a sub-bullet."""
+def _format_prereq_line(rows: list[PrereqRow]) -> str:
+    """Single-line summary of prereq rows for use as a sub-bullet.
+
+    Format per row: `{marker} {current}/{threshold} {label}[: detail]`. The
+    optional `detail` lists the specific items required (e.g., the chapter
+    titles when a mock pins to specific SD chapters), each annotated with ✓
+    if already complete."""
     parts: list[str] = []
-    for label, met, current, threshold in rows:
-        marker = "✓" if met else "❌"
-        parts.append(f"{marker} {threshold} {label} (have {current})")
+    for row in rows:
+        marker = "✓" if row.met else "❌"
+        head = f"{marker} {row.current}/{row.threshold} {row.label}"
+        if row.detail:
+            parts.append(f"{head}: {row.detail}")
+        else:
+            parts.append(head)
     return f"  - Prereqs: {', '.join(parts)}"
 
 
 def _render_next_mock_block(
-    mock: Mock, today: date, em_done: int = 0, sd_done: int = 0
+    mock: Mock,
+    today: date,
+    em_done: int = 0,
+    sd_done: int = 0,
+    sd_chapters: list[SDChapter] | None = None,
 ) -> list[str]:
     """One-mock display, formatted as an editable checkbox tagged `[mock-id]`.
     User flow:
@@ -781,7 +869,7 @@ def _render_next_mock_block(
         line = f"- [ ] [{mock.id}] {descriptor} — _pending_"
 
     lines = [line]
-    prereqs = mock_prereq_status(mock, em_done, sd_done)
+    prereqs = mock_prereq_status(mock, em_done, sd_done, sd_chapters)
     if prereqs:
         lines.append(_format_prereq_line(prereqs))
 
@@ -869,6 +957,7 @@ def render_today(
     next_up_mock: Mock | None = None,
     em_done: int = 0,
     sd_done: int = 0,
+    sd_chapters: list[SDChapter] | None = None,
 ) -> str:
     """Produce the markdown that gets written to today.md.
 
@@ -914,7 +1003,9 @@ def render_today(
     if next_up_mock is not None:
         lines.extend(["## Next mock", ""])
         lines.extend(
-            _render_next_mock_block(next_up_mock, today, em_done, sd_done)
+            _render_next_mock_block(
+                next_up_mock, today, em_done, sd_done, sd_chapters
+            )
         )
         lines.append("")
     lines.extend(["## Recall — most overdue first", ""])
@@ -1017,6 +1108,7 @@ def _render_upcoming_mocks_block(
     today: date,
     em_done: int = 0,
     sd_done: int = 0,
+    sd_chapters: list[SDChapter] | None = None,
 ) -> list[str]:
     """The 'Upcoming mocks' block that surfaces in today.md when scheduled
     mocks are within the look-ahead window. Each mock with prerequisites
@@ -1039,7 +1131,7 @@ def _render_upcoming_mocks_block(
             f"- {descriptor} · {m.scheduled_date.strftime('%a %b ').replace(' 0', ' ')}"
             f"{m.scheduled_date.day} ({urgency})"
         )
-        prereqs = mock_prereq_status(m, em_done, sd_done)
+        prereqs = mock_prereq_status(m, em_done, sd_done, sd_chapters)
         if prereqs:
             lines.append(_format_prereq_line(prereqs))
     return lines
@@ -1152,6 +1244,7 @@ def _render_mocks_section(
     today: date,
     em_done: int = 0,
     sd_done: int = 0,
+    sd_chapters: list[SDChapter] | None = None,
 ) -> list[str]:
     """The `## Mocks` section in coverage.md. Summary line + Next (one entry,
     the first non-completed mock with prereqs) + Completed history. Future
@@ -1181,7 +1274,9 @@ def _render_mocks_section(
     lines.append("### Next")
     lines.append("")
     if nxt is not None:
-        lines.extend(_render_next_mock_block(nxt, today, em_done, sd_done))
+        lines.extend(
+            _render_next_mock_block(nxt, today, em_done, sd_done, sd_chapters)
+        )
     else:
         lines.append("_All mocks completed._")
     lines.append("")
@@ -1323,7 +1418,11 @@ def render_coverage(
     if mocks is not None:
         lines.extend(
             _render_mocks_section(
-                mocks, today=today or date.today(), em_done=em_done, sd_done=sd_done
+                mocks,
+                today=today or date.today(),
+                em_done=em_done,
+                sd_done=sd_done,
+                sd_chapters=sd_chapters,
             )
         )
     if sd_chapters is not None:
@@ -1419,6 +1518,7 @@ def recompute(
             next_up_mock=next_up_mock,
             em_done=em_done_count,
             sd_done=sd_done_count,
+            sd_chapters=sd_chapters,
         )
     )
 
