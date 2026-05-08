@@ -55,7 +55,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Valid Anagram (E)
   - [ ] [Arrays & Hashing] -> Two Sum (E)
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
-  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) — pageviews variant (chestnut / lightning-ai)
+  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) — lightning-ai variant
   - [ ] [String Transformation] -> Longest Common Prefix (E)
   - [ ] today's hardest: **_ • didn't click: _** (no warm-up — sprint start)
 
