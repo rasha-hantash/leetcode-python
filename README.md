@@ -5,10 +5,10 @@ A 90-day NeetCode 150 + system design + behavioral prep system built on top of a
 ## Daily flow
 
 1. **Morning (one-time, automatic at 8:30 AM):** the LaunchAgent runs `uv run python -m recall_engine recompute`. This logs yesterday's completions into the ledger, then writes a fresh `prep-data/today.md` with today's **Recall** + **New** sections. _If the cron didn't fire, run the command manually — same result._
-2. **Morning DSA block (9:00–13:00):** open `prep-plan-daily.md` to find today's `### Day N` curriculum. Solve those problems. _Don't tick the source-day boxes — tick today's New section in `prep-data/today.md` instead._
+2. **Morning Recall block (9:00–13:00):** open `prep-data/today.md`. Drain **Recall** top-down — click the checkbox of each problem as you re-solve it. Tasks plugin auto-stamps `✅ DATE`. Recall is the highest-leverage work — protecting it with the morning slot keeps it from getting dropped when the day runs long.
 3. **Afternoon System Design (14:00–15:30):** today's chapter in `prep-plan-daily.md` names what to read. Tick the box there.
-4. **Consolidation block (15:30–19:30):** open `prep-data/today.md`. Drain **Recall** top-down — click the checkbox of each problem as you re-solve it. Tasks plugin auto-stamps `✅ DATE`.
-5. **End the day:** fill in the inline "today's hardest" note in today's `prep-plan-daily.md` Day section. That's tomorrow's first re-solve.
+4. **DSA New block (15:30–19:30):** open `prep-plan-daily.md` to find today's `### Day N` curriculum. Solve those problems. _Don't tick the source-day boxes — tick today's New section in `prep-data/today.md` instead._
+5. **End the day:** fill in the inline "today's hardest" note in today's `prep-plan-daily.md` Day section. That's tomorrow morning's first re-solve.
 
 That's it. The list you wake up to is the list for the day — it does not reshuffle as you check items off. Whatever you don't finish gets folded into tomorrow's queue with more days overdue.
 
@@ -46,11 +46,11 @@ A problem you've solved once is due 1 day later. Solved twice → 3 days. Solved
 
 **Recall always wins over New.** A recall item is knowledge you've already paid for; the forgetting curve is exponential. A skipped new problem is just deferred scope; nothing degrades.
 
-| Situation                            | What to do                                                                                                     |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Skipped yesterday                    | Drain Recall today. Skip New. Tomorrow morning the engine surfaces yesterday's leftovers in New automatically. |
-| 4+ recall items aging fast           | Spend the morning DSA block on Recall too. Yesterday's leftovers will surface in tomorrow's New automatically. |
-| Chronically behind (1+ week of slip) | Stop trying to catch up intake. Drop your daily new-problem rate by 1/day for the rest of the phase.           |
+| Situation                            | What to do                                                                                                                                      |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Skipped yesterday                    | Drain Recall in the morning. Skip the afternoon DSA New block. Tomorrow morning the engine surfaces yesterday's leftovers in New automatically. |
+| 4+ recall items aging fast           | Extend the morning Recall block past 13:00 and skip DSA New entirely. Yesterday's leftovers will surface in tomorrow's New automatically.       |
+| Chronically behind (1+ week of slip) | Stop trying to catch up intake. Drop your daily new-problem rate by 1/day for the rest of the phase.                                            |
 
 **Caveat:** if a mock this week needs a specific pattern you haven't covered yet (e.g., Friday Pramp = Trees), prioritize that pattern over recall for one day.
 
@@ -95,8 +95,8 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 
 ## Glossary
 
-- **Cons / Consolidation block** — the 4 hr afternoon slot (15:30–19:30) for re-solves and review.
-- **DSA New** — the 4 hr morning slot for fresh problems.
+- **Recall block** — the 4 hr morning slot (9:00–13:00) for draining the Recall queue + yesterday's-hardest re-solve. Highest-leverage work; protected by the morning slot so it doesn't get dropped when the day runs long.
+- **DSA New** — the 4 hr afternoon slot (15:30–19:30) for fresh problems from today's curriculum. On mock days shifts to 17:30–19:30.
 - **Recall (10)** — the most-overdue 10 items in `prep-data/today.md`, frozen at recompute time.
 - **New (3)** — the next 3 never-touched curriculum problems in `prep-data/today.md`, frozen at recompute time.
 - **Touch** — one successful (re-)solve event. One line in `completions.jsonl`.
