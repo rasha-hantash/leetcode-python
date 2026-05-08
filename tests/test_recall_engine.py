@@ -41,7 +41,6 @@ from recall_engine import (
     projected_end_date,
     recompute,
     render_coverage,
-    render_mocks_md,
     render_readiness_block,
     render_today,
     start_date,
@@ -1008,10 +1007,10 @@ def test_render_coverage_groups_problems_by_pattern() -> None:
         Problem("[Arrays & Hashing] -> Group Anagrams", source_day=1, difficulty="M"),
     ]
     out = render_coverage(curriculum, ledger=[])
-    assert "## Arrays & Hashing" in out
-    assert "## Two Pointers" in out
+    assert "### Arrays & Hashing" in out
+    assert "### Two Pointers" in out
     # Both Arrays & Hashing problems land under their shared heading
-    section = out.split("## Arrays & Hashing", 1)[1].split("##", 1)[0]
+    section = out.split("### Arrays & Hashing", 1)[1].split("###", 1)[0]
     assert "Two Sum" in section
     assert "Group Anagrams" in section
 
@@ -1060,8 +1059,8 @@ def test_render_coverage_orders_patterns_by_source_tier() -> None:
         ),
     ]
     out = render_coverage(curriculum, ledger=[])
-    core_pos = out.find("## Core")
-    beyond_pos = out.find("## Beyond")
+    core_pos = out.find("### Core")
+    beyond_pos = out.find("### Beyond")
     assert 0 <= core_pos < beyond_pos
 
 
@@ -1100,7 +1099,7 @@ def test_recompute_writes_coverage_md_when_path_provided(tmp_path: Path) -> None
         coverage_md_path=coverage_md,
     )
     assert coverage_md.exists()
-    assert "## Arrays & Hashing" in coverage_md.read_text()
+    assert "### Arrays & Hashing" in coverage_md.read_text()
 
 
 # ─── Mock tracking ────────────────────────────────────────────────────────────
@@ -1203,7 +1202,7 @@ def test_render_coverage_includes_mock_section_with_progress_bar() -> None:
         Mock(id="m3", status="pending"),
     ]
     out = render_coverage(curriculum, ledger=[], mocks=mocks)
-    assert "## Mocks (1/3 complete · 1 scheduled)" in out
+    assert "## Mocks (1/3 complete · 1 scheduled · 1 pending)" in out
     # Progress bar present (Unicode block characters)
     assert "█" in out and "░" in out
 
@@ -1501,10 +1500,10 @@ def test_render_today_renders_readiness_block_above_recall_section() -> None:
     assert 0 <= readiness_pos < recall_pos
 
 
-# ─── Standalone mocks.md view ─────────────────────────────────────────────────
+# ─── Coverage.md mocks subsections (folded in from old mocks.md) ──────────────
 
 
-def test_render_mocks_md_includes_upcoming_completed_and_pending_sections() -> None:
+def test_render_coverage_mocks_section_has_upcoming_completed_to_schedule_subsections() -> None:
     today = date(2026, 5, 11)
     mocks = [
         Mock(
@@ -1524,49 +1523,44 @@ def test_render_mocks_md_includes_upcoming_completed_and_pending_sections() -> N
         ),
         Mock(id="m3", platform="Pramp", topic="Backtracking", status="pending"),
     ]
-    out = render_mocks_md(mocks, today)
-    assert "# Mocks" in out
-    # Aggregate summary line
-    assert "1/3 complete · 1 scheduled · 1 pending" in out
-    assert "## Upcoming" in out
-    assert "Trees" in out
-    assert "## Completed" in out
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1, difficulty="E")],
+        ledger=[],
+        today=today,
+        mocks=mocks,
+    )
+    assert "## Mocks (1/3 complete · 1 scheduled · 1 pending)" in out
+    assert "### Upcoming" in out
+    assert "### Completed" in out
     assert "weak on memo" in out
-    assert "## To schedule" in out
+    assert "### To schedule" in out
     assert "Backtracking" in out
 
 
-def test_render_mocks_md_handles_empty_list_with_seed_hint() -> None:
-    out = render_mocks_md([], today=date(2026, 5, 11))
-    assert "# Mocks" in out
-    assert "0/0 complete" in out
-    assert "mocks.example.json" in out
-
-
-def test_recompute_writes_mocks_md_when_mocks_md_path_provided(tmp_path: Path) -> None:
-    daily_md = tmp_path / "prep-plan-daily.md"
-    daily_md.write_text(
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [A] -> Foo (E)\n"
+def test_render_coverage_orders_sections_readiness_then_mocks_then_sd_then_dsa() -> None:
+    """User asked for coverage.md to surface readiness/mocks/SD ABOVE the
+    DSA pattern walk — high-level state first, then drill-down."""
+    em = CategoryProgress(name="E+M problems", done=0, total=1)
+    sd_progress = CategoryProgress(name="System Design", done=0, total=1)
+    mocks_progress = CategoryProgress(name="Mocks", done=0, total=1)
+    readiness = Readiness(
+        em=em,
+        sd=sd_progress,
+        mocks=mocks_progress,
+        tiers=[ReadinessTier(name="Fallback-ready", criteria=[("x", False)])],
     )
-    today_md = tmp_path / "today.md"
-    ledger = tmp_path / "completions.jsonl"
-    mocks_path = tmp_path / "mocks.json"
-    mocks_path.write_text(
-        '[{"id": "m1", "status": "scheduled", "platform": "Pramp", '
-        '"topic": "Trees", "scheduled_date": "2026-05-13"}]'
-    )
-    mocks_md = tmp_path / "mocks.md"
-    recompute(
-        daily_md,
-        today_md,
-        ledger,
+    out = render_coverage(
+        [Problem("[Trees] -> Foo", source_day=1)],
+        ledger=[],
         today=date(2026, 5, 11),
-        mocks_path=mocks_path,
-        mocks_md_path=mocks_md,
+        mocks=[Mock(id="m1", status="pending")],
+        sd_chapters=[
+            SDChapter(id="ch-1", title="T", book="B", status="pending")
+        ],
+        readiness=readiness,
     )
-    assert mocks_md.exists()
-    text = mocks_md.read_text()
-    assert "# Mocks" in text
-    assert "Trees" in text
+    readiness_pos = out.find("## Readiness")
+    mocks_pos = out.find("## Mocks")
+    sd_pos = out.find("## System Design")
+    dsa_pos = out.find("## DSA — by pattern")
+    assert 0 <= readiness_pos < mocks_pos < sd_pos < dsa_pos

@@ -7,7 +7,6 @@ __pycache__
 prep-data/completions.jsonl
 prep-data/today.md
 prep-data/coverage.md
-prep-data/mocks.md
 # User-edited mock bookings — personal scheduling state, not source.
 # A starter template lives at prep-data/mocks.example.json.
 prep-data/mocks.json
