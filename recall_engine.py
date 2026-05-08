@@ -67,6 +67,33 @@ class RecallItem:
 
 
 @dataclass(frozen=True)
+class CurriculumPhase:
+    """A `## Phase N — Name (Days A–B)` section header parsed from the curriculum."""
+
+    number: int
+    name: str
+    days_start: int
+    days_end: int
+
+    @property
+    def heading(self) -> str:
+        return f"Phase {self.number} — {self.name} (Days {self.days_start}–{self.days_end})"
+
+    @property
+    def slug(self) -> str:
+        """GitHub-flavored markdown anchor for the phase header.
+
+        GitHub strips punctuation but preserves the *number* of spaces — a
+        run of `space em-dash space` becomes `--` (the em-dash is dropped
+        but the two surrounding spaces survive as two hyphens)."""
+        s = self.heading.lower()
+        s = re.sub(r"[^\w\s-]", "", s, flags=re.UNICODE)
+        # Each whitespace char → one hyphen (no collapsing)
+        s = re.sub(r"\s", "-", s).strip("-")
+        return s
+
+
+@dataclass(frozen=True)
 class RecomputeResult:
     """Summary of what a single recompute() call did. Useful for CLI output."""
 
@@ -92,6 +119,33 @@ def due_date(touches: int, last_touched: date) -> date:
 def overdue_days(touches: int, last_touched: date, today: date) -> int:
     """Positive = past due. Zero = exactly due today. Negative = not yet due."""
     return (today - due_date(touches, last_touched)).days
+
+
+# ─── Sprint day + phase math ─────────────────────────────────────────────────
+
+
+def start_date(ledger: list[Touch]) -> date | None:
+    """The earliest touch in the ledger, or None if the ledger is empty.
+
+    This anchors Day 1 to the first DSA completion — friend-portable and
+    independent of any pre-configured calendar."""
+    return min((t.on for t in ledger), default=None)
+
+
+def day_n_for(today: date, start: date) -> int:
+    """Day number relative to the user's first touch. start_date itself is Day 1."""
+    return (today - start).days + 1
+
+
+def phase_for(
+    day_n: int, phases: list[CurriculumPhase]
+) -> CurriculumPhase | None:
+    """Find the curriculum phase containing the given day number, or None
+    if the day falls outside every phase's range (e.g., past Day 90)."""
+    for phase in phases:
+        if phase.days_start <= day_n <= phase.days_end:
+            return phase
+    return None
 
 
 # ─── Touch aggregation ───────────────────────────────────────────────────────
@@ -159,6 +213,9 @@ def compute_new(
 
 
 _DAY_HEADING = re.compile(r"^###\s+Day\s+(\d+)\b")
+_PHASE_HEADING = re.compile(
+    r"^##\s+Phase\s+(\d+)\s+[—-]\s+(.+?)\s+\(Days?\s+(\d+)[–-](\d+)\)"
+)
 _PROBLEM_LINE = re.compile(r"^\s*-\s+\[[ xX]\]\s+(.*)$")
 _CHECKED_LINE = re.compile(r"^\s*-\s+\[[xX]\]\s+(.*)$")
 _DONE_DATE = re.compile(r"\s*✅\s*(\d{4}-\d{2}-\d{2}).*$")
@@ -230,6 +287,23 @@ def parse_curriculum(daily_md: str) -> list[Problem]:
             )
 
     return problems
+
+
+def parse_phases(daily_md: str) -> list[CurriculumPhase]:
+    """Walk the daily schedule file, emit one CurriculumPhase per `## Phase N — Name (Days A–B)` heading."""
+    phases: list[CurriculumPhase] = []
+    for line in daily_md.splitlines():
+        match = _PHASE_HEADING.match(line)
+        if match:
+            phases.append(
+                CurriculumPhase(
+                    number=int(match.group(1)),
+                    name=match.group(2).strip(),
+                    days_start=int(match.group(3)),
+                    days_end=int(match.group(4)),
+                )
+            )
+    return phases
 
 
 def parse_completions(today_md: str) -> list[Touch]:
@@ -312,10 +386,31 @@ def _render_new_line(problem: Problem) -> str:
     return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)} (Day {problem.source_day})"
 
 
-def render_today(today: date, recall: list[RecallItem], new: list[Problem]) -> str:
-    """Produce the markdown that gets written to today.md."""
+def render_today(
+    today: date,
+    recall: list[RecallItem],
+    new: list[Problem],
+    *,
+    day_n: int | None = None,
+    phase: CurriculumPhase | None = None,
+    daily_md_link: str = "./prep-plan-daily.md",
+) -> str:
+    """Produce the markdown that gets written to today.md.
+
+    The header reflects sprint state:
+    - No ledger yet → `· Pre-prep`
+    - Ledger exists, no matching phase → `· Day N`
+    - Ledger exists and inside a known phase → `· [Phase X — Name](link) · Day N`
+    """
     weekday = today.strftime("%a")
-    header = f"# Today — {weekday} {_format_date(today)}, {today.year}"
+    base_header = f"# Today — {weekday} {_format_date(today)}, {today.year}"
+    if day_n is None:
+        header = f"{base_header} · Pre-prep"
+    elif phase is None:
+        header = f"{base_header} · Day {day_n}"
+    else:
+        link = f"[{phase.heading}]({daily_md_link}#{phase.slug})"
+        header = f"{base_header} · {link} · Day {day_n}"
 
     lines = [
         header,
@@ -367,7 +462,9 @@ def recompute(
     new_limit: int = DEFAULT_NEW_LIMIT,
 ) -> RecomputeResult:
     """One full cycle: log yesterday's completions, then regenerate today.md."""
-    curriculum = parse_curriculum(daily_md_path.read_text())
+    daily_md = daily_md_path.read_text()
+    curriculum = parse_curriculum(daily_md)
+    phases = parse_phases(daily_md)
 
     new_touches: list[Touch] = []
     if today_md_path.exists():
@@ -380,7 +477,15 @@ def recompute(
     )
     new = compute_new(curriculum, ledger, limit=new_limit)
 
-    today_md_path.write_text(render_today(today=today, recall=recall, new=new))
+    start = start_date(ledger)
+    day_n = day_n_for(today, start) if start else None
+    phase = phase_for(day_n, phases) if day_n is not None else None
+
+    today_md_path.write_text(
+        render_today(
+            today=today, recall=recall, new=new, day_n=day_n, phase=phase
+        )
+    )
 
     return RecomputeResult(
         new_touches_logged=logged, recall_size=len(recall), new_size=len(new)
@@ -424,6 +529,49 @@ def recompute_cmd(daily: Path, today_md: Path, ledger: Path) -> None:
         f"logged {result.new_touches_logged} new touch(es) · "
         f"recall: {result.recall_size} · new: {result.new_size}"
     )
+
+
+@cli.command(name="reset")
+@click.option("--dsa", is_flag=True, help="Delete the DSA completion ledger.")
+@click.option(
+    "--sd",
+    is_flag=True,
+    help="Delete the system-design ledger (reserved — no SD ledger exists yet).",
+)
+@click.option(
+    "--all", "all_", is_flag=True, help="Delete every ledger this command knows about."
+)
+@click.option("--yes", is_flag=True, help="Skip the confirmation prompt.")
+@click.option(
+    "--ledger-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    default=Path("prep-data"),
+    show_default=True,
+    help="Directory containing the ledger files.",
+)
+def reset_cmd(dsa: bool, sd: bool, all_: bool, yes: bool, ledger_dir: Path) -> None:
+    """Delete one or more ledgers. Deletion = the next recompute treats you as pre-prep."""
+    targets: list[tuple[str, Path]] = []
+    if dsa or all_:
+        targets.append(("DSA ledger", ledger_dir / "completions.jsonl"))
+    if sd or all_:
+        targets.append(
+            ("SD ledger (not yet in use)", ledger_dir / "sd-completions.jsonl")
+        )
+    if not targets:
+        click.echo("Nothing to reset. Pass --dsa, --sd, or --all.")
+        return
+    click.echo("Will delete:")
+    for label, path in targets:
+        existence = "exists" if path.exists() else "does not exist (no-op)"
+        click.echo(f"  - {label}: {path} ({existence})")
+    if not yes and not click.confirm("Proceed?", default=False):
+        click.echo("Aborted.")
+        return
+    for _label, path in targets:
+        if path.exists():
+            path.unlink()
+    click.echo("Reset complete. Run `recompute` to regenerate today.md.")
 
 
 if __name__ == "__main__":
