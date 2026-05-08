@@ -598,6 +598,7 @@ def render_today(
     projection_untouched: int | None = None,
     sd_next: SDChapter | None = None,
     readiness: Readiness | None = None,
+    upcoming: list[Mock] | None = None,
 ) -> str:
     """Produce the markdown that gets written to today.md.
 
@@ -640,6 +641,10 @@ def render_today(
     )
     if readiness is not None:
         lines.extend(render_readiness_block(readiness))
+    if upcoming:
+        lines.extend(["## Upcoming mocks", ""])
+        lines.extend(_render_upcoming_mocks_block(upcoming, today))
+        lines.append("")
     lines.extend(["## Recall — most overdue first", ""])
     if recall:
         lines.extend(_render_recall_line(item) for item in recall)
@@ -1056,6 +1061,7 @@ def recompute(
     mocks: list[Mock] = []
     if mocks_path is not None and mocks_path.exists():
         mocks = load_mocks(mocks_path)
+    upcoming = upcoming_mocks(mocks, today) if mocks else []
 
     sd_chapters: list[SDChapter] = []
     if sd_chapters_path is not None and sd_chapters_path.exists():
@@ -1076,6 +1082,7 @@ def recompute(
             projection_untouched=untouched,
             sd_next=sd_next,
             readiness=readiness,
+            upcoming=upcoming,
         )
     )
 
