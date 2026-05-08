@@ -1220,12 +1220,11 @@ def test_render_coverage_omits_mocks_section_when_mocks_arg_is_none() -> None:
     assert "Mocks" not in out
 
 
-def test_recompute_renders_upcoming_mocks_in_today_and_summary_in_coverage(
+def test_recompute_renders_next_mock_in_today_and_full_mocks_in_coverage(
     tmp_path: Path,
 ) -> None:
-    """today.md gets the next-up Upcoming mocks block (between Readiness and
-    Recall) — daily attention. coverage.md still has the full Mocks section,
-    and mocks.md has the standalone view."""
+    """today.md gets a single 'Next mock' block between Readiness and Recall.
+    coverage.md has the full ## Mocks section (summary + Next + Completed)."""
     daily_md = tmp_path / "prep-plan-daily.md"
     daily_md.write_text(
         "## Phase 1 — X (Days 1–7)\n"
@@ -1249,12 +1248,11 @@ def test_recompute_renders_upcoming_mocks_in_today_and_summary_in_coverage(
         mocks_path=mocks_path,
     )
     today_text = today_md.read_text()
-    assert "## Upcoming mocks" in today_text
-    # Upcoming mocks sits between Readiness and Recall
+    assert "## Next mock" in today_text
     readiness_pos = today_text.find("## Readiness")
-    upcoming_pos = today_text.find("## Upcoming mocks")
+    next_pos = today_text.find("## Next mock")
     recall_pos = today_text.find("## Recall")
-    assert 0 <= readiness_pos < upcoming_pos < recall_pos
+    assert 0 <= readiness_pos < next_pos < recall_pos
     assert "## Mocks" in coverage_md.read_text()
 
 
@@ -1507,7 +1505,10 @@ def test_render_today_renders_readiness_block_above_recall_section() -> None:
 # ─── Coverage.md mocks subsections (folded in from old mocks.md) ──────────────
 
 
-def test_render_coverage_mocks_section_has_upcoming_completed_to_schedule_subsections() -> None:
+def test_render_coverage_mocks_section_shows_next_and_completed_subsections() -> None:
+    """Mocks section collapses future entries into a single 'Next' (the first
+    non-completed mock). Completed history stays visible. Future pending mocks
+    aren't enumerated — the user works through them sequentially."""
     today = date(2026, 5, 11)
     mocks = [
         Mock(
@@ -1534,11 +1535,12 @@ def test_render_coverage_mocks_section_has_upcoming_completed_to_schedule_subsec
         mocks=mocks,
     )
     assert "## Mocks (1/3 complete · 1 scheduled · 1 pending)" in out
-    assert "### Upcoming" in out
+    assert "### Next" in out
     assert "### Completed" in out
     assert "weak on memo" in out
-    assert "### To schedule" in out
-    assert "Backtracking" in out
+    # Next is m2 (first non-completed) — m3 not surfaced individually
+    assert "Trees" in out
+    assert "Backtracking" not in out
 
 
 def test_render_coverage_orders_sections_readiness_behavioral_mocks_sd_dsa() -> None:
@@ -1712,32 +1714,32 @@ def test_mock_prereq_status_returns_empty_when_no_prereqs_defined() -> None:
     assert mock_prereq_status(mock, em_done=99, sd_done=99) == []
 
 
-def test_render_today_upcoming_block_shows_prereq_subbullet_when_defined() -> None:
-    upcoming = [
-        Mock(
-            id="m1",
-            status="scheduled",
-            platform="Pramp",
-            topic="Trees",
-            scheduled_date=date(2026, 5, 20),
-            prerequisites=MockPrereq(em_problems=25, sd_chapters=4),
-        )
-    ]
+def test_render_today_next_mock_block_shows_prereq_subbullet_when_defined() -> None:
+    nxt = Mock(
+        id="m1",
+        status="scheduled",
+        platform="Pramp",
+        topic="Trees",
+        scheduled_date=date(2026, 5, 20),
+        prerequisites=MockPrereq(em_problems=25, sd_chapters=4),
+    )
     out = render_today(
         today=date(2026, 5, 11),
         recall=[],
         new=[],
-        upcoming=upcoming,
+        next_up_mock=nxt,
         em_done=24,
         sd_done=5,
     )
-    # Prereq line shows ❌ for unmet (24 < 25) and ✓ for met (5 >= 4)
+    assert "## Next mock" in out
     assert "Prereqs:" in out
     assert "❌ 25 E/M problems (have 24)" in out
     assert "✓ 4 SD chapters (have 5)" in out
 
 
-def test_render_coverage_to_schedule_subsection_shows_prereq_subbullet() -> None:
+def test_render_coverage_next_subsection_shows_prereq_subbullet_for_pending_mock() -> None:
+    """The first non-completed mock surfaces its prereqs in coverage.md's
+    ## Mocks → ### Next section. Future pending mocks aren't shown."""
     mocks = [
         Mock(
             id="m1",
@@ -1755,8 +1757,82 @@ def test_render_coverage_to_schedule_subsection_shows_prereq_subbullet() -> None
         em_done=24,
         sd_done=2,
     )
-    # In the To-schedule section, the pending mock surfaces its prereqs
-    assert "### To schedule" in out
+    assert "### Next" in out
     assert "Prereqs:" in out
     assert "❌ 50 E/M problems (have 24)" in out
     assert "❌ 10 SD chapters (have 2)" in out
+
+
+def test_render_coverage_next_subsection_skips_completed_to_find_first_open_mock() -> None:
+    """If mock-1 and mock-2 are completed, Next is mock-3 (the first non-completed)."""
+    mocks = [
+        Mock(id="m1", status="completed", completed_date=date(2026, 5, 1)),
+        Mock(id="m2", status="completed", completed_date=date(2026, 5, 5)),
+        Mock(id="m3", status="pending", platform="Pramp", topic="Stack"),
+        Mock(id="m4", status="pending", platform="Pramp", topic="DP"),
+    ]
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)],
+        ledger=[],
+        today=date(2026, 5, 11),
+        mocks=mocks,
+    )
+    next_section = out.split("### Next", 1)[1].split("###", 1)[0]
+    assert "Stack" in next_section
+    # mock-4 is also pending but not surfaced — only the immediate next one
+    assert "DP" not in next_section
+
+
+# ─── Mock booking links ───────────────────────────────────────────────────────
+
+
+def test_pending_mock_with_pramp_platform_renders_default_booking_link() -> None:
+    """Pramp/Interviewing.io don't expose booking APIs, so we surface the
+    platform's dashboard URL as a clickable link on the pending Next mock."""
+    mocks = [Mock(id="m1", status="pending", platform="Pramp", topic="Trees")]
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)],
+        ledger=[],
+        today=date(2026, 5, 11),
+        mocks=mocks,
+    )
+    assert "Book: [Pramp](https://www.pramp.com/" in out
+
+
+def test_pending_mock_with_explicit_booking_url_overrides_platform_default() -> None:
+    mocks = [
+        Mock(
+            id="m1",
+            status="pending",
+            platform="Pramp",
+            topic="Trees",
+            booking_url="https://my-custom-booking.example/slot/abc123",
+        )
+    ]
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)],
+        ledger=[],
+        today=date(2026, 5, 11),
+        mocks=mocks,
+    )
+    assert "https://my-custom-booking.example/slot/abc123" in out
+
+
+def test_scheduled_mock_does_not_show_booking_link() -> None:
+    """Already booked — no need to surface the booking URL."""
+    mocks = [
+        Mock(
+            id="m1",
+            status="scheduled",
+            platform="Pramp",
+            topic="Trees",
+            scheduled_date=date(2026, 5, 20),
+        )
+    ]
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)],
+        ledger=[],
+        today=date(2026, 5, 11),
+        mocks=mocks,
+    )
+    assert "Book:" not in out

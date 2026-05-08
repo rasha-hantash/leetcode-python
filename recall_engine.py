@@ -121,6 +121,12 @@ class MockPrereq:
         return self.em_problems > 0 or self.sd_chapters > 0
 
 
+_PLATFORM_BOOKING_URLS: dict[str, str] = {
+    "Pramp": "https://www.pramp.com/dashboard/upcoming-sessions",
+    "Interviewing.io": "https://interviewing.io/dashboard",
+}
+
+
 @dataclass(frozen=True)
 class Mock:
     """A planned, scheduled, or completed mock interview. State machine:
@@ -134,6 +140,17 @@ class Mock:
     completed_date: date | None = None
     notes: str | None = None
     prerequisites: MockPrereq | None = None
+    booking_url: str | None = None
+
+    @property
+    def effective_booking_url(self) -> str | None:
+        """Per-mock override wins; otherwise fall back to the platform default
+        for Pramp / Interviewing.io. Returns None for unknown platforms."""
+        if self.booking_url:
+            return self.booking_url
+        if self.platform and self.platform in _PLATFORM_BOOKING_URLS:
+            return _PLATFORM_BOOKING_URLS[self.platform]
+        return None
 
 
 SDChapterStatus = Literal["pending", "completed"]
@@ -590,6 +607,7 @@ def load_mocks(path: Path) -> list[Mock]:
                 completed_date=date.fromisoformat(completed) if completed else None,
                 notes=record.get("notes"),
                 prerequisites=prerequisites,
+                booking_url=record.get("booking_url"),
             )
         )
     return mocks
@@ -631,6 +649,42 @@ def _format_prereq_line(rows: list[tuple[str, bool, int, int]]) -> str:
         marker = "✓" if met else "❌"
         parts.append(f"{marker} {threshold} {label} (have {current})")
     return f"  - Prereqs: {', '.join(parts)}"
+
+
+def _render_next_mock_block(
+    mock: Mock, today: date, em_done: int = 0, sd_done: int = 0
+) -> list[str]:
+    """One-mock display: status descriptor (scheduled date or pending), platform/topic,
+    prereq sub-bullet if defined, and a booking link if pending. Used in today.md
+    and coverage.md to surface the single mock the user should focus on next."""
+    bits = [mock.platform or "", mock.topic or ""]
+    descriptor = " · ".join(b for b in bits if b) or mock.id
+    if mock.status == "scheduled" and mock.scheduled_date is not None:
+        delta = (mock.scheduled_date - today).days
+        if delta < 0:
+            urgency = f"{abs(delta)}d ago — mark complete or reschedule"
+        elif delta == 0:
+            urgency = "today"
+        elif delta == 1:
+            urgency = "tomorrow"
+        else:
+            urgency = f"in {delta}d"
+        date_str = (
+            mock.scheduled_date.strftime("%a %b ").replace(" 0", " ")
+            + str(mock.scheduled_date.day)
+        )
+        line = f"- {descriptor} · {date_str} ({urgency})"
+    else:
+        line = f"- {descriptor} · _pending — book this next_"
+    lines = [line]
+    prereqs = mock_prereq_status(mock, em_done, sd_done)
+    if prereqs:
+        lines.append(_format_prereq_line(prereqs))
+    if mock.status == "pending":
+        url = mock.effective_booking_url
+        if url:
+            lines.append(f"  - Book: [{mock.platform or 'link'}]({url})")
+    return lines
 
 
 def append_to_ledger(path: Path, new_touches: list[Touch]) -> int:
@@ -698,7 +752,7 @@ def render_today(
     projection_untouched: int | None = None,
     sd_next: SDChapter | None = None,
     readiness: Readiness | None = None,
-    upcoming: list[Mock] | None = None,
+    next_up_mock: Mock | None = None,
     em_done: int = 0,
     sd_done: int = 0,
 ) -> str:
@@ -743,9 +797,11 @@ def render_today(
     )
     if readiness is not None:
         lines.extend(render_readiness_block(readiness))
-    if upcoming:
-        lines.extend(["## Upcoming mocks", ""])
-        lines.extend(_render_upcoming_mocks_block(upcoming, today, em_done, sd_done))
+    if next_up_mock is not None:
+        lines.extend(["## Next mock", ""])
+        lines.extend(
+            _render_next_mock_block(next_up_mock, today, em_done, sd_done)
+        )
         lines.append("")
     lines.extend(["## Recall — most overdue first", ""])
     if recall:
@@ -798,6 +854,16 @@ def _progress_bar(done: int, total: int, width: int = 13) -> str:
         return f"[{'░' * width}]"
     filled = round((done / total) * width)
     return f"[{'█' * filled}{'░' * (width - filled)}]"
+
+
+def next_mock(mocks: list[Mock]) -> Mock | None:
+    """The first non-completed mock in document order — the one the user
+    should focus on next, whether it's scheduled or still pending. Returns
+    None if every mock is completed."""
+    for m in mocks:
+        if m.status != "completed":
+            return m
+    return None
 
 
 def upcoming_mocks(
@@ -973,9 +1039,10 @@ def _render_mocks_section(
     em_done: int = 0,
     sd_done: int = 0,
 ) -> list[str]:
-    """The `## Mocks` section in coverage.md. Summary line + Upcoming,
-    Completed, and To-schedule sub-sections. Mocks with prerequisites get
-    a sub-bullet showing whether thresholds are met."""
+    """The `## Mocks` section in coverage.md. Summary line + Next (one entry,
+    the first non-completed mock with prereqs) + Completed history. Future
+    pending mocks aren't listed individually — the user works through them
+    sequentially, so only the immediate next one matters."""
     completed_count = sum(1 for m in mocks if m.status == "completed")
     scheduled_count = sum(1 for m in mocks if m.status == "scheduled")
     pending_count = sum(1 for m in mocks if m.status == "pending")
@@ -996,15 +1063,13 @@ def _render_mocks_section(
         lines.append("")
         return lines
 
-    upcoming = upcoming_mocks(mocks, today)
-    lines.append("### Upcoming")
+    nxt = next_mock(mocks)
+    lines.append("### Next")
     lines.append("")
-    if upcoming:
-        lines.extend(
-            _render_upcoming_mocks_block(upcoming, today, em_done, sd_done)
-        )
+    if nxt is not None:
+        lines.extend(_render_next_mock_block(nxt, today, em_done, sd_done))
     else:
-        lines.append("_No mocks scheduled within the next 14 days._")
+        lines.append("_All mocks completed._")
     lines.append("")
 
     completed_mocks = [m for m in mocks if m.status == "completed"]
@@ -1014,17 +1079,6 @@ def _render_mocks_section(
         for m in completed_mocks:
             note = f" — _{m.notes}_" if m.notes else ""
             lines.append(f"{_format_mock_line(m)}{note}")
-        lines.append("")
-
-    pending_mocks = [m for m in mocks if m.status == "pending"]
-    if pending_mocks:
-        lines.append("### To schedule")
-        lines.append("")
-        for m in pending_mocks:
-            lines.append(_format_mock_line(m))
-            prereqs = mock_prereq_status(m, em_done, sd_done)
-            if prereqs:
-                lines.append(_format_prereq_line(prereqs))
         lines.append("")
 
     return lines
@@ -1209,7 +1263,7 @@ def recompute(
     mocks: list[Mock] = []
     if mocks_path is not None and mocks_path.exists():
         mocks = load_mocks(mocks_path)
-    upcoming = upcoming_mocks(mocks, today) if mocks else []
+    next_up_mock = next_mock(mocks) if mocks else None
 
     sd_chapters: list[SDChapter] = []
     if sd_chapters_path is not None and sd_chapters_path.exists():
@@ -1237,7 +1291,7 @@ def recompute(
             projection_untouched=untouched,
             sd_next=sd_next,
             readiness=readiness,
-            upcoming=upcoming,
+            next_up_mock=next_up_mock,
             em_done=em_done_count,
             sd_done=sd_done_count,
         )
