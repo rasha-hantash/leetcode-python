@@ -1,4 +1,4 @@
-# Interview Prep Sprint — README
+# Interview Prep — README
 
 A 90-day NeetCode 150 + system design + behavioral prep system built on top of a snapshot-mode SM-2 lite recall queue. Each morning a Python script generates today's queue into `prep-data/today.md`. You drain it. Tomorrow morning the script regenerates based on what you checked.
 
@@ -40,7 +40,7 @@ Run `uv run python -m recall_engine recompute` any time. It scans `today.md` for
 
 A problem you've solved once is due 1 day later. Solved twice → 3 days. Solved five times → 60 days, and stays there forever. The more you've drilled it, the longer it can wait.
 
-**Why not Dataview / Tasks-plugin only?** Tasks plugin keeps only one `✅ DATE` stamp per line. To count _touches_ across the sprint you need a history that grows — that's what the JSONL ledger is for. The Python engine does what Dataview can't: accumulate completion history across re-solves.
+**Why not Dataview / Tasks-plugin only?** Tasks plugin keeps only one `✅ DATE` stamp per line. To count _touches_ across the curriculum you need a history that grows — that's what the JSONL ledger is for. The Python engine does what Dataview can't: accumulate completion history across re-solves.
 
 ## When you fall behind
 
@@ -88,7 +88,7 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 | `prep-plan-overview.md`                 | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.      |
 | `dynamic-recall-system-plan.md`         | History of the dynamic-recall system evolution.                                               |
 | `neetcode-150.md`                       | Original NC150 list (reference).                                                              |
-| `python-gotchas.md`                     | Append-only log of Python language stumbles you hit during the sprint.                        |
+| `python-gotchas.md`                     | Append-only log of Python language stumbles you hit during the prep.                          |
 | `patterns/*.md`                         | One file per pattern (e.g., `arrays-and-hashing.md`). Mistakes nested under each problem.     |
 | `anki/`                                 | Four decks: code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total. |
 | `problems/<pattern>/<diff>-<n>.py`      | Your actual solution code, organized by pattern + difficulty.                                 |
@@ -103,6 +103,9 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 - **Ledger** — `prep-data/completions.jsonl`. Append-only history of every touch.
 - **Recompute** — running `uv run python -m recall_engine recompute`. Logs new touches, regenerates `today.md`.
 - **Snapshot mode** — today's queue is frozen at recompute time. Clicking checkboxes through the day does NOT re-rank. Tomorrow morning's recompute reflects what you did today.
-- **`T2`** — vestigial low-priority marker on a few problems. The engine strips it when computing canonical text.
-- **`M`** — mock-interview day.
-- **Sprint phases** — P1–P10 across 90 days. P1–P7 = acquisition (NC150 net-new), P8 = pattern mastery + 7 net-new patterns, P9–P10 = mock-heavy + interview mode.
+- **`(mock)`** — mock-interview day. Appears after the date in the day header.
+- **Phases** — three ledger-derived phases that any user (you or a friend) progresses through:
+  - **E+M Acquisition** — there are still untouched E or M problems
+  - **Hard Acquisition** — all E+M touched, Hards remain
+  - **Reinforcement** — every curriculum problem touched ≥1; pure consolidation
+- **Curriculum phases** — Phase 1–Phase 8 in `prep-plan-overview.md`. These are calendar/document-order milestones (e.g., Phase 5 = D40–D53 Hard Problems), separate from the ledger-derived phases above.

@@ -1,6 +1,6 @@
-# Interview Prep Sprint — Daily Schedule
+# Interview Prep — Daily Schedule
 
-_Day 0 setup + 90-day day-by-day execution + retrospective. For system rules and cadence see [`prep-plan-overview.md`](./prep-plan-overview.md). Sprint starts **Mon May 11, 2026** (D1)._
+_Day 0 setup + 90-day day-by-day execution + retrospective. For system rules and cadence see [`prep-plan-overview.md`](./prep-plan-overview.md). Day 1 = **Mon May 11, 2026**._
 
 ---
 
@@ -20,7 +20,7 @@ This file is the **curriculum reference** — what each Day's New problems are. 
 - `(nc-150+)` — problem outside the original NeetCode 150 list. Untagged problems are NC150.
 - `(company question)` — problem asked in a real interview at a specific company.
 - `(variant of: X)` — follow-up variant of canonical problem X (e.g., House Robber II is a variant of House Robber).
-- `M` (after the date) — mock-interview day.
+- `(mock)` (after the day header) — mock-interview day.
 - Each problem prefixed with its NeetCode pattern category in brackets.
 
 ---
@@ -59,11 +59,11 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
   - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (company question)
   - [ ] [String Transformation] -> Longest Common Prefix (E) (nc-150+)
-  - [ ] today's hardest: **_ • didn't click: _** (no warm-up — sprint start)
+  - [ ] today's hardest: **_ • didn't click: _** (no warm-up — Day 1)
 
 ---
 
-### Day 2 — Tue May 12 (5) `M`
+### Day 2 — Tue May 12 (5) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
@@ -78,7 +78,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Valid Sudoku (M)
   - [ ] [String Transformation] -> Valid Word Abbreviation (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -117,7 +117,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
 
 ---
 
-### Day 5 — Fri May 15 (5) `M`
+### Day 5 — Fri May 15 (5) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
@@ -132,7 +132,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Stack] -> Min Stack (E)
   - [ ] [Stack] -> Evaluate Reverse Polish Notation (M)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -181,7 +181,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
 
 ---
 
-### Day 9 — Tue May 19 (5) `M`
+### Day 9 — Tue May 19 (5) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -196,7 +196,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Linked List] -> Linked List Cycle (E)
   - [ ] [String Transformation] -> Decode String (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -234,7 +234,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
 
 ---
 
-### Day 12 — Fri May 22 (4) `M`
+### Day 12 — Fri May 22 (4) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -248,7 +248,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Trees] -> Same Tree (E)
   - [ ] [Trees] -> Subtree of Another Tree (E)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -290,7 +290,7 @@ Light reading: _Fluent Python_ Ch 2 (sequences).
 
 ---
 
-### Day 16 — Tue May 26 (4) `M`
+### Day 16 — Tue May 26 (4) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -304,7 +304,7 @@ Light reading: _Fluent Python_ Ch 2 (sequences).
   - [ ] [Heap] -> K Closest Points to Origin (M)
   - [ ] [Heap] -> Kth Largest Element in an Array (M)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -344,7 +344,7 @@ All Mediums (these patterns have no Easies in NC150).
 
 ---
 
-### Day 19 — Fri May 29 (4) `M`
+### Day 19 — Fri May 29 (4) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -358,7 +358,7 @@ All Mediums (these patterns have no Easies in NC150).
   - [ ] [Backtracking] -> Letter Combinations of a Phone Number (M)
   - [ ] [Tries] -> Implement Trie Prefix Tree (M)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -400,7 +400,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
 
 ---
 
-### Day 23 — Tue Jun 2 (5) `M`
+### Day 23 — Tue Jun 2 (5) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -415,7 +415,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
   - [ ] [Graphs] -> Graph Valid Tree (M)
   - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -455,7 +455,7 @@ E+M only across the remaining patterns. Largest phase. By D39 every NC150 E+M is
 
 ---
 
-### Day 26 — Fri Jun 5 (4) `M`
+### Day 26 — Fri Jun 5 (4) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -469,7 +469,7 @@ E+M only across the remaining patterns. Largest phase. By D39 every NC150 E+M is
   - [ ] [1-D DP] -> Palindromic Substrings (M)
   - [ ] [1-D DP] -> Decode Ways (M)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -510,7 +510,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
 
 ---
 
-### Day 30 — Tue Jun 9 (4) `M`
+### Day 30 — Tue Jun 9 (4) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -524,7 +524,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
   - [ ] [2-D DP] -> Target Sum (M)
   - [ ] [2-D DP] -> Interleaving String (M)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -560,7 +560,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
 
 ---
 
-### Day 33 — Fri Jun 12 (4) `M`
+### Day 33 — Fri Jun 12 (4) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -574,7 +574,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
   - [ ] [Intervals] -> Merge Intervals (M)
   - [ ] [Intervals] -> Non Overlapping Intervals (M)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -619,7 +619,7 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
 
 ---
 
-### Day 37 — Tue Jun 16 (4) `M`
+### Day 37 — Tue Jun 16 (4) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -633,7 +633,7 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
   - [ ] [Bit Manipulation] -> Single Number (E)
   - [ ] [Bit Manipulation] -> Number of 1 Bits (E)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: what stalled? \_\_\_
+  - [ ] mock notes: what stalled? \_\_\_
 
 ---
 
@@ -659,7 +659,7 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
-  - **Mid-sprint checkpoint:** all 128 NC150 E+M + 9 String Transformation + 8 NC150+ E+M + 8 company-tagged variants touched (153 total). Tomorrow the Hard sprint opens.
+  - **Mid-prep checkpoint:** all 128 NC150 E+M + 9 String Transformation + 8 NC150+ E+M + 8 company-tagged variants touched (153 total). Tomorrow Phase 5 (Hard problems) opens.
   - [ ] D38 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 1 (Proximity Service) — start
@@ -672,11 +672,11 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
 
 ---
 
-## Phase 5 — Hard Sprint (Days 40–53) `M` heavy
+## Phase 5 — Hard Problems (Days 40–53) — mock-heavy
 
 22 NC150 Hards drilled fresh, ~1.5/day at 90 min each. Recall queue keeps E+M alive. Hards paired by pattern when possible. Mocks continue weekly.
 
-### Day 40 — Fri Jun 19 (2) `M`
+### Day 40 — Fri Jun 19 (2) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain (E+M still active).
@@ -688,7 +688,7 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
   - [ ] [Two Pointers] -> Trapping Rain Water (H)
   - [ ] [Sliding Window] -> Minimum Window Substring (H)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: \_\_\_
+  - [ ] mock notes: \_\_\_
 
 ---
 
@@ -726,7 +726,7 @@ Light reading: _Fluent Python_ Ch 6.
 
 ---
 
-### Day 44 — Tue Jun 23 (2) `M`
+### Day 44 — Tue Jun 23 (2) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -738,7 +738,7 @@ Light reading: _Fluent Python_ Ch 6.
   - [ ] [Linked List] -> Merge K Sorted Lists (H)
   - [ ] [Linked List] -> Reverse Nodes In K Group (H)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: \_\_\_
+  - [ ] mock notes: \_\_\_
 
 ---
 
@@ -771,7 +771,7 @@ Light reading: _Fluent Python_ Ch 6.
 
 ---
 
-### Day 47 — Fri Jun 26 (2) `M`
+### Day 47 — Fri Jun 26 (2) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -783,7 +783,7 @@ Light reading: _Fluent Python_ Ch 6.
   - [ ] [Tries] -> Word Search II (H)
   - [ ] [Graphs] -> Word Ladder (H)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: \_\_\_
+  - [ ] mock notes: \_\_\_
 
 ---
 
@@ -821,7 +821,7 @@ Light reading: _Fluent Python_ Ch 7.
 
 ---
 
-### Day 51 — Tue Jun 30 (2) `M`
+### Day 51 — Tue Jun 30 (2) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -833,7 +833,7 @@ Light reading: _Fluent Python_ Ch 7.
   - [ ] [2-D DP] -> Longest Increasing Path In a Matrix (H)
   - [ ] [2-D DP] -> Distinct Subsequences (H)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: \_\_\_
+  - [ ] mock notes: \_\_\_
 
 ---
 
@@ -852,11 +852,11 @@ Light reading: _Fluent Python_ Ch 7.
 
 ---
 
-### Day 53 — Thu Jul 2 (3) — **HARD SPRINT COMPLETE**
+### Day 53 — Thu Jul 2 (3) — **HARD ACQUISITION COMPLETE**
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
-  - **Milestone:** all 22 NC150 Hards touched. Tomorrow opens net-new.
+  - **Milestone:** all 22 NC150 Hards touched. Tomorrow opens Phase 6 (Reinforcement).
   - [ ] D52 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 8 re-read — distributed system failure modes
@@ -868,11 +868,11 @@ Light reading: _Fluent Python_ Ch 7.
 
 ---
 
-## Phase 6 — Reinforcement + Apply Window (Days 54–58)
+## Phase 6 — Reinforcement + Job Application Window (Days 54–58)
 
-No new acquisition. All 153 E+M and 23 Hards touched by D53. P6 is a transition phase: heavy Recall, mock-heavy ramp, behavioral story practice, and the safety-tier apply window. The 6 enrichment problems (Segment Tree, Bitmask DP, Sweep Line) are NOT scheduled — engine deprioritizes them, only surface if Recall is fully drained.
+All 153 E+M and 23 Hards touched by D53 — every curriculum problem now has at least one touch. Phase 6 is a transition phase: heavy Recall, extra mocks, behavioral story practice, and fallback-tier company applications. The 6 heavy NC-150+ problems (Segment Tree, Bitmask DP, Sweep Line) live at the end of the document order — they only surface if Recall is fully drained and you opt to pull them.
 
-### Day 54 — Fri Jul 3 (0) `M`
+### Day 54 — Fri Jul 3 (0) (mock)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain (heavy now — 175+ problems on rotation).
@@ -883,7 +883,7 @@ No new acquisition. All 153 E+M and 23 Hards touched by D53. P6 is a transition 
 - **17:30–19:30 Reinforcement:**
   - Pick 1-2 weakest patterns from the past week — re-solve a canonical from each on a 30-min clock.
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: \_\_\_
+  - [ ] mock notes: \_\_\_
 
 ---
 
@@ -921,17 +921,17 @@ Light reading: _Fluent Python_ Ch 8.
 
 ---
 
-### Day 58 — Tue Jul 7 (0) `M` — **APPLY WINDOW (safety tier)**
+### Day 58 — Tue Jul 7 (0) (mock) — **JOB APPLICATION WINDOW (fallback companies)**
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
-  - **Apply checkpoint:** safety-tier applications go out today.
+  - **Application checkpoint:** fallback-company applications go out today.
   - [ ] D57 hardest re-solve: \_\_\_
 - **14:00–16:00 Mock slot:** Interviewing.io full real-screen simulation.
 - **16:00–17:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 5 re-read — metrics monitoring
-- **17:30–19:30 Reinforcement (enrichment if Recall is drained):**
-  - **Enrichment (engine deprioritizes — only surface if core+optional is fully drained):**
+- **17:30–19:30 Reinforcement (heavy NC-150+ patterns if Recall is drained):**
+  - **Heavy NC-150+ patterns (only attempt if Recall is fully drained):**
     - [ ] [Segment Tree] -> Range Sum Query - Mutable (M) (nc-150+)
     - [ ] [Segment Tree] -> Count of Smaller Numbers After Self (H) (nc-150+)
     - [ ] [Bitmask DP] -> Partition K Equal Subsets (M) (nc-150+)
@@ -939,7 +939,7 @@ Light reading: _Fluent Python_ Ch 8.
     - [ ] [Sweep Line] -> My Calendar III (H) (nc-150+)
     - [ ] [Sweep Line] -> Skyline (H) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
-  - [ ] mock retro: \_\_\_
+  - [ ] mock notes: \_\_\_
 
 ---
 
@@ -1009,7 +1009,7 @@ Mocks D79-D90 (~8-10 mocks): daily cadence D85-D89 if possible.
 
 ---
 
-## 90-Day Sprint Retrospective — Day 90 (Sat Aug 8)
+## 90-Day Retrospective — Day 90 (Sat Aug 8)
 
 - Total NC150 problems completed: \_\_\_ / 150
 - NC150 Easies fluent (3+ touches): \_\_\_ / 30
