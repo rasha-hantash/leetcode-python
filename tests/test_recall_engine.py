@@ -31,6 +31,7 @@ from recall_engine import (
     phase_for,
     projected_end_date,
     recompute,
+    render_coverage,
     render_today,
     start_date,
 )
@@ -965,3 +966,126 @@ def test_renderer_omits_projection_line_when_curriculum_already_fully_touched() 
         projection_untouched=0,
     )
     assert "Projected" not in out
+
+
+# ─── Coverage view (by-pattern) ───────────────────────────────────────────────
+
+
+def test_curriculum_parser_captures_variant_of_relationship() -> None:
+    md = (
+        "## Phase 1 — X (Days 1–7)\n"
+        "### Day 1\n"
+        "- [ ] [1-D DP] -> House Robber (M)\n"
+        "- [ ] [1-D DP] -> House Robber II (M) (variant of: House Robber)\n"
+    )
+    problems = parse_curriculum(md)
+    assert problems[0].variant_of is None
+    assert problems[1].variant_of == "House Robber"
+
+
+def test_problem_pattern_and_name_split_on_arrow() -> None:
+    p = Problem("[Arrays & Hashing] -> Two Sum", source_day=1, difficulty="E")
+    assert p.pattern == "Arrays & Hashing"
+    assert p.name == "Two Sum"
+
+
+def test_render_coverage_groups_problems_by_pattern() -> None:
+    curriculum = [
+        Problem("[Arrays & Hashing] -> Two Sum", source_day=1, difficulty="E"),
+        Problem("[Two Pointers] -> Valid Palindrome", source_day=2, difficulty="E"),
+        Problem("[Arrays & Hashing] -> Group Anagrams", source_day=1, difficulty="M"),
+    ]
+    out = render_coverage(curriculum, ledger=[])
+    assert "## Arrays & Hashing" in out
+    assert "## Two Pointers" in out
+    # Both Arrays & Hashing problems land under their shared heading
+    section = out.split("## Arrays & Hashing", 1)[1].split("##", 1)[0]
+    assert "Two Sum" in section
+    assert "Group Anagrams" in section
+
+
+def test_render_coverage_checks_box_when_problem_is_in_ledger() -> None:
+    curriculum = [
+        Problem("[Arrays & Hashing] -> Two Sum", source_day=1, difficulty="E"),
+        Problem("[Arrays & Hashing] -> Group Anagrams", source_day=1, difficulty="M"),
+    ]
+    ledger = [Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11))]
+    out = render_coverage(curriculum, ledger)
+    assert "- [x] Two Sum (E)" in out
+    assert "- [ ] Group Anagrams (M)" in out
+
+
+def test_render_coverage_nests_variants_under_their_canonical() -> None:
+    curriculum = [
+        Problem("[1-D DP] -> House Robber", source_day=1, difficulty="M"),
+        Problem(
+            "[1-D DP] -> House Robber II",
+            source_day=1,
+            difficulty="M",
+            variant_of="House Robber",
+        ),
+    ]
+    out = render_coverage(curriculum, ledger=[])
+    assert "- [ ] House Robber (M)" in out
+    # Variant is indented (two-space prefix) under canonical
+    assert "  - [ ] House Robber II (M)" in out
+
+
+def test_render_coverage_orders_patterns_by_source_tier() -> None:
+    """nc-150 patterns surface before nc-150+ ones, regardless of doc order."""
+    curriculum = [
+        Problem(
+            "[Beyond] -> X",
+            source_day=54,
+            difficulty="M",
+            source="nc-150+",
+        ),
+        Problem(
+            "[Core] -> Y",
+            source_day=54,
+            difficulty="M",
+            source="nc-150",
+        ),
+    ]
+    out = render_coverage(curriculum, ledger=[])
+    core_pos = out.find("## Core")
+    beyond_pos = out.find("## Beyond")
+    assert 0 <= core_pos < beyond_pos
+
+
+def test_render_coverage_handles_variant_whose_canonical_is_not_in_curriculum() -> None:
+    """Some II-suffix problems (Basic Calculator II, My Calendar III) have no
+    canonical in the curriculum — render them at top level with a footnote
+    rather than dropping them or crashing."""
+    curriculum = [
+        Problem(
+            "[Stack] -> Basic Calculator II",
+            source_day=10,
+            difficulty="M",
+            variant_of="Basic Calculator",
+        ),
+    ]
+    out = render_coverage(curriculum, ledger=[])
+    assert "Basic Calculator II" in out
+    assert "(variant of Basic Calculator)" in out
+
+
+def test_recompute_writes_coverage_md_when_path_provided(tmp_path: Path) -> None:
+    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md.write_text(
+        "## Phase 1 — X (Days 1–7)\n"
+        "### Day 1\n"
+        "- [ ] [Arrays & Hashing] -> Two Sum (E)\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    coverage_md = tmp_path / "coverage.md"
+    recompute(
+        daily_md,
+        today_md,
+        ledger,
+        today=date(2026, 5, 11),
+        coverage_md_path=coverage_md,
+    )
+    assert coverage_md.exists()
+    assert "## Arrays & Hashing" in coverage_md.read_text()

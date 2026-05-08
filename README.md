@@ -75,23 +75,24 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 
 ## Files
 
-| File                                    | What's in it                                                                                  |
-| --------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `recall_engine.py`                      | Snapshot-mode SM-2 lite engine. Run via `uv run python -m recall_engine recompute`.           |
-| `tests/test_recall_engine.py`           | Narrative tests — also serve as the spec.                                                     |
-| `pyproject.toml`                        | Python project metadata + uv lock. `click` (CLI) + `pytest` (dev).                            |
-| `launchd/com.rasha.recall-engine.plist` | LaunchAgent template that runs `recompute` daily at 8:30 AM.                                  |
-| `prep-data/today.md`                    | _(generated)_ Today's frozen Recall + New queue. Tick boxes here.                             |
-| `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth.                                 |
-| `setup.md`                              | Day-0 setup guide — Obsidian, Anki, Python, books, mocks, GCal, slash commands.               |
-| `prep-plan-daily.md`                    | Day-by-day curriculum reference. Each Day's New problems and afternoon SD chapter.            |
-| `prep-plan-overview.md`                 | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.      |
-| `dynamic-recall-system-plan.md`         | History of the dynamic-recall system evolution.                                               |
-| `neetcode-150.md`                       | Original NC150 list (reference).                                                              |
-| `python-gotchas.md`                     | Append-only log of Python language stumbles you hit during the prep.                          |
-| `patterns/*.md`                         | One file per pattern (e.g., `arrays-and-hashing.md`). Mistakes nested under each problem.     |
-| `anki/`                                 | Four decks: code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total. |
-| `problems/<pattern>/<diff>-<n>.py`      | Your actual solution code, organized by pattern + difficulty.                                 |
+| File                                    | What's in it                                                                                                   |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `recall_engine.py`                      | Snapshot-mode SM-2 lite engine. Run via `uv run python -m recall_engine recompute`.                            |
+| `tests/test_recall_engine.py`           | Narrative tests — also serve as the spec.                                                                      |
+| `pyproject.toml`                        | Python project metadata + uv lock. `click` (CLI) + `pytest` (dev).                                             |
+| `launchd/com.rasha.recall-engine.plist` | LaunchAgent template that runs `recompute` daily at 8:30 AM.                                                   |
+| `prep-data/today.md`                    | _(generated)_ Today's frozen Recall + New queue. Tick boxes here.                                              |
+| `prep-data/coverage.md`                 | _(generated)_ All curriculum problems grouped by pattern, variants nested, boxes auto-checked from the ledger. |
+| `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth.                                                  |
+| `setup.md`                              | Day-0 setup guide — Obsidian, Anki, Python, books, mocks, GCal, slash commands.                                |
+| `prep-plan-daily.md`                    | Day-by-day curriculum reference. Each Day's New problems and afternoon SD chapter.                             |
+| `prep-plan-overview.md`                 | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.                       |
+| `dynamic-recall-system-plan.md`         | History of the dynamic-recall system evolution.                                                                |
+| `neetcode-150.md`                       | Original NC150 list (reference).                                                                               |
+| `python-gotchas.md`                     | Append-only log of Python language stumbles you hit during the prep.                                           |
+| `patterns/*.md`                         | One file per pattern (e.g., `arrays-and-hashing.md`). Mistakes nested under each problem.                      |
+| `anki/`                                 | Four decks: code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total.                  |
+| `problems/<pattern>/<diff>-<n>.py`      | Your actual solution code, organized by pattern + difficulty.                                                  |
 
 ## Glossary
 
