@@ -1057,8 +1057,8 @@ def _render_mocks_section(
 
     if total == 0:
         lines.append(
-            "_No mocks tracked yet. Add entries to `prep-data/mocks.json` "
-            "(see `mocks.example.json` for the schema)._"
+            "_No mocks tracked yet. Add entries to `prep-data/mock_interviews.json` "
+            "(see `mock_interviews.example.json` for the schema)._"
         )
         lines.append("")
         return lines
@@ -1107,7 +1107,7 @@ def _render_behavioral_section(topics: list[BehavioralTopic]) -> list[str]:
             note = f" — _{t.notes}_" if t.notes else ""
             lines.append(f"- [{box}] {t.prompt}{stamp}{note}")
     else:
-        lines.append("_Empty — add prompts to `prep-data/behavioral.json`._")
+        lines.append("_Empty — add prompts to `prep-data/behavioral_prompts.json`._")
     lines.append("")
     return lines
 
@@ -1131,7 +1131,7 @@ def _render_sd_section(sd_chapters: list[SDChapter]) -> list[str]:
             )
             lines.append(f"- [{box}] {ch.book} · {ch.title}{stamp}")
     else:
-        lines.append("_Empty — add chapters to `prep-data/sd-chapters.json`._")
+        lines.append("_Empty — add chapters to `prep-data/system_design_chapters.json`._")
     lines.append("")
     return lines
 
@@ -1358,21 +1358,21 @@ def cli() -> None:
 @click.option(
     "--mocks",
     type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("prep-data/mocks.json"),
+    default=Path("prep-data/mock_interviews.json"),
     show_default=True,
     help="User-editable list of mock interviews (pending/scheduled/completed).",
 )
 @click.option(
     "--sd-chapters",
     type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("prep-data/sd-chapters.json"),
+    default=Path("prep-data/system_design_chapters.json"),
     show_default=True,
     help="User-editable list of System Design chapters (pending/completed).",
 )
 @click.option(
     "--behavioral",
     type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("prep-data/behavioral.json"),
+    default=Path("prep-data/behavioral_prompts.json"),
     show_default=True,
     help="User-editable list of behavioral interview prompts (pending/completed).",
 )

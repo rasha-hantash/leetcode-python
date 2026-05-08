@@ -8,11 +8,11 @@ prep-data/completions.jsonl
 prep-data/today.md
 prep-data/coverage.md
 # User-edited mock bookings — personal scheduling state, not source.
-# A starter template lives at prep-data/mocks.example.json.
-prep-data/mocks.json
+# A starter template lives at prep-data/mock_interviews.example.json.
+prep-data/mock_interviews.json
 # User-edited SD chapter list — personal completion state, not source.
-# A starter template lives at prep-data/sd-chapters.example.json.
-prep-data/sd-chapters.json
+# A starter template lives at prep-data/system_design_chapters.example.json.
+prep-data/system_design_chapters.json
 # User-edited behavioral prompt list — personal completion state, not source.
-# A starter template lives at prep-data/behavioral.example.json.
-prep-data/behavioral.json
+# A starter template lives at prep-data/behavioral_prompts.example.json.
+prep-data/behavioral_prompts.json

@@ -5,8 +5,8 @@ Tracker for deferred prep-system work. Strike items through (`~~text~~`) when do
 ## Pre-D1 (before Mon May 11)
 
 - [x] ~~Push branch to origin.~~ Done 2026-05-07 — 4 PRs created via `gt submit` after repo synced. Stack: <https://app.graphite.com/submit/rasha-hantash/leetcode-python/2>.
-- [ ] **Book mocks as Pramp/Interviewing.io availability lets you.** The recall engine doesn't depend on calendar mock dates — it just tracks `pending → scheduled (with date) → completed` from `prep-data/mocks.json`. Each mock can carry `prerequisites: {em_problems, sd_chapters}` thresholds; the engine surfaces met/unmet status under each mock. Book what's actually available; the readiness gates and prereq checks will tell you when each one is in scope.
-- [ ] **Seed your tracking files.** Copy `prep-data/mocks.example.json` → `mocks.json`, `sd-chapters.example.json` → `sd-chapters.json`, `behavioral.example.json` → `behavioral.json`. Edit as you progress. The example files stay in git as reference templates; the active files are gitignored as personal state.
+- [ ] **Book mocks as Pramp/Interviewing.io availability lets you.** The recall engine doesn't depend on calendar mock dates — it just tracks `pending → scheduled (with date) → completed` from `prep-data/mock_interviews.json`. Each mock can carry `prerequisites: {em_problems, sd_chapters}` thresholds; the engine surfaces met/unmet status under each mock. Book what's actually available; the readiness gates and prereq checks will tell you when each one is in scope.
+- [ ] **Seed your tracking files.** Copy `prep-data/mock_interviews.example.json` → `mock_interviews.json`, `system_design_chapters.example.json` → `system_design_chapters.json`, `behavioral_prompts.example.json` → `behavioral_prompts.json`. Edit as you progress. The example files stay in git as reference templates; the active files are gitignored as personal state.
 
 ## Mid-prep (when relevant)
 
