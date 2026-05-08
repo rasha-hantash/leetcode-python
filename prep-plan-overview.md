@@ -4,109 +4,106 @@ _System-level reference (dashboard, routine, spaced-repetition rules, mock caden
 
 ## Sprint Dashboard
 
-- **Window:** Wed May 6 – Wed Aug 5, 2026 (90 days, ~78 working days, 13 Sundays off)
-  - **Acquisition phase (D1–D50):** finish NC150
-  - **Consolidation phase (D51–D90):** depth, mocks, system design — gains compound here
+- **Window:** Mon May 11 – Sat Aug 8, 2026 (90 days, ~77 working days, 13 Sundays off)
+  - **E+M acquisition (D1–D39):** all NC150 Easies + Mediums by pattern, zero Hards. ~3.3/day average.
+  - **Hard sprint (D40–D53):** all 22 NC150 Hards drilled fresh, ~1.5/day at 90 min each.
+  - **Net-new (D54–D58):** 5 core + 2 optional from the 13 net-new (6 enrichment deferred to engine fallback).
+  - **Mock-heavy reinforcement (D59–D78):** zero new, daily clocked re-solves + mocks + SD depth.
+  - **Interview mode (D79–D90):** real-screen simulation, daily mocks, polished behaviorals.
 - **Daily ceiling:** 9 hrs focused work
-- **Coverage:** 150 NeetCode + 13 net-new (= 163 problems across 25 patterns) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~10 polished behavioral stories · ~24 mocks
-- **System artifacts:** `patterns/` (25 pattern notes, Mistakes nested) · `anki/` (4 decks: code-templates, pattern-recognition, python-gotchas, complexity — ~90 cards total) · `python-gotchas.md` (language stumbles log, append-only)
-- **Cadence:** every phase has a single integer cadence (no fractional days)
+- **Coverage:** 150 NeetCode + 13 net-new (= 163 problems across 18 patterns) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~10 polished behavioral stories · ~24 mocks
+- **System artifacts:** `patterns/` notes (Mistakes nested) · `anki/` (4 decks: code-templates, pattern-recognition, python-gotchas, complexity — ~90 cards total) · `python-gotchas.md`
+- **Difficulty-first sequencing:** within each pattern, Easies before Mediums. Across all patterns, E+M before H. **No Hards touched until D40.**
 
-| Phase | Days  | Categories                                   | Problems               | Cadence                    | WD  |
-| ----- | ----- | -------------------------------------------- | ---------------------- | -------------------------- | --- |
-| P1    | 1–6   | A&H + 2P + Sliding Window                    | 20                     | 4/day                      | 5   |
-| P2    | 7–13  | Stack + Binary Search + Linked List          | 24                     | 4/day                      | 6   |
-| P3    | 14–18 | Trees + Tries + 2 Heap (intro)               | 20                     | 4/day                      | 5   |
-| P4    | 20–24 | rest Heap + Backtracking                     | 15                     | 3/day                      | 5   |
-| P5    | 25–30 | Graphs + Adv Graphs + Climbing Stairs        | 20                     | **4/day (aggressive)**     | 5   |
-| P6    | 31–38 | rest 1D DP + most 2D DP                      | 21                     | 3/day                      | 7   |
-| P7    | 39–50 | last 2D DP + Greedy + Intervals + Math + Bit | 30                     | 3/day                      | 10  |
-| P8    | 51–65 | Pattern Mastery + 7 net-new patterns         | 13 net-new + re-solves | ~1/day new, heavy re-solve | 13  |
-| P9    | 66–78 | Mock-heavy + System Design Deep Dive         | 0 new (re-solves only) | 1 problem/day on clock     | 11  |
-| P10   | 79–90 | Interview Mode (full simulation)             | 0 new (mock-paced)     | daily mock cadence         | 10  |
+| Phase  | Days      | What                                                                           | Problems          | Cadence                | WD  |
+| ------ | --------- | ------------------------------------------------------------------------------ | ----------------- | ---------------------- | --- |
+| P1     | 1–7       | Linear: Arrays/Hashing → Two Pointers → SW → Stack → Binary Search start (E+M) | 27                | 4/day                  | 6   |
+| P2     | 8–17      | Binary Search rest → Linked List → Trees (E+M)                                 | 36                | 4/day                  | 9   |
+| P3     | 18–24     | Backtracking → Tries → Graphs → Adv Graphs (M)                                 | 27                | 4/day                  | 6   |
+| P4     | 25–39     | 1D DP → 2D DP → Greedy → Intervals → Math → Bit (E+M)                          | 38                | 3-4/day                | 13  |
+| **P5** | **40–53** | **🔥 Hard sprint — all 22 NC150 Hards**                                        | 22                | 1.5-2/day              | 12  |
+| P6     | 54–58     | Net-new core (5) + optional (2)                                                | 7+                | 2/day                  | 4   |
+| P7     | 59–78     | Mock-heavy reinforcement (no new)                                              | 0 new (re-solves) | 1 weakness/day clocked | 17  |
+| P8     | 79–90     | Interview mode (full simulation)                                               | 0 new             | daily mock cadence     | 10  |
 
-Total: **163** problems (150 NC150 + 13 net-new), **~78** working days, 25 patterns. Cross-phase moves to maintain 50-day consistency: 2 easy Heap problems lifted into P3, 1 1D DP (Climbing Stairs) lifted into P5, 1 2D DP (Regex Matching T2) pushed into P7.
+Total: **163** problems · 18 NC150 patterns + 7 net-new patterns · ~77 working days. The 6 enrichment net-new problems live in the curriculum but the engine deprioritizes them — they only surface if all core+optional is drained.
 
-**P8 net-new problems:** Segment Tree (Range Sum Query - Mutable + Count of Smaller After Self), Bitmask DP (Shortest Path Visiting All Nodes + Partition K Equal Subsets), Bit-Trie (Maximum XOR), Sweep Line (My Calendar III + Skyline), Reservoir Sampling (LL Random Node + Random Pick with Weight), Boyer-Moore (Majority Element + Majority Element II), Difference Array (Corporate Flight Bookings + Car Pooling).
+**Apply window mapping:**
 
-**P5 cadence note:** Graphs at 4/day = ~1 hr/problem, dense. If you fall behind here, slip 1–2 problems into start of P6 — the dynamic Recall queue absorbs the slip without rescheduling.
+- D45 (Wed Jun 24): stretch tier (FAANG, top startups — slow recruiter pipelines)
+- D52 (Wed Jul 1): target tier
+- D58 (Tue Jul 7): safety tier
+- First-round screens land Jul 8 onward; onsites Jul 21 onward.
+
+**Hard sprint pattern decay mitigation:** when a Hard's pattern hasn't been touched in 2+ weeks (typical by D40), do a 5-min E+M canonical re-solve as warm-up before attempting the Hard.
 
 ---
 
 ## Daily Routine
 
-Schedule shape shifts between the **acquisition phase (D1–D50)** — finishing NC150 — and the **consolidation phase (D51–D90)** — mocks, depth, system design. Saturdays in D51–D90 also restructure to fit a Behavioral Intensive block. Sundays are off across all phases.
+Schedule shape shifts across phases: **E+M acquisition (D1–D39)** → **Hard sprint (D40–D53)** → **net-new (D54–D58)** → **mock-heavy reinforcement (D59–D78)** → **interview mode (D79–D90)**. Saturdays in D59+ restructure to fit a Behavioral Intensive block. Sundays are off across all phases.
 
-The "queue" referenced below is the **dynamic Recall (10) dashboard** at the top of `prep-plan-daily.md` — a live Dataview query that re-ranks every solved problem by overdue-ness each time the file opens. Drain top-down during the Consolidation block; whatever doesn't get done becomes more overdue and bubbles higher tomorrow. No manual scheduling.
+The "Recall queue" below is the **`prep-data/today.md`** snapshot generated each morning by `recall_engine`. Open it during the Consolidation block; drain top-down. Whatever doesn't get done is folded into tomorrow's queue with higher overdue-ness. No manual scheduling.
 
-### D1–D50 — Mon–Sat (Acquisition)
+### D1–D58 — Mon–Sat (Acquisition + Hard sprint + net-new)
 
-| Time        | Block                      | Activity                                                                                                                                                                |
-| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 7:00–8:00   | Workout                    | Fixed (BDNF prime)                                                                                                                                                      |
-| 8:00–9:00   | Shower + breakfast         | Read tomorrow's first problem 10 min (incubation)                                                                                                                       |
-| 9:00–13:00  | **DSA New (4 hr · peak)**  | Today's fresh problems (count varies by phase)                                                                                                                          |
-| 13:00–14:00 | Lunch + walk               | Off-screen                                                                                                                                                              |
-| 14:00–15:30 | **System Design (1.5 hr)** | Today's chapter writeup in Obsidian                                                                                                                                     |
-| 15:30–19:30 | **Consolidation (4 hr)**   | Open Recall (10) dashboard → drain top-down at standard time (E 20m / M 40m / H 90m) until the block ends → yesterday's hardest → Pythonic refactor → editorial → Anki. |
-| 19:30+      | Free                       | Pre-bed: read tomorrow's first problem 10 min                                                                                                                           |
+| Time        | Block                      | Activity                                                                                                                            |
+| ----------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 7:00–8:00   | Workout                    | Fixed (BDNF prime)                                                                                                                  |
+| 8:00–9:00   | Shower + breakfast         | Read tomorrow's first problem 10 min (incubation)                                                                                   |
+| 9:00–13:00  | **DSA New (4 hr · peak)**  | Today's fresh problems (D1-D39: 3-4 E+M/day · D40-D53: 1.5-2 Hards/day · D54-D58: 2 net-new/day)                                    |
+| 13:00–14:00 | Lunch + walk               | Off-screen                                                                                                                          |
+| 14:00–15:30 | **System Design (1.5 hr)** | Today's chapter writeup in Obsidian (mock days swap to 14:00-16:00 mock + 16:00-17:30 SD)                                           |
+| 15:30–19:30 | **Consolidation (4 hr)**   | Open `prep-data/today.md` → drain Recall top-down at standard time (E 20m / M 40m / H 90m) → yesterday's hardest → editorial → Anki |
+| 19:30+      | Free                       | Pre-bed: read tomorrow's first problem 10 min                                                                                       |
 
-**Saturday note (D4, D11, D18, D25, D32, D39, D46).** Same time blocks. The 4 hr Consolidation block absorbs **Pattern coverage rotation** (~2 hr re-solving canonical problems from `patterns/`) + Recall queue + yesterday's hardest + (from D25) the +21d batch. Saturdays are the densest day — pattern rotation eats half the block, so Recall drain may only fit 2–3 items. Items that don't fit auto-bubble higher next Monday.
+**Saturday note (D6, D13, D20, D27, D34, D41, D48, D55).** Same time blocks. The 4 hr Consolidation block opens with **This week's hardest — your pick**: open `prep-data/today.md` (Saturday's render adds the section automatically) and re-solve 2-3 problems you flagged hardest from your Mon-Fri "today's hardest" notes. Then drain Recall. New (3) intake on Saturdays drops to 3 problems instead of 4 to fit the reinforcement block.
 
 **Daily ceiling note.** Extending Consolidation to 4 hr brings focused-work hours to 9.5 (4 DSA + 1.5 SD + 4 Cons), 0.5 hr over the 9-hr dashboard ceiling. Acceptable on weekdays; if drift starts compounding, shrink the SD slot to 1 hr or end Consolidation 30 min early on light-queue days.
 
-### D51–D90 — Mon–Fri (Consolidation)
+### D59–D90 — Mon–Fri (Consolidation)
 
 Workout (7:00–8:00) and breakfast / incubation (8:00–9:00) carry over to every working day. Each sub-phase shifts the rest of the day:
 
-**P8 (D51–D65) — Pattern Mastery + Net-New**
+**P7 (D59–D78) — Mock-heavy reinforcement + SD Deep Dive**
 
-| Time        | Block                        | Activity                                                                         |
-| ----------- | ---------------------------- | -------------------------------------------------------------------------------- |
-| 9:00–13:00  | DSA New                      | ~1 net-new problem/day                                                           |
-| 13:00–14:00 | Lunch + walk                 | Off-screen                                                                       |
-| 14:00–16:00 | **Interview / Mock slot**    | Real screens, paid mocks, peer Pramp. When empty: 2 weakness re-solves.          |
-| 16:00–17:30 | System Design                | DDIA Ch 7 + Alex Xu Vol 2                                                        |
-| 17:30–18:30 | **Consolidation (anchored)** | Recall (10) drain top-down → 1 weakness re-solve OR cross-pattern mistake-mining |
-
-**P9 (D66–D78) — Mock-heavy + SD Deep Dive**
-
-| Time        | Block                              | Activity                                                                                                                             |
-| ----------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 9:00–13:00  | Re-solve clock + Pythonic refactor | One problem on a 30-min clock narrating aloud, then 3 hrs Pythonic refactor + writeup. Drain Recall (10) top-down within this block. |
-| 13:00–14:00 | Lunch + walk                       | Off-screen                                                                                                                           |
-| 14:00–16:00 | **Interview / Mock slot**          | Paid mocks scheduled. When empty: SD writeup.                                                                                        |
-| 16:00–17:00 | **SD anchor**                      | DDIA Ch 8–9 reading or SD writeup continuation                                                                                       |
-| 18:30–19:15 | Anki                               | Review the day's takeaways                                                                                                           |
+| Time        | Block                              | Activity                                                                                                                              |
+| ----------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 9:00–13:00  | Re-solve clock + Pythonic refactor | One problem on a 30-min clock narrating aloud, then 3 hrs Pythonic refactor + writeup. Drain Recall queue top-down within this block. |
+| 13:00–14:00 | Lunch + walk                       | Off-screen                                                                                                                            |
+| 14:00–16:00 | **Interview / Mock slot**          | Paid mocks scheduled. Real first-round screens land here from D59 onward. When empty: SD writeup.                                     |
+| 16:00–17:00 | **SD anchor**                      | DDIA Ch 8–9 deep-dive or SD writeup continuation                                                                                      |
+| 17:00–18:30 | **Behavioral practice**            | Refine 1 of the 10 STAR stories per day                                                                                               |
+| 18:30–19:15 | Anki                               | Review the day's takeaways                                                                                                            |
 
 _From D71 onward: add a 1-problem random retention check (15–20 min, weighted ~20% easy / 65% medium / 15% hard) to the morning block._
 
-**P10 (D79–D90) — Interview Mode**
+**P8 (D79–D90) — Interview Mode**
 
-| Time        | Block                                  | Activity                                                                                                           |
-| ----------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| 9:00–10:30  | DSA mock                               | 1 problem timed (Pramp / Interviewing.io / friend)                                                                 |
-| 10:30–12:00 | Mock retro + Anki                      | Capture takeaways                                                                                                  |
-| 12:00–14:00 | Lunch + walk                           | Off-screen                                                                                                         |
-| 14:00–16:00 | **Interview / Mock slot**              | Real screens, paid mocks. When empty: SD mock (whiteboard-style on a fresh Alex Xu V2 problem).                    |
-| 16:00–17:30 | **Mock retro + Recall + random check** | Whichever mock ran in the slot. Drain Recall (10) top-down + 1 random retention check from "solved >14d ago" pool. |
+| Time        | Block                                  | Activity                                                                                                            |
+| ----------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 9:00–10:30  | DSA mock                               | 1 problem timed (Pramp / Interviewing.io / friend)                                                                  |
+| 10:30–12:00 | Mock retro + Anki                      | Capture takeaways                                                                                                   |
+| 12:00–14:00 | Lunch + walk                           | Off-screen                                                                                                          |
+| 14:00–16:00 | **Interview / Mock slot**              | Real screens, paid mocks. When empty: SD mock (whiteboard-style on a fresh Alex Xu V2 problem).                     |
+| 16:00–17:30 | **Mock retro + Recall + random check** | Whichever mock ran in the slot. Drain Recall queue top-down + 1 random retention check from "solved >14d ago" pool. |
 
-### D51–D90 Saturdays — D53, D60, D67, D74, D81, D88
+### D59–D90 Saturdays — D62, D69, D76, D83, D90
 
 Restructured for **Behavioral Intensive** (3 hr afternoon block).
 
 | Time        | Block                              | Activity                                                                                                 |
 | ----------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| 9:00–12:00  | DSA                                | P8: 1 net-new problem · P9/P10: 1 weakness re-solve on 30-min clock                                      |
+| 9:00–12:00  | DSA                                | 1 weakness re-solve on 30-min clock                                                                      |
 | 12:00–13:00 | System Design                      | Alex Xu Vol 2 chapter                                                                                    |
 | 13:00–14:00 | Lunch + walk                       | Off-screen                                                                                               |
-| 14:00–15:00 | **Consolidation (anchored, 1 hr)** | Recall (10) drain top-down + previous-day hardest re-solve. (P10: + random retention check on D81, D88.) |
+| 14:00–15:00 | **Consolidation (anchored, 1 hr)** | Recall queue drain + this-week's-hardest section in `prep-data/today.md` (P8: + random retention check). |
 | 15:00–18:00 | **Behavioral Intensive (3 hr)**    | Story drafting / refinement, recording + listen-back, 5-story drill (60-sec → 90-sec → 3-min versions).  |
 | 18:00       | Done                               |                                                                                                          |
 
 ### Sundays — OFF (all phases)
 
-D5, D12, D19, D26, D33, D40, D47, D54, D61, D68, D75, D82, D89. Light _Fluent Python_ or DDIA reading allowed. No DSA, no SD, no behavioral.
+D7, D14, D21, D28, D35, D42, D49, D56, D63, D70, D77, D84. Light _Fluent Python_ or DDIA reading allowed. No DSA, no SD, no behavioral.
 
 ---
 
@@ -124,15 +121,16 @@ Four layers, four different jobs:
 
 **Daily hardest re-solve (~30 min, start of consolidation block):** yesterday's hardest, from a blank file. Mistake-driven (not pattern-coverage). Slot is in every day's Consolidation line.
 
-**Pattern coverage rotation (Saturday afternoon, ~2 hrs):** re-solve 2–3 canonical problems from `patterns/` rotation. Spans 13 Saturdays across the 90-day window — every pattern hit at least once, hot patterns 2x. Specific patterns are pre-named in each Saturday's entry.
+**This week's hardest (Saturday afternoon, Cons block):** open `prep-data/today.md` — Saturday's render adds a `## This week's hardest — your pick` section automatically. Pick 2-3 problems you flagged hardest from your Mon-Fri "today's hardest" notes, write their canonical names into the empty bullets, re-solve from blank file, tick to log a touch.
 
-**Recall queue (Cons block, every working day):** dynamic Dataview-driven priority queue at the top of `prep-plan-daily.md`. Replaces the old D+3 / D+7 / D+21 schedule.
+**Recall queue (Cons block, every working day):** snapshot-mode SM-2 lite queue rendered into `prep-data/today.md` by `recall_engine`. Frozen at morning recompute time; clicking checkboxes does not reshuffle.
 
 ### How the Recall queue works
 
-- Each problem appears **once** in `prep-plan-daily.md` — in its source-day's DSA New block. Re-solving = re-checking the same line; the Tasks plugin auto-stamps a new completion timestamp on every toggle.
-- A DataviewJS query computes `priority = today − (last_completion + interval(touch_count))` for every checked task and sorts descending. The top 10 most-overdue items render live as the **Recall (10)** dashboard.
-- During the Cons block: open the dashboard, drain top-down at standard times (Easy 20 min · Medium 40 min · Hard 90 min) until the block ends. Whatever doesn't get done becomes more overdue and bubbles higher tomorrow — no manual rescheduling.
+- An append-only JSONL ledger at `prep-data/completions.jsonl` records every (problem, date) touch.
+- The engine aggregates the ledger by problem → `(touch_count, latest_date)`, applies SM-2 lite to compute a due date, and ranks items most-overdue first (capped at 10).
+- During the Cons block: open `prep-data/today.md`, drain Recall top-down at standard times (Easy 20 min · Medium 40 min · Hard 90 min) until the block ends. Whatever doesn't get done is folded into tomorrow's queue with higher overdue-ness — no manual rescheduling.
+- Snapshot mode means the visible list is fixed for the day. Manual `prep recompute` regenerates it any time (e.g., if you forgot to tick yesterday's items).
 
 ### Intervals (SM-2 lite)
 
@@ -158,35 +156,36 @@ The static D+3 / D+7 / D+21 schedule produced 41 of 45 working days where the Co
 
 **Mistakes are nested inside `patterns/*.md`** — after every wrong/peeked problem, append a 1–2 sentence entry under the relevant problem in its pattern file (problem → "Stuck on", "Unlock", "Pattern"). Saturday weekly review reads these cross-pattern to surface gaps. Non-pattern Python stumbles go in `python-gotchas.md`.
 
-**By Day 50 via this system:** 15 of 18 NC150 patterns hit by canonical re-solve once each (Intervals, Math, Bit get first hit on D53). Plus weekly +21d revisits via the Recall query (no separate scheduling needed). Plus ~50 daily hardest re-solves (mistake-driven). Plus daily Anki on templates.
+**By Day 39 via this system:** every NC150 E+M problem touched at least once (128 problems, fully drilled within their source-day pattern blocks). Plus daily +1d/+3d/+7d Recall revisits (no separate scheduling needed). Plus ~39 daily hardest re-solves (mistake-driven). Plus daily Anki on templates. **Hard sprint opens D40.**
 
 ---
 
 ## Mock Cadence (book all on Day 0 where possible — pre-commitment beats willpower)
 
-### Acquisition phase (D1–D50): 13 mocks, weekly cadence
+### Acquisition + Hard sprint (D1–D58): 13 mocks, weekly cadence
 
-| Week | Days             | Platform                | Focus                     |
-| ---- | ---------------- | ----------------------- | ------------------------- |
-| 2    | Tue D7, Fri D10  | Pramp                   | Easy/Med DSA              |
-| 3    | Tue D14, Fri D17 | Pramp                   | Trees DSA                 |
-| 4    | Tue D21, Fri D24 | Pramp + Interviewing.io | Mixed; one verbal-only    |
-| 5    | Tue D28, Fri D31 | Interviewing.io         | Graphs (hardest verbal)   |
-| 6    | Tue D35, Fri D38 | Interviewing.io         | DP + system design        |
-| 7    | Tue D42, Fri D45 | Interviewing.io         | Mixed full-loop           |
-| 8    | Tue D49          | Interviewing.io         | NC150-end dress rehearsal |
+| Week | Days             | Platform                | Focus                                 |
+| ---- | ---------------- | ----------------------- | ------------------------------------- |
+| 1    | Tue D2, Fri D5   | Pramp                   | Easy/Med DSA                          |
+| 2    | Tue D9, Fri D12  | Pramp                   | Trees DSA                             |
+| 3    | Tue D16, Fri D19 | Pramp + Interviewing.io | Mixed; one verbal-only                |
+| 4    | Tue D23, Fri D26 | Interviewing.io         | Graphs (hardest verbal)               |
+| 5    | Tue D30, Fri D33 | Interviewing.io         | DP + intervals                        |
+| 6    | Tue D37, Fri D40 | Interviewing.io         | E+M dress rehearsal → first Hard mock |
+| 7    | Tue D44, Fri D47 | Interviewing.io         | Hard sprint mid-point                 |
+| 8    | Tue D51, Fri D54 | Interviewing.io         | Hard end + net-new mocks              |
+| 8    | Tue D58          | Interviewing.io         | Full real-screen simulation           |
 
-### Consolidation phase (D51–D90): ~11 mocks, ramping cadence
+### Reinforcement + interview mode (D59–D90): ~11 mocks, ramping cadence
 
-| Week | Days                               | Platform                  | Focus                                           |
-| ---- | ---------------------------------- | ------------------------- | ----------------------------------------------- |
-| 9    | Tue D56                            | Interviewing.io           | Net-new pattern recognition                     |
-| 10   | Tue D63, Fri D66                   | Interviewing.io           | Re-solve weakness areas                         |
-| 11   | Tue D67, Thu D69, Tue D74, Thu D76 | Interviewing.io           | Mock-heavy, full simulation                     |
-| 12   | Tue D79, Thu D81                   | Interviewing.io + paid    | Full-loop simulation                            |
-| 13   | Tue D86, Thu D88                   | Interviewing.io + friends | Final stretch (daily mocks D85–D89 if possible) |
+| Week | Days             | Platform                  | Focus                                           |
+| ---- | ---------------- | ------------------------- | ----------------------------------------------- |
+| 9    | Tue D65, Fri D68 | Interviewing.io           | Re-solve weakness areas                         |
+| 10   | Tue D72, Thu D74 | Interviewing.io           | Mock-heavy, full simulation                     |
+| 11   | Tue D79, Thu D81 | Interviewing.io + paid    | Full-loop simulation                            |
+| 12   | Tue D86, Thu D88 | Interviewing.io + friends | Final stretch (daily mocks D85–D89 if possible) |
 
-**~24 mocks total across 90 days.** Front-loaded weekly in acquisition, ramped up to every-other-day in P9-P10.
+**~24 mocks total across 90 days.** Front-loaded weekly during acquisition + Hard sprint, ramped up to every-other-day in P7-P8.
 
 **After each mock:** 30-min retro. What stalled — communication, pattern recognition, syntax, complexity? Append insights to relevant `patterns/*/Mistakes` section. Add 1-2 Anki cards if there's a takeaway.
 

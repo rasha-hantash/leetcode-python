@@ -1,6 +1,6 @@
 # Interview Prep Sprint — Daily Schedule
 
-_Day 0 setup + P1–P10 day-by-day execution + 90-Day Sprint Retrospective. For system rules and cadence see [`prep-plan-overview.md`](./prep-plan-overview.md)._
+_Day 0 setup + 90-day day-by-day execution + retrospective. For system rules and cadence see [`prep-plan-overview.md`](./prep-plan-overview.md). Sprint starts **Mon May 11, 2026** (D1)._
 
 ---
 
@@ -10,37 +10,47 @@ This file is the **curriculum reference** — what each Day's New problems are. 
 
 > Skipped a day? Run `uv run python -m recall_engine recompute` — yesterday's untouched problems surface in today's New automatically.
 
+> **Difficulty-first sequencing:** within each pattern, all Easies before any Mediums. Across all patterns, all E+M before any Hard. The Hard sprint runs D40–D53. The 13 net-new problems are tagged `(core)` (drill always), `(optional)` (drill if ahead), or `(enrichment)` (skip if behind) — the engine respects these when computing today's New.
+
 ---
 
-## Day 0 — Setup (Tue May 5)
+## Legend
+
+- `(E)` `(M)` `(H)` — LeetCode difficulty.
+- `(core)` `(optional)` `(enrichment)` — first-round-relevance for the 13 net-new problems. NC150 problems default to `core`.
+- `M` (after the date) — mock-interview day.
+- Each problem prefixed with its NeetCode pattern category in brackets.
+
+---
+
+## Day 0 — Setup (Sun May 10)
 
 5-hour cap. After this, no more tool tweaking — start solving.
 
-- [ ] Anki desktop + AnkiMobile (iOS) or AnkiDroid (Android), import the shared deck you found
-- [ ] Obsidian — point vault at this repo folder; install **Tasks** + **Dataview** plugins (in Dataview, enable JavaScript queries; in Tasks, enable "Set done date on task completion"); also install Obsidian_to_Anki plugin (or standalone Python script); skip themes/customization
-- [ ] Index DDIA + Alex Xu Vol 1 + Vol 2 in `technical-rag` MCP (PDF text extraction first; OCR via Gemini only if scans)
-- [ ] Create `.claude/commands/hint.md` for graduated hints (L1=pattern category, L2=approach, L3=pseudocode, L4=code)
-- [ ] GCal block: 7:00–8:00 workout · 9:00–13:00 DSA · 14:00–15:30 SD · 15:30–19:30 consolidation
-- [ ] Push existing in-progress files (`problems/stack/easy-valid_parenthesis.py`, `problems/arrays-and-hashing/*`, `problems/sliding-window/*`)
-- [ ] Initialize `notes/mistakes.md` and `notes/python-gotchas.md`
-- [ ] `uv init` (~30 min skim of uv docs)
-- [ ] Buy _Fluent Python_ (2nd ed, Ramalho) — Sunday reading material
-- [ ] Book all 13 mocks (Pramp + Interviewing.io) on the dates in the Mock Cadence table — pre-commitment beats willpower
+- [ ] Anki desktop + AnkiMobile (iOS) or AnkiDroid (Android), import the shared deck
+- [ ] Obsidian — point vault at this repo folder; install **Tasks** plugin (enable "Set done date on task completion"); also install Obsidian_to_Anki plugin (or standalone Python script)
+- [ ] `uv sync` from the repo root; `uv run pytest` should pass; `uv run python -m recall_engine recompute` generates the first `prep-data/today.md`
+- [ ] Install LaunchAgent: `cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist`
+- [ ] Index DDIA + Alex Xu Vol 1 + Vol 2 in `technical-rag` MCP
+- [ ] Create `.claude/commands/hint.md` for graduated hints (L1=pattern, L2=approach, L3=pseudocode, L4=code)
+- [ ] GCal blocks: 7:00–8:00 workout · 9:00–13:00 DSA · 14:00–15:30 SD · 15:30–19:30 consolidation
+- [ ] Book all ~13 acquisition-phase mocks (Pramp + Interviewing.io)
+- [ ] Buy _Fluent Python_ (Ramalho, 2nd ed) — Sunday reading
 - [ ] **Diagnostic:** pick 3 random problems from your 27 already solved on neetcode.io. Re-solve each on a 30-min clock without looking. Retention baseline → feeds Phase 1 calibration.
 
 ---
 
-`T2` = vestigial low-priority marker on a few problems (kept on source lines for historical reference; ignored by the dynamic Recall queue). `M` = mock day. Each problem is prefixed with its NeetCode category in brackets.
+## Phase 1 — Linear Patterns E+M (Days 1–7)
 
-## Phase 1 — Arrays/Hashing + Two Pointers + Sliding Window (Days 1–6, 4/day)
+Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search start. All Easies then Mediums per pattern. Zero Hards.
 
-### Day 1 — Wed May 6 (4)
+### Day 1 — Mon May 11 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Arrays & Hashing] -> Contains Duplicate
-  - [ ] [Arrays & Hashing] -> Valid Anagram
-  - [ ] [Arrays & Hashing] -> Two Sum
-  - [ ] [Arrays & Hashing] -> Group Anagrams
+  - [ ] [Arrays & Hashing] -> Contains Duplicate (E)
+  - [ ] [Arrays & Hashing] -> Valid Anagram (E)
+  - [ ] [Arrays & Hashing] -> Two Sum (E)
+  - [ ] [Arrays & Hashing] -> Group Anagrams (M)
 - **14:00–15:30 System Design:**
   - [ ] Grokking SD Fundamentals — intro + caching basics
 - **15:30–19:30 Consolidation:**
@@ -49,28 +59,30 @@ This file is the **curriculum reference** — what each Day's New problems are. 
 
 ---
 
-### Day 2 — Thu May 7 (4)
+### Day 2 — Tue May 12 (4) `M`
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Arrays & Hashing] -> Top K Frequent Elements
-  - [ ] [Arrays & Hashing] -> Encode/Decode Strings
-  - [ ] [Arrays & Hashing] -> Product of Array Except Self
-  - [ ] [Arrays & Hashing] -> Valid Sudoku
-- **14:00–15:30 System Design:**
+  - [ ] [Arrays & Hashing] -> Top K Frequent Elements (M)
+  - [ ] [Arrays & Hashing] -> Encode and Decode Strings (M)
+  - [ ] [Arrays & Hashing] -> Product of Array Except Self (M)
+  - [ ] [Arrays & Hashing] -> Valid Sudoku (M)
+- **14:00–16:00 Mock slot:** Pramp Easy/Med DSA — first calibration mock.
+- **16:00–17:30 System Design:**
   - [ ] Grokking SD Fundamentals — CDNs, load balancers
-- **15:30–19:30 Consolidation:**
+- **17:30–19:30 Consolidation:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D1 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 3 — Fri May 8 (4)
+### Day 3 — Wed May 13 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence
-  - [ ] [Two Pointers] -> Valid Palindrome
-  - [ ] [Two Pointers] -> Two Sum II
-  - [ ] [Two Pointers] -> 3Sum
+  - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence (M)
+  - [ ] [Two Pointers] -> Valid Palindrome (E)
+  - [ ] [Two Pointers] -> Two Sum II (M)
+  - [ ] [Two Pointers] -> 3Sum (M)
 - **14:00–15:30 System Design:**
   - [ ] Grokking SD Fundamentals — sharding + replication basics
 - **15:30–19:30 Consolidation:**
@@ -79,941 +91,876 @@ This file is the **curriculum reference** — what each Day's New problems are. 
 
 ---
 
-### Day 4 — Sat May 9 (4)
+### Day 4 — Thu May 14 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Two Pointers] -> Container With Most Water
-  - [ ] [Two Pointers] -> Trapping Rain Water `T2`
-  - [ ] [Sliding Window] -> Best Time to Buy/Sell Stock
-  - [ ] [Sliding Window] -> Longest Substring Without Repeating Chars
+  - [ ] [Two Pointers] -> Container With Most Water (M)
+  - [ ] [Sliding Window] -> Best Time to Buy and Sell Stock (E)
+  - [ ] [Sliding Window] -> Longest Substring Without Repeating Characters (M)
+  - [ ] [Sliding Window] -> Longest Repeating Character Replacement (M)
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 1 (Scale from Zero to Millions) — start
 - **15:30–19:30 Consolidation:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D3 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-  - **Pattern coverage rotation (Wk 1) — re-solve canonical from blank file:**
-    - [ ] [Arrays & Hashing] -> Two Sum
-    - [ ] [Sliding Window] -> Longest Substring Without Repeating Characters
-    - [ ] (optional) Hardest from this week — own choice
 
 ---
 
-### Day 5 — Sun May 10 — OFF
+### Day 5 — Fri May 15 (4) `M`
+
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Sliding Window] -> Permutation in String (M)
+  - [ ] [Stack] -> Valid Parentheses (E)
+  - [ ] [Stack] -> Min Stack (E)
+  - [ ] [Stack] -> Evaluate Reverse Polish Notation (M)
+- **14:00–16:00 Mock slot:** Pramp Easy/Med DSA.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 1 (Scale from Zero to Millions) — finish
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - [ ] D4 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
+
+---
+
+### Day 6 — Sat May 16 (3)
+
+- **9:00–13:00 DSA New (3):**
+  - [ ] [Stack] -> Daily Temperatures (M)
+  - [ ] [Stack] -> Car Fleet (M)
+  - [ ] [Binary Search] -> Binary Search (E)
+- **14:00–15:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 2 (Back-of-envelope estimation) — part 1
+- **15:30–19:30 Consolidation:**
+  - **This week's hardest:** open [`prep-data/today.md`](./prep-data/today.md) — Saturday's render adds a `## This week's hardest — your pick` section. Pick 2-3 problems from your D1-D5 daily-hardest notes, write their canonical names into the empty bullets, re-solve from blank file, and tick to log a touch.
+  - **Recall queue:** then drain the Recall section.
+  - [ ] D5 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+
+---
+
+### Day 7 — Sun May 17 — OFF
 
 Light reading: _Fluent Python_ Ch 1 (data model) — optional.
 
 ---
 
-### Day 6 — Mon May 11 (4)
+## Phase 2 — Search + Linear Containers + Trees E+M (Days 8–17)
+
+Binary Search → Linked List → Trees E+M. Zero Hards.
+
+### Day 8 — Mon May 18 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Sliding Window] -> Longest Repeating Character Replacement
-  - [ ] [Sliding Window] -> Permutation in String
-  - [ ] [Sliding Window] -> Minimum Window Substring
-  - [ ] [Sliding Window] -> Sliding Window Maximum `T2`
+  - [ ] [Binary Search] -> Search a 2D Matrix (M)
+  - [ ] [Binary Search] -> Koko Eating Bananas (M)
+  - [ ] [Binary Search] -> Find Minimum in Rotated Sorted Array (M)
+  - [ ] [Binary Search] -> Search in Rotated Sorted Array (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 1 (Scale to Millions) — finish
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D4 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
----
-
-## Phase 2 — Stack + Binary Search + Linked List (Days 7–13, 4/day)
-
-### Day 7 — Tue May 12 (4) `M`
-
-- **9:00–13:00 DSA New (4):**
-  - [ ] [Stack] -> Valid Parentheses
-  - [ ] [Stack] -> Min Stack
-  - [ ] [Stack] -> Evaluate RPN
-  - [ ] [Stack] -> Daily Temperatures
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 2 (Back-of-envelope estimation) — part 1
+  - [ ] Alex Xu Vol 1 Ch 2 — finish
 - **15:30–19:30 Consolidation:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D6 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro (Pramp easy/med DSA):**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 8 — Wed May 13 (4)
+### Day 9 — Tue May 19 (4) `M`
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Stack] -> Car Fleet
-  - [ ] [Stack] -> Largest Rectangle in Histogram `T2`
-  - [ ] [Binary Search] -> Binary Search
-  - [ ] [Binary Search] -> Search 2D Matrix
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 2 (BoE estimation) — part 2 + practice 2 estimations
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D7 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
----
-
-### Day 9 — Thu May 14 (4)
-
-- **9:00–13:00 DSA New (4):**
-  - [ ] [Binary Search] -> Koko Eating Bananas
-  - [ ] [Binary Search] -> Find Minimum in Rotated Sorted Array
-  - [ ] [Binary Search] -> Search in Rotated Sorted Array
-  - [ ] [Binary Search] -> Time Based Key-Value Store
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 3 (Framework for SD interviews) — part 1
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - [ ] [Binary Search] -> Time Based Key Value Store (M)
+  - [ ] [Linked List] -> Reverse Linked List (E)
+  - [ ] [Linked List] -> Merge Two Sorted Lists (E)
+  - [ ] [Linked List] -> Linked List Cycle (E)
+- **14:00–16:00 Mock slot:** Pramp Easy/Med DSA.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 3 (Framework for SD interviews)
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D8 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 10 — Fri May 15 (4) `M`
+### Day 10 — Wed May 20 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Binary Search] -> Median of Two Sorted Arrays `T2`
-  - [ ] [Linked List] -> Reverse Linked List
-  - [ ] [Linked List] -> Merge Two Sorted Lists
-  - [ ] [Linked List] -> Linked List Cycle
+  - [ ] [Linked List] -> Reorder List (M)
+  - [ ] [Linked List] -> Remove Nth Node From End of List (M)
+  - [ ] [Linked List] -> Copy List With Random Pointer (M)
+  - [ ] [Linked List] -> Add Two Numbers (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 3 (Framework) — part 2 + write the 4-step framework on a card
+  - [ ] Alex Xu Vol 1 Ch 4 (Rate Limiter)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D9 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 11 — Sat May 16 (4)
+### Day 11 — Thu May 21 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Linked List] -> Reorder List
-  - [ ] [Linked List] -> Remove Nth Node From End
-  - [ ] [Linked List] -> Copy List With Random Pointer
-  - [ ] [Linked List] -> Add Two Numbers
+  - [ ] [Linked List] -> Find The Duplicate Number (M)
+  - [ ] [Linked List] -> LRU Cache (M)
+  - [ ] [Trees] -> Invert Binary Tree (E)
+  - [ ] [Trees] -> Maximum Depth of Binary Tree (E)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 4 (Rate Limiter) — part 1
+  - [ ] Alex Xu Vol 1 Ch 5 (Consistent Hashing)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D10 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-  - **Pattern coverage rotation (Wk 2) — re-solve canonical from blank file:**
-    - [ ] [Two Pointers] -> 3Sum
-    - [ ] [Stack] -> Daily Temperatures
-    - [ ] (optional) Hardest from this week — own choice
 
 ---
 
-### Day 12 — Sun May 17 — OFF
-
-_Fluent Python_ Ch 2 (sequences) or Ch 3 (dicts/sets).
-
----
-
-### Day 13 — Mon May 18 (4)
+### Day 12 — Fri May 22 (4) `M`
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Linked List] -> Find the Duplicate Number
-  - [ ] [Linked List] -> LRU Cache
-  - [ ] [Linked List] -> Merge K Sorted Lists `T2`
-  - [ ] [Linked List] -> Reverse Nodes in K-Group `T2`
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 4 (Rate Limiter) — part 2 + token-bucket vs leaky-bucket card
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - [ ] [Trees] -> Diameter of Binary Tree (E)
+  - [ ] [Trees] -> Balanced Binary Tree (E)
+  - [ ] [Trees] -> Same Tree (E)
+  - [ ] [Trees] -> Subtree of Another Tree (E)
+- **14:00–16:00 Mock slot:** Pramp Trees DSA.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 6 (Key-Value Store)
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D11 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-## Phase 3 — Trees + Tries + Heap intro (Days 14–18, 4/day)
+### Day 13 — Sat May 23 (3)
 
-### Day 14 — Tue May 19 (4) `M`
+- **9:00–13:00 DSA New (3):**
+  - [ ] [Trees] -> Lowest Common Ancestor of a BST (E)
+  - [ ] [Trees] -> Binary Tree Level Order Traversal (M)
+  - [ ] [Trees] -> Binary Tree Right Side View (M)
+- **14:00–15:30 System Design:**
+  - [ ] DDIA Ch 5 (Replication) — start
+- **15:30–19:30 Consolidation:**
+  - **This week's hardest:** open [`prep-data/today.md`](./prep-data/today.md) Saturday section — pick 2-3 from your D8-D12 daily-hardest notes.
+  - **Recall queue:** drain.
+  - [ ] today's hardest: **_ • didn't click: _**
+
+---
+
+### Day 14 — Sun May 24 — OFF
+
+Light reading: _Fluent Python_ Ch 2 (sequences).
+
+---
+
+### Day 15 — Mon May 25 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Trees] -> Invert Binary Tree
-  - [ ] [Trees] -> Maximum Depth Binary Tree
-  - [ ] [Trees] -> Diameter of Binary Tree
-  - [ ] [Trees] -> Balanced Binary Tree
+  - [ ] [Trees] -> Count Good Nodes in Binary Tree (M)
+  - [ ] [Trees] -> Validate Binary Search Tree (M)
+  - [ ] [Trees] -> Kth Smallest Element in a BST (M)
+  - [ ] [Trees] -> Construct Binary Tree from Preorder and Inorder Traversal (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 5 (Consistent Hashing) — part 1
+  - [ ] DDIA Ch 5 — finish
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D13 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 15 — Wed May 20 (4)
+### Day 16 — Tue May 26 (4) `M`
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Trees] -> Same Tree
-  - [ ] [Trees] -> Subtree of Another Tree
-  - [ ] [Trees] -> LCA of BST
-  - [ ] [Trees] -> Binary Tree Level Order Traversal
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 5 (Consistent Hashing) — part 2 + virtual node card
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D14 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
----
-
-### Day 16 — Thu May 21 (4)
-
-- **9:00–13:00 DSA New (4):**
-  - [ ] [Trees] -> Binary Tree Right Side View
-  - [ ] [Trees] -> Count Good Nodes in Binary Tree
-  - [ ] [Trees] -> Validate Binary Search Tree
-  - [ ] [Trees] -> Kth Smallest Element in BST
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 6 (Key-Value Store) — part 1 (data partitioning, replication)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - [ ] [Heap] -> Kth Largest Element in a Stream (E)
+  - [ ] [Heap] -> Last Stone Weight (E)
+  - [ ] [Heap] -> K Closest Points to Origin (M)
+  - [ ] [Heap] -> Kth Largest Element in an Array (M)
+- **14:00–16:00 Mock slot:** Pramp Trees/Heap DSA.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 7 (Unique ID generator)
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D15 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 17 — Fri May 22 (4) `M`
+### Day 17 — Wed May 27 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Trees] -> Construct Tree from Preorder/Inorder
-  - [ ] [Trees] -> Binary Tree Maximum Path Sum `T2`
-  - [ ] [Trees] -> Serialize and Deserialize Binary Tree `T2`
-  - [ ] [Heap / Priority Queue] -> Kth Largest Element in Stream
+  - [ ] [Heap] -> Task Scheduler (M)
+  - [ ] [Heap] -> Design Twitter (M)
+  - [ ] [Backtracking] -> Subsets (M)
+  - [ ] [Backtracking] -> Combination Sum (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 6 (KV Store) — part 2 (consistency, gossip, anti-entropy)
+  - [ ] Alex Xu Vol 1 Ch 8 (URL shortener)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D16 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 18 — Sat May 23 (4)
+## Phase 3 — Backtracking + Tries + Graphs (Days 18–24)
+
+All Mediums (these patterns have no Easies in NC150).
+
+### Day 18 — Thu May 28 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Tries] -> Implement Trie (Prefix Tree)
-  - [ ] [Tries] -> Design Add and Search Words
-  - [ ] [Tries] -> Word Search II `T2`
-  - [ ] [Heap / Priority Queue] -> Last Stone Weight
+  - [ ] [Backtracking] -> Combination Sum II (M)
+  - [ ] [Backtracking] -> Permutations (M)
+  - [ ] [Backtracking] -> Subsets II (M)
+  - [ ] [Backtracking] -> Generate Parentheses (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 7 (Unique ID Generator) — Snowflake breakdown
+  - [ ] Alex Xu Vol 1 Ch 9 (Web Crawler)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D17 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-  - **Pattern coverage rotation (Wk 3) — re-solve canonical from blank file:**
-    - [ ] [Binary Search] -> Koko Eating Bananas
-    - [ ] [Linked List] -> Reverse Linked List
-    - [ ] (optional) Hardest from this week — own choice
 
 ---
 
-### Day 19 — Sun May 24 — OFF
+### Day 19 — Fri May 29 (4) `M`
 
-_Fluent Python_ Ch 7 (first-class functions) or Ch 9 (decorators preview).
-
----
-
-## Phase 4 — Heap (rest) + Backtracking (Days 20–24, 3/day)
-
-### Day 20 — Mon May 25 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Heap / Priority Queue] -> K Closest Points to Origin
-  - [ ] [Heap / Priority Queue] -> Kth Largest Element in Array
-  - [ ] [Heap / Priority Queue] -> Task Scheduler
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 8 (URL Shortener)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Backtracking] -> Word Search (M)
+  - [ ] [Backtracking] -> Palindrome Partitioning (M)
+  - [ ] [Backtracking] -> Letter Combinations of a Phone Number (M)
+  - [ ] [Tries] -> Implement Trie Prefix Tree (M)
+- **14:00–16:00 Mock slot:** Pramp + Interviewing.io (mixed DSA).
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 10 (Notification System)
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D18 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 21 — Tue May 26 (3) `M`
+### Day 20 — Sat May 30 (3)
 
 - **9:00–13:00 DSA New (3):**
-  - [ ] [Heap / Priority Queue] -> Design Twitter
-  - [ ] [Heap / Priority Queue] -> Find Median From Data Stream `T2`
-  - [ ] [Backtracking] -> Subsets
+  - [ ] [Tries] -> Design Add and Search Words Data Structure (M)
+  - [ ] [Graphs] -> Number of Islands (M)
+  - [ ] [Graphs] -> Max Area of Island (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 9 (Web Crawler) — politeness, freshness, dedup
+  - [ ] Alex Xu Vol 1 Ch 11 (News Feed System)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D15-D19 daily-hardest notes.
+  - **Recall queue:** drain.
+  - [ ] today's hardest: **_ • didn't click: _**
+
+---
+
+### Day 21 — Sun May 31 — OFF
+
+Light reading: _Fluent Python_ Ch 3 (dictionaries).
+
+---
+
+### Day 22 — Mon Jun 1 (4)
+
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Graphs] -> Clone Graph (M)
+  - [ ] [Graphs] -> Walls and Gates (M)
+  - [ ] [Graphs] -> Rotting Oranges (M)
+  - [ ] [Graphs] -> Pacific Atlantic Water Flow (M)
+- **14:00–15:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 12 (Chat System)
+- **15:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D20 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 22 — Wed May 27 (3)
+### Day 23 — Tue Jun 2 (4) `M`
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Backtracking] -> Combination Sum
-  - [ ] [Backtracking] -> Combination Sum II
-  - [ ] [Backtracking] -> Permutations
-- **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 5 part 1 (Replication: single-leader, sync vs async)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D21 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
----
-
-### Day 23 — Thu May 28 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Backtracking] -> Subsets II
-  - [ ] [Backtracking] -> Generate Parentheses
-  - [ ] [Backtracking] -> Word Search
-- **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 5 part 2 (multi-leader, leaderless, conflict resolution)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Graphs] -> Surrounded Regions (M)
+  - [ ] [Graphs] -> Course Schedule (M)
+  - [ ] [Graphs] -> Course Schedule II (M)
+  - [ ] [Graphs] -> Graph Valid Tree (M)
+- **14:00–16:00 Mock slot:** Interviewing.io Graphs DSA.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 13 (Search Autocomplete)
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D22 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 24 — Fri May 29 (3) `M`
+### Day 24 — Wed Jun 3 (4)
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Backtracking] -> Palindrome Partitioning
-  - [ ] [Backtracking] -> Letter Combinations of Phone Number
-  - [ ] [Backtracking] -> N-Queens `T2`
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Graphs] -> Number of Connected Components in an Undirected Graph (M)
+  - [ ] [Graphs] -> Redundant Connection (M)
+  - [ ] [Advanced Graphs] -> Network Delay Time (M)
+  - [ ] [Advanced Graphs] -> Min Cost to Connect All Points (M)
 - **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 6 part 1 (Partitioning by key range vs hash)
+  - [ ] Alex Xu Vol 1 Ch 14 (YouTube)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D23 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-## Phase 5 — Graphs + Adv Graphs + Climbing Stairs (Days 25–30, 4/day · aggressive)
+## Phase 4 — DP + Greedy + Intervals + Math + Bit (Days 25–39)
 
-### Day 25 — Sat May 30 (4)
+E+M only across the remaining patterns. Largest phase. By D39 every NC150 E+M is touched.
+
+### Day 25 — Thu Jun 4 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Graphs] -> Number of Islands
-  - [ ] [Graphs] -> Max Area of Island
-  - [ ] [Graphs] -> Clone Graph
-  - [ ] [Graphs] -> Walls and Gates
+  - [ ] [Advanced Graphs] -> Cheapest Flights Within K Stops (M)
+  - [ ] [1-D DP] -> Climbing Stairs (E)
+  - [ ] [1-D DP] -> Min Cost Climbing Stairs (E)
+  - [ ] [1-D DP] -> House Robber (M)
 - **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 6 part 2 (Rebalancing, request routing)
+  - [ ] Alex Xu Vol 1 Ch 15 (Google Drive)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D24 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-  - **Pattern coverage rotation (Wk 4) — re-solve canonical from blank file:**
-    - [ ] [Trees] -> Maximum Depth of Binary Tree
-    - [ ] [Tries] -> Implement Trie (Prefix Tree)
-    - [ ] (optional) Hardest from this week — own choice
-  - **+21d batch (from Wk 1, D1–D4):** re-solve 1–2 already-known patterns at long delay
-    - [ ] +21d: [Arrays & Hashing] re-solve a Wk-1 problem on a 25-min clock
-    - [ ] +21d: [Sliding Window] re-solve a Wk-1 problem on a 25-min clock
 
 ---
 
-### Day 26 — Sun May 31 — OFF
-
-_Fluent Python_ Ch 9 (decorators).
-
----
-
-### Day 27 — Mon Jun 1 (4)
+### Day 26 — Fri Jun 5 (4) `M`
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Graphs] -> Rotting Oranges
-  - [ ] [Graphs] -> Pacific Atlantic Water Flow
-  - [ ] [Graphs] -> Surrounded Regions
-  - [ ] [Graphs] -> Course Schedule
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 10 (Notification System) — fanout patterns
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - [ ] [1-D DP] -> House Robber II (M)
+  - [ ] [1-D DP] -> Longest Palindromic Substring (M)
+  - [ ] [1-D DP] -> Palindromic Substrings (M)
+  - [ ] [1-D DP] -> Decode Ways (M)
+- **14:00–16:00 Mock slot:** Interviewing.io DP DSA.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 1 Ch 16 (Wrap-up + interview tips)
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D25 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 28 — Tue Jun 2 (4) `M`
+### Day 27 — Sat Jun 6 (3)
+
+- **9:00–13:00 DSA New (3):**
+  - [ ] [1-D DP] -> Coin Change (M)
+  - [ ] [1-D DP] -> Maximum Product Subarray (M)
+  - [ ] [1-D DP] -> Word Break (M)
+- **14:00–15:30 System Design:**
+  - [ ] DDIA Ch 6 (Partitioning) — start
+- **15:30–19:30 Consolidation:**
+  - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D22-D26.
+  - **Recall queue:** drain.
+  - [ ] today's hardest: **_ • didn't click: _**
+
+---
+
+### Day 28 — Sun Jun 7 — OFF
+
+Light reading: _Fluent Python_ Ch 4 (text vs bytes).
+
+---
+
+### Day 29 — Mon Jun 8 (4)
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Graphs] -> Course Schedule II
-  - [ ] [Graphs] -> Graph Valid Tree
-  - [ ] [Graphs] -> Number of Connected Components
-  - [ ] [Graphs] -> Redundant Connection
+  - [ ] [1-D DP] -> Longest Increasing Subsequence (M)
+  - [ ] [1-D DP] -> Partition Equal Subset Sum (M)
+  - [ ] [2-D DP] -> Unique Paths (M)
+  - [ ] [2-D DP] -> Longest Common Subsequence (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 11 (News Feed) — pull vs push vs hybrid
+  - [ ] DDIA Ch 6 — finish
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D27 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 29 — Wed Jun 3 (4)
+### Day 30 — Tue Jun 9 (4) `M`
 
 - **9:00–13:00 DSA New (4):**
-  - [ ] [Graphs] -> Word Ladder `T2`
-  - [ ] [Advanced Graphs] -> Network Delay Time
-  - [ ] [Advanced Graphs] -> Reconstruct Itinerary
-  - [ ] [Advanced Graphs] -> Min Cost to Connect All Points
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 12 (Chat System) — online presence, message storage
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D28 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
----
-
-### Day 30 — Thu Jun 4 (4)
-
-- **9:00–13:00 DSA New (4):**
-  - [ ] [Advanced Graphs] -> Swim in Rising Water `T2`
-  - [ ] [Advanced Graphs] -> Alien Dictionary
-  - [ ] [Advanced Graphs] -> Cheapest Flights Within K Stops `T2`
-  - [ ] [1-D DP] -> Climbing Stairs
-- **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 7 part 1 (Transactions: ACID, weak isolation)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - [ ] [2-D DP] -> Best Time to Buy and Sell Stock With Cooldown (M)
+  - [ ] [2-D DP] -> Coin Change II (M)
+  - [ ] [2-D DP] -> Target Sum (M)
+  - [ ] [2-D DP] -> Interleaving String (M)
+- **14:00–16:00 Mock slot:** Interviewing.io 2D DP DSA.
+- **16:00–17:30 System Design:**
+  - [ ] DDIA Ch 7 (Transactions) — start
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D29 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-## Phase 6 — DP (Days 31–38, 3/day)
+### Day 31 — Wed Jun 10 (4)
 
-### Day 31 — Fri Jun 5 (3) `M`
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [1-D DP] -> Min Cost Climbing Stairs
-  - [ ] [1-D DP] -> House Robber
-  - [ ] [1-D DP] -> House Robber II
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Greedy] -> Maximum Subarray (M)
+  - [ ] [Greedy] -> Jump Game (M)
+  - [ ] [Greedy] -> Jump Game II (M)
+  - [ ] [Greedy] -> Gas Station (M)
 - **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 7 part 2 (Snapshot isolation, serializability, SSI)
+  - [ ] DDIA Ch 7 — middle
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D30 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 32 — Sat Jun 6 (3)
+### Day 32 — Thu Jun 11 (4)
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [1-D DP] -> Longest Palindromic Substring
-  - [ ] [1-D DP] -> Palindromic Substrings
-  - [ ] [1-D DP] -> Decode Ways
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Greedy] -> Hand of Straights (M)
+  - [ ] [Greedy] -> Merge Triplets to Form Target Triplet (M)
+  - [ ] [Greedy] -> Partition Labels (M)
+  - [ ] [Greedy] -> Valid Parenthesis String (M)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 13 (Search Autocomplete) — trie + ranking
+  - [ ] DDIA Ch 7 — finish
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D31 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-  - **Pattern coverage rotation (Wk 5) — re-solve canonical from blank file:**
-    - [ ] [Heap] -> Kth Largest Element in a Stream
-    - [ ] [Backtracking] -> Subsets
-    - [ ] (optional) Hardest from this week — own choice
-  - **+21d batch (from Wk 2, D6–D11):** re-solve 1–2 already-known patterns at long delay
-    - [ ] +21d: [Two Pointers] re-solve a Wk-2 problem on a 25-min clock
-    - [ ] +21d: [Stack] re-solve a Wk-2 problem on a 25-min clock
 
 ---
 
-### Day 33 — Sun Jun 7 — OFF
+### Day 33 — Fri Jun 12 (4) `M`
 
-_Fluent Python_ Ch 17 (generators/coroutines).
-
----
-
-### Day 34 — Mon Jun 8 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [1-D DP] -> Coin Change
-  - [ ] [1-D DP] -> Maximum Product Subarray
-  - [ ] [1-D DP] -> Word Break
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 14 (YouTube) — video upload, transcoding, CDN
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Intervals] -> Meeting Rooms (E)
+  - [ ] [Intervals] -> Insert Interval (M)
+  - [ ] [Intervals] -> Merge Intervals (M)
+  - [ ] [Intervals] -> Non Overlapping Intervals (M)
+- **14:00–16:00 Mock slot:** Pramp Intervals + Greedy.
+- **16:00–17:30 System Design:**
+  - [ ] DDIA Ch 8 (The Trouble with Distributed Systems) — start
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D32 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 35 — Tue Jun 9 (3) `M`
+### Day 34 — Sat Jun 13 (3)
 
 - **9:00–13:00 DSA New (3):**
-  - [ ] [1-D DP] -> Longest Increasing Subsequence
-  - [ ] [1-D DP] -> Partition Equal Subset Sum
-  - [ ] [2-D DP] -> Unique Paths
+  - [ ] [Intervals] -> Meeting Rooms II (M)
+  - [ ] [Math & Geometry] -> Plus One (E)
+  - [ ] [Math & Geometry] -> Happy Number (E)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 15 (Google Drive) — block-level dedup, sync conflicts
+  - [ ] DDIA Ch 8 — finish
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D29-D33.
+  - **Recall queue:** drain.
+  - [ ] today's hardest: **_ • didn't click: _**
+
+---
+
+### Day 35 — Sun Jun 14 — OFF
+
+Light reading: _Fluent Python_ Ch 5 (functions as objects).
+
+---
+
+### Day 36 — Mon Jun 15 (4)
+
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Math & Geometry] -> Rotate Image (M)
+  - [ ] [Math & Geometry] -> Spiral Matrix (M)
+  - [ ] [Math & Geometry] -> Set Matrix Zeroes (M)
+  - [ ] [Math & Geometry] -> Pow(x, n) (M)
+- **14:00–15:30 System Design:**
+  - [ ] DDIA Ch 9 (Consistency and Consensus) — start
+- **15:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D34 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 36 — Wed Jun 10 (3)
+### Day 37 — Tue Jun 16 (4) `M`
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [2-D DP] -> Longest Common Subsequence
-  - [ ] [2-D DP] -> Best Time to Buy/Sell with Cooldown
-  - [ ] [2-D DP] -> Coin Change II
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 1 Ch 16 (Search Engine summary)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D35 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
----
-
-### Day 37 — Thu Jun 11 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [2-D DP] -> Target Sum
-  - [ ] [2-D DP] -> Interleaving String `T2`
-  - [ ] [2-D DP] -> Longest Increasing Path in Matrix `T2`
-- **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 8 part 1 (Trouble: faults, partial failures, lies)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Math & Geometry] -> Multiply Strings (M)
+  - [ ] [Math & Geometry] -> Detect Squares (M)
+  - [ ] [Bit Manipulation] -> Single Number (E)
+  - [ ] [Bit Manipulation] -> Number of 1 Bits (E)
+- **14:00–16:00 Mock slot:** Interviewing.io mixed DSA.
+- **16:00–17:30 System Design:**
+  - [ ] DDIA Ch 9 — middle
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D36 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 38 — Fri Jun 12 (3) `M`
+### Day 38 — Wed Jun 17 (4)
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [2-D DP] -> Distinct Subsequences `T2`
-  - [ ] [2-D DP] -> Edit Distance
-  - [ ] [2-D DP] -> Burst Balloons `T2`
+- **9:00–13:00 DSA New (4):**
+  - [ ] [Bit Manipulation] -> Counting Bits (E)
+  - [ ] [Bit Manipulation] -> Reverse Bits (E)
+  - [ ] [Bit Manipulation] -> Missing Number (E)
+  - [ ] [Bit Manipulation] -> Sum of Two Integers (M)
 - **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 8 part 2 (Knowledge, truth, lies of distributed systems)
+  - [ ] DDIA Ch 9 — finish
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D37 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-## Phase 7 — Last 2D DP + Greedy + Intervals + Math + Bit (Days 39–50, 3/day)
+### Day 39 — Thu Jun 18 (1) — **NC150 E+M ACQUISITION COMPLETE**
 
-### Day 39 — Sat Jun 13 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [2-D DP] -> Regular Expression Matching `T2`
-  - [ ] [Greedy] -> Maximum Subarray
-  - [ ] [Greedy] -> Jump Game
+- **9:00–13:00 DSA New (1) + buffer:**
+  - [ ] [Bit Manipulation] -> Reverse Integer (M)
+  - **Buffer time:** re-solve 2-3 problems you know are weakest from the past 5 weeks. Use Recall queue if it has overdue items, otherwise pick from your daily-hardest log.
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 2 Ch 1 (Proximity Service) — geohash, quadtree
+  - [ ] Alex Xu Vol 2 Ch 1 (Proximity Service) — start
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
+  - **Mid-sprint checkpoint:** all 128 NC150 E+M problems touched at least once. Tomorrow the Hard sprint opens.
   - [ ] D38 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-  - **Pattern coverage rotation (Wk 6) — re-solve canonical from blank file:**
-    - [ ] [Graphs] -> Number of Islands
-    - [ ] [Advanced Graphs] -> Network Delay Time
-    - [ ] (optional) Hardest from this week — own choice
-  - **+21d batch (from Wk 3, D13–D18):** re-solve 1–2 already-known patterns at long delay
-    - [ ] +21d: [Binary Search] re-solve a Wk-3 problem on a 25-min clock
-    - [ ] +21d: [Linked List] re-solve a Wk-3 problem on a 25-min clock
 
 ---
 
-### Day 40 — Sun Jun 14 — OFF
+## Phase 5 — Hard Sprint (Days 40–53) `M` heavy
 
-_Fluent Python_ Ch 19 (concurrency overview).
+22 NC150 Hards drilled fresh, ~1.5/day at 90 min each. Recall queue keeps E+M alive. Hards paired by pattern when possible. Mocks continue weekly.
 
----
+### Day 40 — Fri Jun 19 (2) `M`
 
-### Day 41 — Mon Jun 15 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Greedy] -> Jump Game II
-  - [ ] [Greedy] -> Gas Station
-  - [ ] [Greedy] -> Hand of Straights
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 2 Ch 2 (Nearby Friends) — pub-sub, location updates
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–12:30 DSA New (2 Hards):**
+  - [ ] [Two Pointers] -> Trapping Rain Water (H)
+  - [ ] [Sliding Window] -> Minimum Window Substring (H)
+- **14:00–16:00 Mock slot:** Interviewing.io Hard DSA — first Hard mock.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 2 Ch 1 — finish
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain (E+M still active).
   - [ ] D39 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: \_\_\_
 
 ---
 
-### Day 42 — Tue Jun 16 (3) `M`
+### Day 41 — Sat Jun 20 (1)
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Greedy] -> Merge Triplets to Form Target
-  - [ ] [Greedy] -> Partition Labels
-  - [ ] [Greedy] -> Valid Parenthesis String
+- **9:00–11:00 DSA New (1 Hard):**
+  - [ ] [Sliding Window] -> Sliding Window Maximum (H)
+- **11:00–13:00 Pattern warm-up:** before each Hard, do a 5-min E+M canonical re-solve of its pattern. Sliding Window's E (Best Time) + 1 M.
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 2 Ch 3 (Google Maps) — routing, ETA, road network graph
+  - [ ] Alex Xu Vol 2 Ch 2 (Nearby Friends)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D36-D40.
+  - **Recall queue:** drain.
+  - [ ] today's hardest: **_ • didn't click: _**
+
+---
+
+### Day 42 — Sun Jun 21 — OFF
+
+Light reading: _Fluent Python_ Ch 6.
+
+---
+
+### Day 43 — Mon Jun 22 (2)
+
+- **9:00–12:30 DSA New (2 Hards):**
+  - [ ] [Stack] -> Largest Rectangle in Histogram (H)
+  - [ ] [Binary Search] -> Median of Two Sorted Arrays (H)
+- **14:00–15:30 System Design:**
+  - [ ] Alex Xu Vol 2 Ch 3 (Google Maps)
+- **15:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D41 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 43 — Wed Jun 17 (3)
+### Day 44 — Tue Jun 23 (2) `M`
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Intervals] -> Insert Interval
-  - [ ] [Intervals] -> Merge Intervals
-  - [ ] [Intervals] -> Non-overlapping Intervals
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 2 Ch 4 (Distributed Message Queue) — Kafka-style design
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D42 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
----
-
-### Day 44 — Thu Jun 18 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Intervals] -> Meeting Rooms
-  - [ ] [Intervals] -> Meeting Rooms II
-  - [ ] [Intervals] -> Minimum Interval to Include Each Query `T2`
-- **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 2 Ch 5 (Metrics Monitoring) — time-series DB
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–12:30 DSA New (2 Hards, paired):**
+  - [ ] [Linked List] -> Merge K Sorted Lists (H)
+  - [ ] [Linked List] -> Reverse Nodes In K Group (H)
+- **14:00–16:00 Mock slot:** Pramp Hard DSA.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 2 Ch 4 (Distributed Message Queue)
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D43 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: \_\_\_
 
 ---
 
-### Day 45 — Fri Jun 19 (3) `M`
+### Day 45 — Wed Jun 24 (2) — **APPLY WINDOW OPENS (stretch tier)**
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Math & Geometry] -> Rotate Image
-  - [ ] [Math & Geometry] -> Spiral Matrix
-  - [ ] [Math & Geometry] -> Set Matrix Zeroes
+- **9:00–12:30 DSA New (2 Hards, paired):**
+  - [ ] [Trees] -> Binary Tree Maximum Path Sum (H)
+  - [ ] [Trees] -> Serialize and Deserialize Binary Tree (H)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 2 Ch 6 (Ad Click Aggregation) — exactly-once, idempotency
+  - [ ] Alex Xu Vol 2 Ch 5 (Metrics monitoring)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
+  - **Apply checkpoint:** mock #1-#11 reviewed. If hitting 2/3 unseen Mediums clean across recent 2 mocks → start sending stretch-tier applications today.
   - [ ] D44 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro:**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 46 — Sat Jun 20 (3)
+### Day 46 — Thu Jun 25 (2)
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Math & Geometry] -> Happy Number
-  - [ ] [Math & Geometry] -> Plus One
-  - [ ] [Math & Geometry] -> Pow(x, n)
+- **9:00–12:30 DSA New (2 Hards):**
+  - [ ] [Heap] -> Find Median From Data Stream (H)
+  - [ ] [Backtracking] -> N Queens (H)
 - **14:00–15:30 System Design:**
-  - [ ] Alex Xu Vol 2 Ch 7 (Hotel Reservation) — locking, double-booking prevention
+  - [ ] Alex Xu Vol 2 Ch 6 (Ad Click aggregation)
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **Recall queue:** drain.
   - [ ] D45 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-  - **Pattern coverage rotation (Wk 7) — re-solve canonical from blank file:**
-    - [ ] [1-D DP] -> House Robber
-    - [ ] [2-D DP] -> Unique Paths
-    - [ ] [Greedy] -> Maximum Subarray (Kadane's)
-  - **+21d batch (from Wk 4, D20–D25):** re-solve 1–2 already-known patterns at long delay
-    - [ ] +21d: [Trees] re-solve a Wk-4 problem on a 25-min clock
-    - [ ] +21d: [Tries] re-solve a Wk-4 problem on a 25-min clock
 
 ---
 
-### Day 47 — Sun Jun 21 — OFF
+### Day 47 — Fri Jun 26 (2) `M`
 
-_Fluent Python_ — re-read weakest chapter from the sprint.
-
----
-
-### Day 48 — Mon Jun 22 (3)
-
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Math & Geometry] -> Multiply Strings `T2`
-  - [ ] [Math & Geometry] -> Detect Squares `T2`
-  - [ ] [Bit Manipulation] -> Single Number
-- **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 9 part 1 (Linearizability, total order broadcast)
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–12:30 DSA New (2 Hards):**
+  - [ ] [Tries] -> Word Search II (H)
+  - [ ] [Graphs] -> Word Ladder (H)
+- **14:00–16:00 Mock slot:** Interviewing.io Hard DSA + verbal.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 2 Ch 7 (Hotel Reservation) — start
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D46 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: \_\_\_
 
 ---
 
-### Day 49 — Tue Jun 23 (3) `M`
+### Day 48 — Sat Jun 27 (1)
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Bit Manipulation] -> Number of 1 Bits
-  - [ ] [Bit Manipulation] -> Counting Bits
-  - [ ] [Bit Manipulation] -> Reverse Bits
+- **9:00–11:00 DSA New (1 Hard):**
+  - [ ] [Advanced Graphs] -> Reconstruct Itinerary (H)
+- **11:00–13:00 Pattern warm-up + Hard re-attempt:** any Hard from D40-D47 that didn't click — re-solve from blank file.
 - **14:00–15:30 System Design:**
-  - [ ] DDIA Ch 9 part 2 (Quorum, consensus, Raft/Paxos sketch)
+  - [ ] Alex Xu Vol 2 Ch 7 — finish
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+  - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D43-D47 Hards.
+  - **Recall queue:** drain.
+  - [ ] today's hardest: **_ • didn't click: _**
+
+---
+
+### Day 49 — Sun Jun 28 — OFF
+
+Light reading: _Fluent Python_ Ch 7.
+
+---
+
+### Day 50 — Mon Jun 29 (2)
+
+- **9:00–12:30 DSA New (2 Hards, paired):**
+  - [ ] [Advanced Graphs] -> Swim In Rising Water (H)
+  - [ ] [Advanced Graphs] -> Alien Dictionary (H)
+- **14:00–15:30 System Design:**
+  - [ ] DDIA Ch 5 re-read — replication patterns
+- **15:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
   - [ ] D48 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **Mock retro (final dress):**
-  - [ ] what stalled? \_\_\_
 
 ---
 
-### Day 50 — Wed Jun 24 (3) — NC150 ACQUISITION COMPLETE (mid-sprint checkpoint)
+### Day 51 — Tue Jun 30 (2) `M`
 
-- **9:00–13:00 DSA New (3):**
-  - [ ] [Bit Manipulation] -> Missing Number
-  - [ ] [Bit Manipulation] -> Sum of Two Integers
-  - [ ] [Bit Manipulation] -> Reverse Integer `T2`
+- **9:00–12:30 DSA New (2 Hards):**
+  - [ ] [2-D DP] -> Longest Increasing Path In a Matrix (H)
+  - [ ] [2-D DP] -> Distinct Subsequences (H)
+- **14:00–16:00 Mock slot:** Interviewing.io DP-heavy Hard.
+- **16:00–17:30 System Design:**
+  - [ ] DDIA Ch 6 re-read — partitioning patterns
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
+  - [ ] D50 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: \_\_\_
+
+---
+
+### Day 52 — Wed Jul 1 (2) — **APPLY WINDOW (target tier)**
+
+- **9:00–12:30 DSA New (2 Hards):**
+  - [ ] [2-D DP] -> Edit Distance (H)
+  - [ ] [2-D DP] -> Burst Balloons (H)
 - **14:00–15:30 System Design:**
-  - [ ] Final review — re-read weakest chapter + Anki cards on shaky concepts
+  - [ ] DDIA Ch 7 re-read — transactions patterns
 - **15:30–19:30 Consolidation:**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D49 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-
-**50-Day Mid-Sprint Checkpoint** (sprint continues to D90):
-
-- Total NC150 problems completed: \_\_\_ / 150
-- T2 problems dropped: \_\_\_
-- Strongest pattern category (so far): \_\_\_
-- Weakest pattern category (target P8 re-solves): \_\_\_
-- Mocks at "would hire": \_\_\_ / 13
-- Behavioral stories drafted: \_\_\_ / 10
-- DDIA chapters covered: \_\_\_ / 5 (Ch 5–9)
-- Alex Xu Vol 1 chapters: \_\_\_ / 16
-- Pattern notes with non-empty Mistakes section: \_\_\_ / 18 (NC150 patterns only — net-new start P8)
-- **Plan adjustments for P8–P10 based on this checkpoint:** \_\_\_
+  - **Recall queue:** drain.
+  - **Apply checkpoint:** target-tier applications go out today.
+  - [ ] D51 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
 
 ---
 
-## Phase Totals (auto-tally)
+### Day 53 — Thu Jul 2 (2) — **HARD SPRINT COMPLETE**
 
-- [ ] P1 — 20/20 (Days 1–6)
-- [ ] P2 — 24/24 (Days 7–13)
-- [ ] P3 — 20/20 (Days 14–18)
-- [ ] P4 — 15/15 (Days 20–24)
-- [ ] P5 — 20/20 (Days 25–30)
-- [ ] P6 — 21/21 (Days 31–38)
-- [ ] P7 — 30/30 (Days 39–50)
-- [ ] P8 — 13/13 net-new (Days 51–65)
-- [ ] P9 — re-solves + 8 mocks (Days 66–78)
-- [ ] P10 — daily mocks + final review (Days 79–90)
-
----
-
-# 90-Day Extension — Phases 8 / 9 / 10
-
-The first 50 days finish NC150. Days 51–90 are **consolidation** — depth, mocks, system design. The day-by-day for these phases is intentionally NOT pre-filled — the right content depends on which patterns turn out to be your weakest by D50. Expand to per-day during the **D50 mid-sprint checkpoint**.
-
-Saturdays in the 90-day window: D4, D11, D18, D25, D32, D39, D46 (acquisition) + **D53, D60, D67, D74, D81, D88** (consolidation) = 13 total.
-
----
-
-## Phase 8 — Pattern Mastery + 7 Net-New Patterns (Days 51–65, 13 wd)
-
-**Goal:** Introduce all 7 net-new patterns (13 problems total) AND start using the consolidation block exclusively for re-solving from your accumulated weakness list.
-
-**Daily shape (Mon–Fri):**
-
-- **9:00–13:00** DSA New: ~1 net-new problem/day (some days 2 if you fly through)
-- **13:00–14:00** Lunch + walk
-- **14:00–16:00 Interview / Mock slot**: real screen, paid mock, or peer Pramp when scheduled. Lunch is done, brain is rested, anxiety window is short. When empty: 2 weakness re-solves from `patterns/*/Mistakes`. Default availability for recruiters.
-- **16:00–17:30** System Design: DDIA Ch 7 + Alex Xu Vol 2 chapters
-- **17:30–18:30 Consolidation (anchored)**: drain Recall (10) top-down → 1 weakness re-solve OR cross-pattern mistake-mining — runs even on interview days so consolidation never fully drops out.
-
-_Behavioral handled in Saturday Behavioral Intensive (D53, D60). No daily slot._
-
-**Net-new problem schedule across P8 (13 wd, 13 problems):**
-
-| Day range | Pattern                | Canonical                           | Variant                             |
-| --------- | ---------------------- | ----------------------------------- | ----------------------------------- |
-| D51–D52   | Segment Tree / Fenwick | Range Sum Query - Mutable           | Count of Smaller Numbers After Self |
-| D53–D54   | Bitmask DP             | Shortest Path Visiting All Nodes    | Partition to K Equal Sum Subsets    |
-| D55       | Bit-Trie               | Maximum XOR of Two Numbers in Array | (canonical only)                    |
-| D56–D57   | Sweep Line             | My Calendar III                     | The Skyline Problem                 |
-| D58–D59   | Reservoir Sampling     | Linked List Random Node             | Random Pick with Weight             |
-| D60–D61   | Boyer-Moore Voting     | Majority Element                    | Majority Element II                 |
-| D62–D63   | Difference Array       | Corporate Flight Bookings           | Car Pooling                         |
-| D64–D65   | Buffer                 | weakness re-solves                  | weakness re-solves                  |
-
-### Saturdays in P8
-
-#### Day 53 — Sat Jun 27 (1 net-new)
-
-- **9:00–12:00 DSA New (1):**
-  - [ ] [Bitmask DP] -> Shortest Path Visiting All Nodes (canonical)
-- **12:00–13:00 System Design:** Alex Xu Vol 2 Ch 1 (Proximity Service) — start
-- **13:00–14:00** Lunch + walk
-- **14:00–15:00 Consolidation (anchored):**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
+- **9:00–12:30 DSA New (2 Hards):**
+  - [ ] [2-D DP] -> Regular Expression Matching (H)
+  - [ ] [Intervals] -> Minimum Interval to Include Each Query (H)
+- **14:00–15:30 System Design:**
+  - [ ] DDIA Ch 8 re-read — distributed system failure modes
+- **15:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
+  - **Milestone:** all 22 NC150 Hards touched. Tomorrow opens net-new.
   - [ ] D52 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **15:00–18:00 Behavioral Intensive (3 hr):**
-  - Story drafting / refinement (phase-appropriate)
-  - Recording + listen-back
-  - 5-story drill (60-sec → 90-sec → 3-min versions)
-  - Map stories to target-company values (Amazon LPs for Big Tech; ownership/scope/ambiguity for Senior startup)
-  - [Specific focus for this Saturday: stories not yet polished — record + listen-back]
-- **18:00** Done
-
-#### Day 60 — Sat Jul 4 (1 net-new) — independence day, lower intensity OK
-
-- **9:00–12:00 DSA New (1):**
-  - [ ] [Boyer-Moore] -> Majority Element (canonical)
-- **12:00–13:00 System Design:** Alex Xu Vol 2 Ch 2 (Nearby Friends)
-- **13:00–14:00** Lunch + walk
-- **14:00–15:00 Consolidation (anchored):**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D59 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
-- **15:00–18:00 Behavioral Intensive (3 hr):**
-  - Story drafting / refinement (phase-appropriate)
-  - Recording + listen-back
-  - 5-story drill (60-sec → 90-sec → 3-min versions)
-  - Map stories to target-company values (Amazon LPs for Big Tech; ownership/scope/ambiguity for Senior startup)
-  - [Specific focus for this Saturday: mock-style story drill (45-second versions)]
-- **18:00** Done
-
-#### Day 67 — Sat Jul 11 (P9 starts D66)
-
-- **9:00–12:00 DSA Re-solve (1 on the clock, 30 min):**
-  - [ ] Pick from weakness list — solve narrating out loud as if in interview
-- **12:00–13:00 System Design:** Alex Xu Vol 2 Ch 3
-- **13:00–14:00** Lunch + walk
-- **14:00–15:00 Consolidation (anchored):**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D66 mock retro: what stalled — communication / pattern recognition / syntax / complexity?
-- **15:00–18:00 Behavioral Intensive (3 hr):**
-  - Story drafting / refinement (phase-appropriate)
-  - Recording + listen-back
-  - 5-story drill (60-sec → 90-sec → 3-min versions)
-  - Map stories to target-company values (Amazon LPs for Big Tech; ownership/scope/ambiguity for Senior startup)
-  - [Specific focus for this Saturday: mock-style with timed delivery]
-- **18:00** Done
-
-#### Day 74 — Sat Jul 18
-
-- **9:00–12:00 DSA Re-solve (1 on the clock):**
-  - [ ] Pick from weakness list
-- **12:00–13:00 System Design:** Alex Xu Vol 2 Ch 4
-- **13:00–14:00** Lunch + walk
-- **14:00–15:00 Consolidation (anchored):**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D73 mock retro: what stalled?
-- **15:00–18:00 Behavioral Intensive (3 hr):**
-  - Story drafting / refinement (phase-appropriate)
-  - Recording + listen-back
-  - 5-story drill (60-sec → 90-sec → 3-min versions)
-  - Map stories to target-company values (Amazon LPs for Big Tech; ownership/scope/ambiguity for Senior startup)
-  - [Specific focus for this Saturday: record top story, listen back, refine]
-- **18:00** Done
-
-#### Day 81 — Sat Jul 25 (P10 mid)
-
-- **9:00–12:00 DSA Re-solve (1 on the clock):**
-  - [ ] Pick from accumulated weakness list
-- **12:00–13:00 System Design:** Alex Xu Vol 2 Ch 5
-- **13:00–14:00** Lunch + walk
-- **14:00–15:00 Consolidation (anchored):**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D80 mock retro
-  - [ ] **Random retention check (P10 cold-start):** 1 problem from solved >14d ago pool. Weighted ~20% easy / 65% medium / 15% hard. Time-box 15–20 min. If unsolved → push back to queue as D+3.
-- **15:00–18:00 Behavioral Intensive (3 hr):**
-  - Story drafting / refinement (phase-appropriate)
-  - Recording + listen-back
-  - 5-story drill (60-sec → 90-sec → 3-min versions)
-  - Map stories to target-company values (Amazon LPs for Big Tech; ownership/scope/ambiguity for Senior startup)
-  - [Specific focus for this Saturday: "Why are you leaving?" / "Why this company?" — these are top of funnel]
-- **18:00** Done
-
-#### Day 88 — Sat Aug 1 (P10 final stretch)
-
-- **9:00–12:00 DSA Re-solve (1 on the clock):**
-  - [ ] Pick weakest pattern from rotation history
-- **12:00–13:00 System Design:** Alex Xu Vol 2 Ch 6
-- **13:00–14:00** Lunch + walk
-- **14:00–15:00 Consolidation (anchored):**
-  - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
-  - [ ] D87 mock retro
-  - [ ] **Random retention check (P10 cold-start):** 1 problem from solved >14d ago pool. Weighted ~20% easy / 65% medium / 15% hard. Time-box 15–20 min. If unsolved → push back to queue as D+3.
-- **15:00–18:00 Behavioral Intensive (3 hr):**
-  - Story drafting / refinement (phase-appropriate)
-  - Recording + listen-back
-  - 5-story drill (60-sec → 90-sec → 3-min versions)
-  - Map stories to target-company values (Amazon LPs for Big Tech; ownership/scope/ambiguity for Senior startup)
-  - [Specific focus for this Saturday: full-loop simulation — present 5 stories back-to-back]
-- **18:00** Done
-
-### P8 — Sundays (D54, 61) OFF
-
-Light Fluent Python or DDIA reading allowed.
 
 ---
 
-## Phase 9 — Mock-Heavy + System Design Deep Dive (Days 66–78, 11 wd)
+## Phase 6 — Net-New Patterns (Days 54–58)
 
-**Goal:** ramp mocks to every-other-day. Most days = no new problems, just one re-solve on the clock + heavy SD work.
+5 core + 2 optional from the 13 net-new. The 6 enrichment problems (Segment Tree, Bitmask DP, Sweep Line) are NOT scheduled — the engine deprioritizes them. Drill only if Recall queue is light.
 
-**Daily shape (Mon–Fri):**
+### Day 54 — Fri Jul 3 (2) `M`
 
-- **9:00–13:00** Pick 1 problem from weakness list, solve on a 30-min clock narrating out loud (interview simulation), then 3 hrs Pythonic refactor + writeup. **Drain Recall (10) within this block** — the dynamic dashboard at the top of this file ranks all overdue items.
-- **13:00–14:00** Lunch + walk
-- **14:00–16:00 Interview / Mock slot**: real screens, paid mocks, scheduled P9 mocks (Tue D67, Thu D69, Tue D74, Thu D76 land here). When empty: SD Alex Xu writeup.
-- **16:00–17:00 SD anchor**: DDIA Ch 8-9 reading or SD writeup continuation — runs every day.
-- **18:30–19:15** review the day's takeaways into Anki
-
-_From D71 onward (last 8 weekdays of P9): add 1 random retention check from "solved >14d ago" pool to the morning block — weighted ~20% easy / 65% medium / 15% hard, time-box 15–20 min, push back to D+3 if unsolved. Tests cold-start retention as mocks ramp._
-
-_Behavioral handled in Saturday Behavioral Intensive (D67, D74). No daily slot._
-
-**Mocks in P9:** Tue D67, Thu D69, Tue D74, Thu D76 — 4 in this phase.
-
-**Mock retro template** (after each mock):
-
-- What stalled? (communication / pattern recognition / syntax / complexity reasoning)
-- Specific words I fumbled
-- Pattern misidentified? (write to `patterns/*/Mistakes`)
-- 1-2 Anki cards from the lesson
+- **9:00–13:00 DSA New (2 net-new core):**
+  - [ ] [Boyer-Moore] -> Majority Element (E) (core)
+  - [ ] [Boyer-Moore] -> Majority Element II (M) (core)
+- **14:00–16:00 Mock slot:** Pramp full real-screen simulation.
+- **16:00–17:30 System Design:**
+  - [ ] DDIA Ch 9 re-read — consensus
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain (heavy now — 150+ problems on rotation).
+  - [ ] D53 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: \_\_\_
 
 ---
 
-## Phase 10 — Interview Mode (Days 79–90, 10 wd)
+### Day 55 — Sat Jul 4 (2)
 
-**Goal:** simulate the real loop. Daily mocks the last week.
-
-**Daily shape:**
-
-- **9:00–10:30** DSA mock (Pramp / Interviewing.io / friend) — 1 problem timed
-- **10:30–12:00** Mock retro + targeted Anki cards
-- **12:00–14:00** Lunch + walk
-- **14:00–16:00 Interview / Mock slot**: real screens, paid mocks, scheduled P10 mocks (Tue D79, Thu D81, Tue D86, Thu D88 land here). When empty: SD mock (whiteboard-style writeup of a fresh Alex Xu Vol 2 problem on the clock).
-- **16:00–17:30** Mock retro (whichever ran in the slot). Within this block: drain Recall (10) top-down + 1 random retention check from "solved >14d ago" pool (P10 cold-start, ~20% easy / 65% medium / 15% hard, time-box 15–20 min; if unsolved, the next solve will auto-stamp a fresh completion and the item bubbles to the top via the standard query).
-
-_Behavioral handled in Saturday Behavioral Intensive (D81, D88). No daily slot._
-
-**Mocks in P10:** Tue D79, Thu D81, Tue D86, Thu D88 — at minimum 4 paid mocks. Add daily friend-mocks D85-D89 if possible.
-
-**Last 3 days (D88–90):**
-
-- D88 (Sat): final pattern coverage rotation slot (above)
-- D89 (Sun) OFF
-- D90 (Mon, sprint end): light review only — re-read top 3 weakest pattern notes, re-read 3 strongest behavioral stories. **NO new problems on the final day** — fatigue accumulates, fresh state for actual interviews matters.
+- **9:00–13:00 DSA New (2 net-new core):**
+  - [ ] [Difference Array] -> Car Pooling (M) (core)
+  - [ ] [Difference Array] -> Corporate Flight Bookings (M) (core)
+- **14:00–15:30 System Design:**
+  - [ ] Alex Xu Vol 2 Ch 1 re-read — proximity service
+- **15:30–19:30 Consolidation:**
+  - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D50-D54 Hards.
+  - **Recall queue:** drain.
+  - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-## 90-Day Sprint Retrospective — Day 90 (Mon Aug 5)
+### Day 56 — Sun Jul 5 — OFF
+
+Light reading: _Fluent Python_ Ch 8.
+
+---
+
+### Day 57 — Mon Jul 6 (2)
+
+- **9:00–13:00 DSA New (1 core + 1 optional):**
+  - [ ] [Reservoir Sampling] -> Random Pick with Weight (M) (core)
+  - [ ] [Reservoir Sampling] -> Linked List Random Node (M) (optional)
+- **14:00–15:30 System Design:**
+  - [ ] Alex Xu Vol 2 Ch 4 re-read — distributed message queue
+- **15:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
+  - [ ] D55 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+
+---
+
+### Day 58 — Tue Jul 7 (1) `M` — **NET-NEW CORE+OPTIONAL COMPLETE · APPLY WINDOW (safety tier)**
+
+- **9:00–13:00 DSA New (1 optional + enrichment if ahead):**
+  - [ ] [Bit-Trie] -> Maximum XOR (M) (optional)
+  - **Enrichment (engine deprioritizes — only surface if core+optional is fully drained):**
+    - [ ] [Segment Tree] -> Range Sum Query - Mutable (M) (enrichment)
+    - [ ] [Segment Tree] -> Count of Smaller Numbers After Self (H) (enrichment)
+    - [ ] [Bitmask DP] -> Partition K Equal Subsets (M) (enrichment)
+    - [ ] [Bitmask DP] -> Shortest Path Visiting All Nodes (H) (enrichment)
+    - [ ] [Sweep Line] -> My Calendar III (H) (enrichment)
+    - [ ] [Sweep Line] -> Skyline (H) (enrichment)
+- **14:00–16:00 Mock slot:** Interviewing.io full real-screen simulation.
+- **16:00–17:30 System Design:**
+  - [ ] Alex Xu Vol 2 Ch 5 re-read — metrics monitoring
+- **17:30–19:30 Consolidation:**
+  - **Recall queue:** drain.
+  - **Apply checkpoint:** safety-tier applications go out today.
+  - [ ] D57 hardest re-solve: **_ • today's hardest: _** • didn't click: \_\_\_
+  - [ ] mock retro: \_\_\_
+
+---
+
+## Phase 7 — Mock-Heavy Reinforcement (Days 59–78)
+
+No new problems. Daily structure shifts: 1 weakness re-solve on a 30-min clock + 1 mock + heavy Recall queue + system design depth + behavioral story practice.
+
+### Daily shape D59–D78
+
+```
+9:00–10:30   30-min clocked re-solve from `prep-data/today.md` Recall (most overdue)
+             + 60-min retrospective: where did the template break?
+10:30–13:00  System Design deep-dive (Alex Xu Vol 2 + DDIA re-reads)
+13:00–14:00  Lunch + walk
+14:00–16:00  Mock slot (real screens + paid mocks + peer Pramp). Empty slots: SD writeup.
+16:00–17:30  Behavioral stories — refine 1 of the 10 STAR stories per day
+17:30–19:30  Recall queue drain + 1 random retention check (problem solved >14d ago)
+```
+
+Mocks D59-D78 (~10 mocks): aim for 1 mock every other day. Mix Pramp + Interviewing.io + peer.
+
+### Day 59 — Wed Jul 8 — **FIRST ROUND WINDOW STARTS** (apply +14d for stretch tier)
+
+- Daily shape above. Recall queue should hold ~30-50 items at this point.
+- [ ] First-round screens may begin landing this week from stretch-tier applications.
+
+---
+
+### Day 65 — Tue Jul 14 — **First-round peak** (target-tier first rounds landing)
+
+---
+
+### Day 71 — Mon Jul 20 — **Onsite prep** (first onsites being scheduled from stretch-tier passes)
+
+---
+
+### Day 78 — Mon Jul 27 — **Phase 7 wrap**
+
+- 90-min self-eval: which patterns still feel cold? Which mocks went badly and why?
+- Plan Phase 8 mock cadence based on actual interview pipeline.
+
+---
+
+## Phase 8 — Interview Mode (Days 79–90)
+
+Full simulation. Daily mocks, behavioral polish, real interviews intertwined.
+
+### Daily shape D79–D90
+
+```
+9:00–10:30   DSA mock (Pramp/Interviewing.io/friend) — 1 problem timed
+10:30–12:00  Mock retro + targeted re-solves
+12:00–13:00  System Design mock (whiteboard-style on a fresh Alex Xu V2 problem)
+13:00–14:00  Lunch + walk
+14:00–16:00  Real screens / loops as scheduled
+16:00–17:30  Behavioral mock (peer or self-recorded)
+17:30–19:30  Recall queue drain + random retention check
+```
+
+Mocks D79-D90 (~8-10 mocks): daily cadence D85-D89 if possible.
+
+### Day 79 — Tue Jul 28 — Interview-mode begins
+
+---
+
+### Day 90 — Sat Aug 8 — **SPRINT END · RETROSPECTIVE**
+
+---
+
+## 90-Day Sprint Retrospective — Day 90 (Sat Aug 8)
 
 - Total NC150 problems completed: \_\_\_ / 150
-- Net-new problems completed: \_\_\_ / 13
-- T2 problems dropped: \_\_\_
+- NC150 Easies fluent (3+ touches): \_\_\_ / 30
+- NC150 Mediums fluent (3+ touches): \_\_\_ / 98
+- NC150 Hards fluent (2+ touches): \_\_\_ / 22
+- Net-new core problems completed: \_\_\_ / 5
+- Net-new optional completed: \_\_\_ / 2
+- Enrichment problems completed (engine-deprioritized): \_\_\_ / 6
 - Strongest pattern category: \_\_\_
 - Weakest pattern category (target ongoing review): \_\_\_
 - Mocks at "would hire" level: \_\_\_ / ~24
 - Behavioral stories polished (60-sec ready): \_\_\_ / 10
 - DDIA chapters covered: \_\_\_ / 5 (Ch 5–9)
-- Alex Xu chapters: Vol 1 \_\_\_ / 16, Vol 2 \_\_\_ / 7
-- Pattern notes with non-empty Mistakes section (i.e., real lessons captured): \_\_\_ / 25
+- Alex Xu chapters: Vol 1 **_ / 16, Vol 2 _** / 7
+- Pattern notes with non-empty Mistakes section: \_\_\_ / 18
 - Anki deck retention rate: \_\_\_ %
+- First-round mocks landed: \_\_\_
+- First-round mocks passed: \_\_\_
+- Onsite invitations: \_\_\_
+- Offers in hand: \_\_\_
 - Self-assessment of interview readiness (1–10): \_\_\_
