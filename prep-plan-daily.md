@@ -55,8 +55,8 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Valid Anagram (E)
   - [ ] [Arrays & Hashing] -> Two Sum (E)
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
-  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) — lightning-ai variant
-  - [ ] [String Transformation] -> Longest Common Prefix (E)
+  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (core) (company)
+  - [ ] [String Transformation] -> Longest Common Prefix (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _** (no warm-up — sprint start)
 
 ---
@@ -74,7 +74,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Encode and Decode Strings (M)
   - [ ] [Arrays & Hashing] -> Product of Array Except Self (M)
   - [ ] [Arrays & Hashing] -> Valid Sudoku (M)
-  - [ ] [String Transformation] -> Valid Word Abbreviation (E) — solve as finny multi-part scaffold: `.` wildcard → single-digit `n` → multi-digit `n` (e.g. `i18n` → `internationalization`). See `~/workspace/personal/python-practice-interviews/finny/`.
+  - [ ] [String Transformation] -> Valid Word Abbreviation (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
@@ -89,11 +89,11 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] Grokking SD Fundamentals — sharding + replication basics
 - **15:30–19:30 DSA New (6):**
   - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence (M)
-  - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (core) — traba variant
+  - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (core) (company)
   - [ ] [Two Pointers] -> Valid Palindrome (E)
   - [ ] [Two Pointers] -> Two Sum II (M)
   - [ ] [Two Pointers] -> 3Sum (M)
-  - [ ] [String Transformation] -> Roman to Integer (E)
+  - [ ] [String Transformation] -> Roman to Integer (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -110,7 +110,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Sliding Window] -> Best Time to Buy and Sell Stock (E)
   - [ ] [Sliding Window] -> Longest Substring Without Repeating Characters (M)
   - [ ] [Sliding Window] -> Longest Repeating Character Replacement (M)
-  - [ ] [String Transformation] -> Add Binary (E)
+  - [ ] [String Transformation] -> Add Binary (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -146,7 +146,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Stack] -> Daily Temperatures (M)
   - [ ] [Stack] -> Car Fleet (M)
   - [ ] [Binary Search] -> Binary Search (E)
-  - [ ] [String Transformation] -> snake_case → camelCase (E) (ramp variant)
+  - [ ] [String Transformation] -> snake_case → camelCase (E) (nc-150+) (company)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -173,8 +173,8 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Binary Search] -> Koko Eating Bananas (M)
   - [ ] [Binary Search] -> Find Minimum in Rotated Sorted Array (M)
   - [ ] [Binary Search] -> Search in Rotated Sorted Array (M)
-  - [ ] [Arrays & Hashing] -> Referral Bonus Event Correlation (M) (core) — suno variant (event-time correlation by hash)
-  - [ ] [String Transformation] -> String Compression (M)
+  - [ ] [Arrays & Hashing] -> Referral Bonus Event Correlation (M) (core) (company)
+  - [ ] [String Transformation] -> String Compression (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -192,7 +192,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Linked List] -> Reverse Linked List (E)
   - [ ] [Linked List] -> Merge Two Sorted Lists (E)
   - [ ] [Linked List] -> Linked List Cycle (E)
-  - [ ] [String Transformation] -> Decode String (M)
+  - [ ] [String Transformation] -> Decode String (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
@@ -210,7 +210,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Linked List] -> Remove Nth Node From End of List (M)
   - [ ] [Linked List] -> Copy List With Random Pointer (M)
   - [ ] [Linked List] -> Add Two Numbers (M)
-  - [ ] [String Transformation] -> Basic Calculator II (M)
+  - [ ] [String Transformation] -> Basic Calculator II (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -227,7 +227,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Linked List] -> LRU Cache (M)
   - [ ] [Trees] -> Invert Binary Tree (E)
   - [ ] [Trees] -> Maximum Depth of Binary Tree (E)
-  - [ ] [String Transformation] -> String to Integer atoi (M)
+  - [ ] [String Transformation] -> String to Integer atoi (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -261,7 +261,7 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
   - [ ] [Trees] -> Lowest Common Ancestor of a BST (E)
   - [ ] [Trees] -> Binary Tree Level Order Traversal (M)
   - [ ] [Trees] -> Binary Tree Right Side View (M)
-  - [ ] [Trees] -> Build Binary Tree From Char Frequencies (M) (core) — zingage variant (recursive max-count tree construction)
+  - [ ] [Trees] -> Build Binary Tree From Char Frequencies (M) (core) (company)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -392,7 +392,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
   - [ ] [Graphs] -> Clone Graph (M)
   - [ ] [Graphs] -> Walls and Gates (M)
   - [ ] [Graphs] -> Rotting Oranges (M)
-  - [ ] [Graphs] -> Find All Possible Recipes (M) (core) — chariot variant (LC 2115; topological/DFS)
+  - [ ] [Graphs] -> Find All Possible Recipes (M) (core) (company)
   - [ ] [Graphs] -> Pacific Atlantic Water Flow (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -411,7 +411,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
   - [ ] [Graphs] -> Course Schedule (M)
   - [ ] [Graphs] -> Course Schedule II (M)
   - [ ] [Graphs] -> Graph Valid Tree (M)
-  - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (core) — credal variant (BFS grid w/ time budget)
+  - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (core) (company)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
@@ -576,16 +576,18 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
 
 ---
 
-### Day 34 — Sat Jun 13 (4)
+### Day 34 — Sat Jun 13 (6)
 
 - **9:00–13:00 Recall:**
   - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D29-D33.
   - **Recall queue:** drain.
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 8 — finish
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (6):**
   - [ ] [Intervals] -> Meeting Rooms II (M)
-  - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (core) — january variant (date-range billing per active user)
+  - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (core) (company)
+  - [ ] [Difference Array] -> Car Pooling (M) (core) (nc-150+)
+  - [ ] [Difference Array] -> Corporate Flight Bookings (M) (core) (nc-150+)
   - [ ] [Math & Geometry] -> Plus One (E)
   - [ ] [Math & Geometry] -> Happy Number (E)
   - [ ] today's hardest: **_ • didn't click: _**
@@ -598,18 +600,19 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
 
 ---
 
-### Day 36 — Mon Jun 15 (4)
+### Day 36 — Mon Jun 15 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
   - [ ] D34 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 9 (Consistency and Consensus) — start
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Math & Geometry] -> Rotate Image (M)
   - [ ] [Math & Geometry] -> Spiral Matrix (M)
   - [ ] [Math & Geometry] -> Set Matrix Zeroes (M)
   - [ ] [Math & Geometry] -> Pow(x, n) (M)
+  - [ ] [Boyer-Moore] -> Majority Element (E) (core) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -632,33 +635,37 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
 
 ---
 
-### Day 38 — Wed Jun 17 (4)
+### Day 38 — Wed Jun 17 (6)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
   - [ ] D37 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 9 — finish
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (6):**
   - [ ] [Bit Manipulation] -> Counting Bits (E)
   - [ ] [Bit Manipulation] -> Reverse Bits (E)
   - [ ] [Bit Manipulation] -> Missing Number (E)
   - [ ] [Bit Manipulation] -> Sum of Two Integers (M)
+  - [ ] [Boyer-Moore] -> Majority Element II (M) (core) (nc-150+)
+  - [ ] [Bit-Trie] -> Maximum XOR (M) (optional) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-### Day 39 — Thu Jun 18 (1) — **NC150 E+M ACQUISITION COMPLETE**
+### Day 39 — Thu Jun 18 (4) — **E+M ACQUISITION COMPLETE**
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
-  - **Mid-sprint checkpoint:** all 128 NC150 E+M problems touched at least once. Tomorrow the Hard sprint opens.
+  - **Mid-sprint checkpoint:** all 128 NC150 E+M + 9 String Transformation + 8 NC150+ E+M + 8 company-tagged variants touched (153 total). Tomorrow the Hard sprint opens.
   - [ ] D38 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 1 (Proximity Service) — start
-- **15:30–19:30 DSA New (1) + buffer:**
+- **15:30–19:30 DSA New (4):**
   - [ ] [Bit Manipulation] -> Reverse Integer (M)
-  - **Buffer time:** re-solve 2-3 problems you know are weakest from the past 5 weeks. Use Recall queue if it has overdue items, otherwise pick from your daily-hardest log.
+  - [ ] [Reservoir Sampling] -> Random Pick with Weight (M) (core) (nc-150+)
+  - [ ] [Reservoir Sampling] -> Wordler Random Get/Remove/Has (M) (core) (nc-150+) (company)
+  - [ ] [Reservoir Sampling] -> Linked List Random Node (M) (optional) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -854,41 +861,40 @@ Light reading: _Fluent Python_ Ch 7.
 - **15:30–19:30 DSA New (3 Hards):**
   - [ ] [2-D DP] -> Regular Expression Matching (H)
   - [ ] [Intervals] -> Minimum Interval to Include Each Query (H)
-  - [ ] [Intervals] -> Employee Free Time (H) (core) — siro variant (intersection of multi-person availability with min duration)
+  - [ ] [Intervals] -> Employee Free Time (H) (core) (company)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-## Phase 6 — Net-New Patterns (Days 54–58)
+## Phase 6 — Reinforcement + Apply Window (Days 54–58)
 
-5 core + 2 optional from the 13 net-new. The 6 enrichment problems (Segment Tree, Bitmask DP, Sweep Line) are NOT scheduled — the engine deprioritizes them. Drill only if Recall queue is light.
+No new acquisition. All 153 E+M and 23 Hards touched by D53. P6 is a transition phase: heavy Recall, mock-heavy ramp, behavioral story practice, and the safety-tier apply window. The 6 enrichment problems (Segment Tree, Bitmask DP, Sweep Line) are NOT scheduled — engine deprioritizes them, only surface if Recall is fully drained.
 
-### Day 54 — Fri Jul 3 (2) `M`
+### Day 54 — Fri Jul 3 (0) `M`
 
 - **9:00–13:00 Recall:**
-  - **Recall queue:** drain (heavy now — 150+ problems on rotation).
+  - **Recall queue:** drain (heavy now — 175+ problems on rotation).
   - [ ] D53 hardest re-solve: \_\_\_
 - **14:00–16:00 Mock slot:** Pramp full real-screen simulation.
 - **16:00–17:30 System Design:**
   - [ ] DDIA Ch 9 re-read — consensus
-- **17:30–19:30 DSA New (2 net-new core):**
-  - [ ] [Boyer-Moore] -> Majority Element (E) (core)
-  - [ ] [Boyer-Moore] -> Majority Element II (M) (core)
+- **17:30–19:30 Reinforcement:**
+  - Pick 1-2 weakest patterns from the past week — re-solve a canonical from each on a 30-min clock.
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: \_\_\_
 
 ---
 
-### Day 55 — Sat Jul 4 (2)
+### Day 55 — Sat Jul 4 (0)
 
 - **9:00–13:00 Recall:**
   - **This week's hardest:** open `prep-data/today.md` Saturday section — pick 2-3 from D50-D54 Hards.
   - **Recall queue:** drain.
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 1 re-read — proximity service
-- **15:30–19:30 DSA New (2 net-new core):**
-  - [ ] [Difference Array] -> Car Pooling (M) (core)
-  - [ ] [Difference Array] -> Corporate Flight Bookings (M) (core)
+- **15:30–19:30 Behavioral + Reinforcement:**
+  - Polish 1 of the 10 STAR stories (rotate weekly).
+  - 30-min clocked re-solve of any Hard from D40-D53 that didn't click.
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -899,22 +905,21 @@ Light reading: _Fluent Python_ Ch 8.
 
 ---
 
-### Day 57 — Mon Jul 6 (3)
+### Day 57 — Mon Jul 6 (0)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
   - [ ] D55 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 4 re-read — distributed message queue
-- **15:30–19:30 DSA New (2 core + 1 optional):**
-  - [ ] [Reservoir Sampling] -> Random Pick with Weight (M) (core)
-  - [ ] [Reservoir Sampling] -> Wordler Random Get/Remove/Has (M) (core) — ngrok variant (random-element data structure with mutation, ~LC 380 flavor)
-  - [ ] [Reservoir Sampling] -> Linked List Random Node (M) (optional)
+- **15:30–19:30 Reinforcement:**
+  - 30-min clocked re-solve from yesterday's Recall picks.
+  - Pattern decay sweep: pick 2 patterns untouched in 14+ days, do canonical from each.
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-### Day 58 — Tue Jul 7 (1) `M` — **NET-NEW CORE+OPTIONAL COMPLETE · APPLY WINDOW (safety tier)**
+### Day 58 — Tue Jul 7 (0) `M` — **APPLY WINDOW (safety tier)**
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -923,15 +928,14 @@ Light reading: _Fluent Python_ Ch 8.
 - **14:00–16:00 Mock slot:** Interviewing.io full real-screen simulation.
 - **16:00–17:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 5 re-read — metrics monitoring
-- **17:30–19:30 DSA New (1 optional + enrichment if ahead):**
-  - [ ] [Bit-Trie] -> Maximum XOR (M) (optional)
+- **17:30–19:30 Reinforcement (enrichment if Recall is drained):**
   - **Enrichment (engine deprioritizes — only surface if core+optional is fully drained):**
-    - [ ] [Segment Tree] -> Range Sum Query - Mutable (M) (enrichment)
-    - [ ] [Segment Tree] -> Count of Smaller Numbers After Self (H) (enrichment)
-    - [ ] [Bitmask DP] -> Partition K Equal Subsets (M) (enrichment)
-    - [ ] [Bitmask DP] -> Shortest Path Visiting All Nodes (H) (enrichment)
-    - [ ] [Sweep Line] -> My Calendar III (H) (enrichment)
-    - [ ] [Sweep Line] -> Skyline (H) (enrichment)
+    - [ ] [Segment Tree] -> Range Sum Query - Mutable (M) (enrichment) (nc-150+)
+    - [ ] [Segment Tree] -> Count of Smaller Numbers After Self (H) (enrichment) (nc-150+)
+    - [ ] [Bitmask DP] -> Partition K Equal Subsets (M) (enrichment) (nc-150+)
+    - [ ] [Bitmask DP] -> Shortest Path Visiting All Nodes (H) (enrichment) (nc-150+)
+    - [ ] [Sweep Line] -> My Calendar III (H) (enrichment) (nc-150+)
+    - [ ] [Sweep Line] -> Skyline (H) (enrichment) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: \_\_\_
 
