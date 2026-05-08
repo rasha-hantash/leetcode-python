@@ -1696,8 +1696,14 @@ def test_mock_prereq_status_marks_each_dimension_as_met_or_unmet() -> None:
     )
     rows = mock_prereq_status(mock, em_done=24, sd_done=2)
     # First dim met (24 >= 20), second unmet (2 < 5)
-    assert rows[0] == ("E/M problems", True, 24, 20)
-    assert rows[1] == ("SD chapters", False, 2, 5)
+    assert rows[0].label == "E/M problems"
+    assert rows[0].met is True
+    assert rows[0].current == 24
+    assert rows[0].threshold == 20
+    assert rows[1].label == "SD chapters"
+    assert rows[1].met is False
+    assert rows[1].current == 2
+    assert rows[1].threshold == 5
 
 
 def test_mock_prereq_status_skips_dimensions_with_zero_threshold() -> None:
@@ -1709,7 +1715,7 @@ def test_mock_prereq_status_skips_dimensions_with_zero_threshold() -> None:
     )
     rows = mock_prereq_status(mock, em_done=25, sd_done=0)
     assert len(rows) == 1
-    assert rows[0][0] == "E/M problems"
+    assert rows[0].label == "E/M problems"
 
 
 def test_mock_prereq_status_returns_empty_when_no_prereqs_defined() -> None:
@@ -1736,8 +1742,8 @@ def test_render_today_next_mock_block_shows_prereq_subbullet_when_defined() -> N
     )
     assert "## Next mock" in out
     assert "Prereqs:" in out
-    assert "❌ 25 E/M problems (have 24)" in out
-    assert "✓ 4 SD chapters (have 5)" in out
+    assert "❌ 24/25 E/M problems" in out
+    assert "✓ 5/4 SD chapters" in out
 
 
 def test_render_coverage_next_subsection_shows_prereq_subbullet_for_pending_mock() -> None:
@@ -1762,8 +1768,107 @@ def test_render_coverage_next_subsection_shows_prereq_subbullet_for_pending_mock
     )
     assert "### Next" in out
     assert "Prereqs:" in out
-    assert "❌ 50 E/M problems (have 24)" in out
-    assert "❌ 10 SD chapters (have 2)" in out
+    assert "❌ 24/50 E/M problems" in out
+    assert "❌ 2/10 SD chapters" in out
+
+
+def test_load_mocks_parses_sd_chapter_ids_into_prerequisites_tuple(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "mocks.json"
+    path.write_text(
+        '[{"id": "m1", "status": "pending", '
+        '"prerequisites": {"sd_chapter_ids": ["axu1-4", "axu1-5", "axu1-6"]}}]'
+    )
+    mocks = load_mocks(path)
+    assert mocks[0].prerequisites == MockPrereq(
+        em_problems=0,
+        sd_chapters=0,
+        sd_chapter_ids=("axu1-4", "axu1-5", "axu1-6"),
+    )
+
+
+def test_mock_prereq_status_with_chapter_ids_uses_chapter_completion_state(
+    tmp_path: Path,
+) -> None:
+    """When `sd_chapter_ids` pins specific chapters, the SD row's `current`
+    counts only those required chapters that are completed — not the global
+    `sd_done` total — and the `detail` lists chapter titles inline with ✓."""
+    chapters = [
+        SDChapter(id="axu1-4", title="Ch 4 — Rate Limiter", book="Alex Xu Vol 1",
+                  status="completed", completed_date=date(2026, 5, 1)),
+        SDChapter(id="axu1-5", title="Ch 5 — Consistent Hashing",
+                  book="Alex Xu Vol 1", status="pending"),
+        SDChapter(id="axu1-6", title="Ch 6 — Key-Value Store",
+                  book="Alex Xu Vol 1", status="pending"),
+        SDChapter(id="axu1-7", title="Ch 7 — Unique ID", book="Alex Xu Vol 1",
+                  status="completed", completed_date=date(2026, 5, 2)),
+    ]
+    mock = Mock(
+        id="m1",
+        status="pending",
+        prerequisites=MockPrereq(sd_chapter_ids=("axu1-4", "axu1-5", "axu1-6")),
+    )
+    rows = mock_prereq_status(mock, em_done=0, sd_done=2, sd_chapters=chapters)
+    assert len(rows) == 1
+    assert rows[0].label == "SD chapters"
+    assert rows[0].current == 1  # only axu1-4 is in the required set AND complete
+    assert rows[0].threshold == 3
+    assert rows[0].met is False
+    assert rows[0].detail is not None
+    assert "Ch 4 — Rate Limiter ✓" in rows[0].detail
+    assert "Ch 5 — Consistent Hashing" in rows[0].detail
+    assert "Ch 6 — Key-Value Store" in rows[0].detail
+
+
+def test_render_today_chapter_id_prereq_lists_chapter_titles_inline() -> None:
+    """Display: `❌ 1/3 SD chapters: Ch 4 — Rate Limiter ✓, Ch 5 — …, Ch 6 — …`"""
+    chapters = [
+        SDChapter(id="axu1-4", title="Ch 4 — Rate Limiter", book="Alex Xu Vol 1",
+                  status="completed", completed_date=date(2026, 5, 1)),
+        SDChapter(id="axu1-5", title="Ch 5 — Consistent Hashing",
+                  book="Alex Xu Vol 1", status="pending"),
+        SDChapter(id="axu1-6", title="Ch 6 — Key-Value Store",
+                  book="Alex Xu Vol 1", status="pending"),
+    ]
+    nxt = Mock(
+        id="m1",
+        status="pending",
+        platform="Pramp",
+        topic="Trees",
+        prerequisites=MockPrereq(sd_chapter_ids=("axu1-4", "axu1-5", "axu1-6")),
+    )
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[],
+        next_up_mock=nxt,
+        em_done=0,
+        sd_done=1,
+        sd_chapters=chapters,
+    )
+    assert "❌ 1/3 SD chapters: Ch 4 — Rate Limiter ✓, " in out
+    assert "Ch 5 — Consistent Hashing" in out
+    assert "Ch 6 — Key-Value Store" in out
+
+
+def test_save_mocks_round_trips_sd_chapter_ids(tmp_path: Path) -> None:
+    """save_mocks → load_mocks must preserve `sd_chapter_ids`."""
+    path = tmp_path / "mocks.json"
+    mocks_in = [
+        Mock(
+            id="m1",
+            status="pending",
+            prerequisites=MockPrereq(
+                em_problems=15, sd_chapter_ids=("axu1-4", "axu1-5")
+            ),
+        )
+    ]
+    save_mocks(path, mocks_in)
+    mocks_out = load_mocks(path)
+    assert mocks_out[0].prerequisites is not None
+    assert mocks_out[0].prerequisites.sd_chapter_ids == ("axu1-4", "axu1-5")
+    assert mocks_out[0].prerequisites.em_problems == 15
 
 
 def test_render_coverage_next_subsection_skips_completed_to_find_first_open_mock() -> None:
