@@ -1,0 +1,67 @@
+[
+  {
+    "id": "b1",
+    "prompt": "Tell me about yourself / walk me through your background",
+    "status": "pending"
+  },
+  {
+    "id": "b2",
+    "prompt": "Why this company / why are you looking",
+    "status": "pending"
+  },
+  {
+    "id": "b3",
+    "prompt": "Most impactful project you've owned end-to-end",
+    "status": "pending"
+  },
+  {
+    "id": "b4",
+    "prompt": "Conflict with a teammate or stakeholder",
+    "status": "pending"
+  },
+  {
+    "id": "b5",
+    "prompt": "Time you disagreed with your manager",
+    "status": "pending"
+  },
+  {
+    "id": "b6",
+    "prompt": "Hardest technical decision you've made",
+    "status": "pending"
+  },
+  {
+    "id": "b7",
+    "prompt": "Failure or mistake — what you learned",
+    "status": "pending"
+  },
+  {
+    "id": "b8",
+    "prompt": "Time you had to learn something new fast",
+    "status": "pending"
+  },
+  {
+    "id": "b9",
+    "prompt": "Mentoring or onboarding someone",
+    "status": "pending"
+  },
+  {
+    "id": "b10",
+    "prompt": "Ambiguous problem you scoped from scratch",
+    "status": "pending"
+  },
+  {
+    "id": "b11",
+    "prompt": "Trade-off between quality and speed",
+    "status": "pending"
+  },
+  {
+    "id": "b12",
+    "prompt": "Most proud-of accomplishment",
+    "status": "pending"
+  },
+  {
+    "id": "b13",
+    "prompt": "Questions to ask the interviewer (per round)",
+    "status": "pending"
+  }
+]
