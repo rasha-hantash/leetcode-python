@@ -17,9 +17,7 @@
     <array>
         <string>/Users/rashasaadeh/.local/bin/uv</string>
         <string>run</string>
-        <string>python</string>
-        <string>-m</string>
-        <string>recall_engine</string>
+        <string>prep</string>
         <string>recompute</string>
     </array>
 

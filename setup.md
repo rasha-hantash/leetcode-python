@@ -49,14 +49,14 @@ The recall engine is a Python script (`recall_engine.py`) that generates the dai
    You should see ~46 passing tests. Each test name is a sentence describing one piece of behavior.
 5. **First recompute** — generates `prep-data/today.md`:
    ```sh
-   uv run python -m recall_engine recompute
+   uv run prep recompute
    ```
 6. **Install the LaunchAgent** so recompute runs daily at 8:30 AM:
    ```sh
    cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/
    launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
    ```
-   Logs land in `~/Library/Logs/recall-engine.log`. The Mac must be awake at 8:30 AM for the cron to fire — if it sleeps through, just `uv run python -m recall_engine recompute` manually whenever you wake up.
+   Logs land in `~/Library/Logs/recall-engine.log`. The Mac must be awake at 8:30 AM for the cron to fire — if it sleeps through, just `uv run prep recompute` manually whenever you wake up.
 7. **Push existing in-progress solutions** so they're checked in:
    ```sh
    git add problems/
@@ -147,7 +147,7 @@ This is the only step that informs anything about your actual schedule — don't
 - [ ] Anki desktop + mobile installed and synced. At least the shared deck is imported.
 - [ ] `python3 --version` is 3.11+, `uv` is installed.
 - [ ] `uv sync` ran clean; `uv run pytest` passes.
-- [ ] `uv run python -m recall_engine recompute` generated `prep-data/today.md`.
+- [ ] `uv run prep recompute` generated `prep-data/today.md`.
 - [ ] LaunchAgent loaded (`launchctl list | grep recall-engine`).
 - [ ] All 13 mocks are on your calendar.
 - [ ] All recurring time blocks are on GCal.
@@ -161,7 +161,7 @@ Once all checked, close everything, sleep, and start D1 fresh in the morning.
 
 See `README.md` → "Daily flow." Five steps, ~30 seconds to remember:
 
-1. Morning: LaunchAgent regenerates `prep-data/today.md` at 8:30 AM. (Or run `uv run python -m recall_engine recompute` manually.)
+1. Morning: LaunchAgent regenerates `prep-data/today.md` at 8:30 AM. (Or run `uv run prep recompute` manually.)
 2. Recall (9–13): drain `prep-data/today.md`'s **Recall** section top-down + yesterday's-hardest re-solve.
 3. Afternoon SD (14–15:30): tick the chapter box in `prep-plan-daily.md`.
 4. DSA New (15:30–19:30): solve from `prep-plan-daily.md`'s Day section, tick boxes in `prep-data/today.md`'s **New** section.
