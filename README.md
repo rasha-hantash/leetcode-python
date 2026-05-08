@@ -86,6 +86,8 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 | `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth.                                                        |
 | `prep-data/mocks.json`                  | _(user-edited)_ Mock interview list — `pending → scheduled (with date) → completed`. Schema in `mocks.example.json`. |
 | `prep-data/mocks.example.json`          | Starter template for `mocks.json`. Copy and edit as you book/complete mocks.                                         |
+| `prep-data/sd-chapters.json`            | _(user-edited)_ System Design chapter list — `pending → completed`. Schema in `sd-chapters.example.json`.            |
+| `prep-data/sd-chapters.example.json`    | Starter template for `sd-chapters.json`, seeded with Alex Xu Vol 1+2 + DDIA chapters in read order.                  |
 | `setup.md`                              | Day-0 setup guide — Obsidian, Anki, Python, books, mocks, GCal, slash commands.                                      |
 | `prep-plan-daily.md`                    | Day-by-day curriculum reference. Each Day's New problems and afternoon SD chapter.                                   |
 | `prep-plan-overview.md`                 | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.                             |

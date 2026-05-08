@@ -122,6 +122,21 @@ class Mock:
     notes: str | None = None
 
 
+SDChapterStatus = Literal["pending", "completed"]
+
+
+@dataclass(frozen=True)
+class SDChapter:
+    """One System Design reading unit (a book chapter). Two states: pending
+    and completed. Sequential — order in the JSON file is the read order."""
+
+    id: str
+    title: str
+    book: str
+    status: SDChapterStatus
+    completed_date: date | None = None
+
+
 @dataclass(frozen=True)
 class RecomputeResult:
     """Summary of what a single recompute() call did. Useful for CLI output."""
@@ -417,6 +432,38 @@ def load_ledger(path: Path) -> list[Touch]:
     return touches
 
 
+def load_sd_chapters(path: Path) -> list[SDChapter]:
+    """Read the user-editable SD chapter list. Empty list if the file does not
+    exist yet. Each line is the latest state of one chapter; the file is
+    edited in place rather than appended to."""
+    if not path.exists():
+        return []
+    raw = json.loads(path.read_text())
+    if not isinstance(raw, list):
+        raise ValueError(f"{path} must contain a JSON list of SD chapters")
+    chapters: list[SDChapter] = []
+    for record in raw:
+        completed = record.get("completed_date")
+        chapters.append(
+            SDChapter(
+                id=record["id"],
+                title=record["title"],
+                book=record["book"],
+                status=record["status"],
+                completed_date=date.fromisoformat(completed) if completed else None,
+            )
+        )
+    return chapters
+
+
+def next_sd_chapter(chapters: list[SDChapter]) -> SDChapter | None:
+    """First pending chapter in document order, or None if all complete."""
+    for ch in chapters:
+        if ch.status == "pending":
+            return ch
+    return None
+
+
 def load_mocks(path: Path) -> list[Mock]:
     """Read the user-editable mocks JSON file. Empty list if the file does not
     exist yet. Unlike the ledger, mocks are mutable — each entry is the latest
@@ -508,6 +555,7 @@ def render_today(
     projection_rate: float | None = None,
     projection_untouched: int | None = None,
     upcoming: list[Mock] | None = None,
+    sd_next: SDChapter | None = None,
 ) -> str:
     """Produce the markdown that gets written to today.md.
 
@@ -560,6 +608,16 @@ def render_today(
     else:
         lines.append(
             "_Empty — every curriculum problem has been touched at least once._"
+        )
+
+    if sd_next is not None:
+        lines.extend(
+            [
+                "",
+                "## Today's SD reading",
+                "",
+                f"- [ ] {sd_next.book} · {sd_next.title}",
+            ]
         )
 
     if upcoming:
@@ -659,6 +717,7 @@ def render_coverage(
     curriculum: list[Problem],
     ledger: list[Touch],
     mocks: list[Mock] | None = None,
+    sd_chapters: list[SDChapter] | None = None,
 ) -> str:
     """Render the full curriculum grouped by pattern, with variants nested
     under their canonical. Boxes auto-check when the problem is in the ledger.
@@ -728,6 +787,28 @@ def render_coverage(
             lines.append("_Empty — add mocks to `prep-data/mocks.json` as you book them._")
         lines.append("")
 
+    if sd_chapters is not None:
+        completed = sum(1 for c in sd_chapters if c.status == "completed")
+        total = len(sd_chapters)
+        lines.append(f"## System Design ({completed}/{total} complete)")
+        lines.append("")
+        lines.append(f"{_progress_bar(completed, total)} {completed}/{total}")
+        lines.append("")
+        if sd_chapters:
+            for ch in sd_chapters:
+                box = "x" if ch.status == "completed" else " "
+                stamp = (
+                    f" · ✅ {ch.completed_date.isoformat()}"
+                    if ch.completed_date
+                    else ""
+                )
+                lines.append(f"- [{box}] {ch.book} · {ch.title}{stamp}")
+        else:
+            lines.append(
+                "_Empty — add chapters to `prep-data/sd-chapters.json`._"
+            )
+        lines.append("")
+
     return "\n".join(lines)
 
 
@@ -743,10 +824,12 @@ def recompute(
     new_limit: int = DEFAULT_NEW_LIMIT,
     coverage_md_path: Path | None = None,
     mocks_path: Path | None = None,
+    sd_chapters_path: Path | None = None,
 ) -> RecomputeResult:
     """One full cycle: log yesterday's completions, then regenerate today.md.
     Also regenerates the by-pattern coverage view if `coverage_md_path` is given,
-    and folds mock state from `mocks_path` into both today.md and coverage.md."""
+    folds mock state from `mocks_path` into both views, and surfaces the next
+    pending SD chapter from `sd_chapters_path` in today.md + coverage.md."""
     daily_md = daily_md_path.read_text()
     curriculum = parse_curriculum(daily_md)
     phases = parse_phases(daily_md)
@@ -776,6 +859,11 @@ def recompute(
         mocks = load_mocks(mocks_path)
     upcoming = upcoming_mocks(mocks, today) if mocks else []
 
+    sd_chapters: list[SDChapter] = []
+    if sd_chapters_path is not None and sd_chapters_path.exists():
+        sd_chapters = load_sd_chapters(sd_chapters_path)
+    sd_next = next_sd_chapter(sd_chapters) if sd_chapters else None
+
     today_md_path.write_text(
         render_today(
             today=today,
@@ -787,13 +875,19 @@ def recompute(
             projection_rate=rate,
             projection_untouched=untouched,
             upcoming=upcoming,
+            sd_next=sd_next,
         )
     )
 
     if coverage_md_path is not None:
         coverage_md_path.parent.mkdir(parents=True, exist_ok=True)
         coverage_md_path.write_text(
-            render_coverage(curriculum, ledger, mocks=mocks if mocks_path else None)
+            render_coverage(
+                curriculum,
+                ledger,
+                mocks=mocks if mocks_path else None,
+                sd_chapters=sd_chapters if sd_chapters_path else None,
+            )
         )
 
     return RecomputeResult(
@@ -845,8 +939,20 @@ def cli() -> None:
     show_default=True,
     help="User-editable list of mock interviews (pending/scheduled/completed).",
 )
+@click.option(
+    "--sd-chapters",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=Path("prep-data/sd-chapters.json"),
+    show_default=True,
+    help="User-editable list of System Design chapters (pending/completed).",
+)
 def recompute_cmd(
-    daily: Path, today_md: Path, ledger: Path, coverage_md: Path, mocks: Path
+    daily: Path,
+    today_md: Path,
+    ledger: Path,
+    coverage_md: Path,
+    mocks: Path,
+    sd_chapters: Path,
 ) -> None:
     """Fold yesterday's checks into the ledger, then regenerate today.md and coverage.md."""
     result = recompute(
@@ -856,6 +962,7 @@ def recompute_cmd(
         today=date.today(),
         coverage_md_path=coverage_md,
         mocks_path=mocks,
+        sd_chapters_path=sd_chapters,
     )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "

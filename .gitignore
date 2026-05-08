@@ -10,3 +10,6 @@ prep-data/coverage.md
 # User-edited mock bookings — personal scheduling state, not source.
 # A starter template lives at prep-data/mocks.example.json.
 prep-data/mocks.json
+# User-edited SD chapter list — personal completion state, not source.
+# A starter template lives at prep-data/sd-chapters.example.json.
+prep-data/sd-chapters.json
