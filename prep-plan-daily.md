@@ -44,22 +44,23 @@ This file is the **curriculum reference** — what each Day's New problems are. 
 
 Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search start. All Easies then Mediums per pattern. Zero Hards.
 
-### Day 1 — Mon May 11 (4)
+### Day 1 — Mon May 11 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
 - **14:00–15:30 System Design:**
   - [ ] Grokking SD Fundamentals — intro + caching basics
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Arrays & Hashing] -> Contains Duplicate (E)
   - [ ] [Arrays & Hashing] -> Valid Anagram (E)
   - [ ] [Arrays & Hashing] -> Two Sum (E)
   - [ ] [Arrays & Hashing] -> Group Anagrams (M)
+  - [ ] [String Transformation] -> Longest Common Prefix (E)
   - [ ] today's hardest: **_ • didn't click: _** (no warm-up — sprint start)
 
 ---
 
-### Day 2 — Tue May 12 (4) `M`
+### Day 2 — Tue May 12 (5) `M`
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
@@ -67,49 +68,52 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
 - **14:00–16:00 Mock slot:** Pramp Easy/Med DSA — first calibration mock.
 - **16:00–17:30 System Design:**
   - [ ] Grokking SD Fundamentals — CDNs, load balancers
-- **17:30–19:30 DSA New (4):**
+- **17:30–19:30 DSA New (5):**
   - [ ] [Arrays & Hashing] -> Top K Frequent Elements (M)
   - [ ] [Arrays & Hashing] -> Encode and Decode Strings (M)
   - [ ] [Arrays & Hashing] -> Product of Array Except Self (M)
   - [ ] [Arrays & Hashing] -> Valid Sudoku (M)
+  - [ ] [String Transformation] -> Valid Word Abbreviation (E) — solve as finny multi-part scaffold: `.` wildcard → single-digit `n` → multi-digit `n` (e.g. `i18n` → `internationalization`). See `~/workspace/personal/python-practice-interviews/finny/`.
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 3 — Wed May 13 (4)
+### Day 3 — Wed May 13 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D2 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Grokking SD Fundamentals — sharding + replication basics
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence (M)
   - [ ] [Two Pointers] -> Valid Palindrome (E)
   - [ ] [Two Pointers] -> Two Sum II (M)
   - [ ] [Two Pointers] -> 3Sum (M)
+  - [ ] [String Transformation] -> Roman to Integer (E)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-### Day 4 — Thu May 14 (4)
+### Day 4 — Thu May 14 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D3 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 1 (Scale from Zero to Millions) — start
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Two Pointers] -> Container With Most Water (M)
   - [ ] [Sliding Window] -> Best Time to Buy and Sell Stock (E)
   - [ ] [Sliding Window] -> Longest Substring Without Repeating Characters (M)
   - [ ] [Sliding Window] -> Longest Repeating Character Replacement (M)
+  - [ ] [String Transformation] -> Add Binary (E)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-### Day 5 — Fri May 15 (4) `M`
+### Day 5 — Fri May 15 (5) `M`
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
@@ -117,8 +121,9 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
 - **14:00–16:00 Mock slot:** Pramp Easy/Med DSA.
 - **16:00–17:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 1 (Scale from Zero to Millions) — finish
-- **17:30–19:30 DSA New (4):**
+- **17:30–19:30 DSA New (5):**
   - [ ] [Sliding Window] -> Permutation in String (M)
+  - [ ] [Sliding Window] -> Count Binary Substrings (E)
   - [ ] [Stack] -> Valid Parentheses (E)
   - [ ] [Stack] -> Min Stack (E)
   - [ ] [Stack] -> Evaluate Reverse Polish Notation (M)
@@ -127,7 +132,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
 
 ---
 
-### Day 6 — Sat May 16 (3)
+### Day 6 — Sat May 16 (4)
 
 - **9:00–13:00 Recall:**
   - **This week's hardest:** open [`prep-data/today.md`](./prep-data/today.md) — Saturday's render adds a `## This week's hardest — your pick` section. Pick 2-3 problems from your D1-D5 daily-hardest notes, write their canonical names into the empty bullets, re-solve from blank file, and tick to log a touch.
@@ -135,10 +140,11 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] D5 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 2 (Back-of-envelope estimation) — part 1
-- **15:30–19:30 DSA New (3):**
+- **15:30–19:30 DSA New (4):**
   - [ ] [Stack] -> Daily Temperatures (M)
   - [ ] [Stack] -> Car Fleet (M)
   - [ ] [Binary Search] -> Binary Search (E)
+  - [ ] [String Transformation] -> snake_case → camelCase (E) (ramp variant)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
@@ -153,23 +159,24 @@ Light reading: _Fluent Python_ Ch 1 (data model) — optional.
 
 Binary Search → Linked List → Trees E+M. Zero Hards.
 
-### Day 8 — Mon May 18 (4)
+### Day 8 — Mon May 18 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** open [`prep-data/today.md`](./prep-data/today.md) — drain top-down until the block ends.
   - [ ] D6 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 2 — finish
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Binary Search] -> Search a 2D Matrix (M)
   - [ ] [Binary Search] -> Koko Eating Bananas (M)
   - [ ] [Binary Search] -> Find Minimum in Rotated Sorted Array (M)
   - [ ] [Binary Search] -> Search in Rotated Sorted Array (M)
+  - [ ] [String Transformation] -> String Compression (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-### Day 9 — Tue May 19 (4) `M`
+### Day 9 — Tue May 19 (5) `M`
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
@@ -177,44 +184,47 @@ Binary Search → Linked List → Trees E+M. Zero Hards.
 - **14:00–16:00 Mock slot:** Pramp Easy/Med DSA.
 - **16:00–17:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 3 (Framework for SD interviews)
-- **17:30–19:30 DSA New (4):**
+- **17:30–19:30 DSA New (5):**
   - [ ] [Binary Search] -> Time Based Key Value Store (M)
   - [ ] [Linked List] -> Reverse Linked List (E)
   - [ ] [Linked List] -> Merge Two Sorted Lists (E)
   - [ ] [Linked List] -> Linked List Cycle (E)
+  - [ ] [String Transformation] -> Decode String (M)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock retro: what stalled? \_\_\_
 
 ---
 
-### Day 10 — Wed May 20 (4)
+### Day 10 — Wed May 20 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
   - [ ] D9 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 4 (Rate Limiter)
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Linked List] -> Reorder List (M)
   - [ ] [Linked List] -> Remove Nth Node From End of List (M)
   - [ ] [Linked List] -> Copy List With Random Pointer (M)
   - [ ] [Linked List] -> Add Two Numbers (M)
+  - [ ] [String Transformation] -> Basic Calculator II (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
 
-### Day 11 — Thu May 21 (4)
+### Day 11 — Thu May 21 (5)
 
 - **9:00–13:00 Recall:**
   - **Recall queue:** drain.
   - [ ] D10 hardest re-solve: \_\_\_
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 5 (Consistent Hashing)
-- **15:30–19:30 DSA New (4):**
+- **15:30–19:30 DSA New (5):**
   - [ ] [Linked List] -> Find The Duplicate Number (M)
   - [ ] [Linked List] -> LRU Cache (M)
   - [ ] [Trees] -> Invert Binary Tree (E)
   - [ ] [Trees] -> Maximum Depth of Binary Tree (E)
+  - [ ] [String Transformation] -> String to Integer atoi (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
 ---
