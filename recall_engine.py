@@ -105,6 +105,23 @@ class CurriculumPhase:
         return s
 
 
+MockStatus = Literal["pending", "scheduled", "completed"]
+
+
+@dataclass(frozen=True)
+class Mock:
+    """A planned, scheduled, or completed mock interview. State machine:
+    pending → scheduled (with date) → completed (with date)."""
+
+    id: str
+    status: MockStatus
+    platform: str | None = None
+    topic: str | None = None
+    scheduled_date: date | None = None
+    completed_date: date | None = None
+    notes: str | None = None
+
+
 @dataclass(frozen=True)
 class RecomputeResult:
     """Summary of what a single recompute() call did. Useful for CLI output."""
@@ -400,6 +417,33 @@ def load_ledger(path: Path) -> list[Touch]:
     return touches
 
 
+def load_mocks(path: Path) -> list[Mock]:
+    """Read the user-editable mocks JSON file. Empty list if the file does not
+    exist yet. Unlike the ledger, mocks are mutable — each entry is the latest
+    state of one mock interview, edited in place rather than appended to."""
+    if not path.exists():
+        return []
+    raw = json.loads(path.read_text())
+    if not isinstance(raw, list):
+        raise ValueError(f"{path} must contain a JSON list of mocks")
+    mocks: list[Mock] = []
+    for record in raw:
+        scheduled = record.get("scheduled_date")
+        completed = record.get("completed_date")
+        mocks.append(
+            Mock(
+                id=record["id"],
+                status=record["status"],
+                platform=record.get("platform"),
+                topic=record.get("topic"),
+                scheduled_date=date.fromisoformat(scheduled) if scheduled else None,
+                completed_date=date.fromisoformat(completed) if completed else None,
+                notes=record.get("notes"),
+            )
+        )
+    return mocks
+
+
 def append_to_ledger(path: Path, new_touches: list[Touch]) -> int:
     """Append touches to the ledger, deduping against existing entries by
     (problem, date). Returns the number of touches actually written."""
@@ -463,6 +507,7 @@ def render_today(
     projection: date | None = None,
     projection_rate: float | None = None,
     projection_untouched: int | None = None,
+    upcoming: list[Mock] | None = None,
 ) -> str:
     """Produce the markdown that gets written to today.md.
 
@@ -517,6 +562,10 @@ def render_today(
             "_Empty — every curriculum problem has been touched at least once._"
         )
 
+    if upcoming:
+        lines.extend(["", "## Upcoming mocks", ""])
+        lines.extend(_render_upcoming_mocks_block(upcoming, today))
+
     if today.weekday() == 5:  # Saturday
         lines.extend(
             [
@@ -535,12 +584,85 @@ def render_today(
     return "\n".join(lines)
 
 
+# ─── Mock progress + upcoming ────────────────────────────────────────────────
+
+
+def _progress_bar(done: int, total: int, width: int = 13) -> str:
+    """Unicode block bar for inline visualization. Always renders even if total
+    is 0 (returns an empty bar)."""
+    if total <= 0:
+        return f"[{'░' * width}]"
+    filled = round((done / total) * width)
+    return f"[{'█' * filled}{'░' * (width - filled)}]"
+
+
+def upcoming_mocks(
+    mocks: list[Mock], today: date, window_days: int = 14
+) -> list[Mock]:
+    """Mocks that are scheduled and due to happen within the next `window_days`,
+    sorted soonest first. Past-dated scheduled mocks (forgotten to mark complete)
+    also surface so the user notices."""
+    soon: list[Mock] = []
+    for m in mocks:
+        if m.status != "scheduled" or m.scheduled_date is None:
+            continue
+        delta = (m.scheduled_date - today).days
+        if delta <= window_days:
+            soon.append(m)
+    soon.sort(key=lambda m: m.scheduled_date or today)
+    return soon
+
+
+def _format_mock_line(mock: Mock) -> str:
+    """One bullet describing a single mock — its status, date, platform, topic."""
+    bits: list[str] = []
+    if mock.platform:
+        bits.append(mock.platform)
+    if mock.topic:
+        bits.append(mock.topic)
+    descriptor = " · ".join(bits) if bits else mock.id
+    if mock.status == "completed" and mock.completed_date:
+        return f"- [x] {descriptor} · ✅ {mock.completed_date.isoformat()}"
+    if mock.status == "scheduled" and mock.scheduled_date:
+        return f"- [ ] {descriptor} · 📅 {mock.scheduled_date.isoformat()}"
+    return f"- [ ] {descriptor} · _pending_"
+
+
+def _render_upcoming_mocks_block(mocks: list[Mock], today: date) -> list[str]:
+    """The 'Upcoming mocks' block that surfaces in today.md when scheduled
+    mocks are within the look-ahead window."""
+    lines: list[str] = []
+    for m in mocks:
+        assert m.scheduled_date is not None  # filtered by upcoming_mocks
+        delta = (m.scheduled_date - today).days
+        if delta < 0:
+            urgency = f"{abs(delta)}d ago — mark complete or reschedule"
+        elif delta == 0:
+            urgency = "today"
+        elif delta == 1:
+            urgency = "tomorrow"
+        else:
+            urgency = f"in {delta}d"
+        bits = [m.platform or "", m.topic or ""]
+        descriptor = " · ".join(b for b in bits if b) or m.id
+        lines.append(
+            f"- {descriptor} · {m.scheduled_date.strftime('%a %b ').replace(' 0', ' ')}"
+            f"{m.scheduled_date.day} ({urgency})"
+        )
+    return lines
+
+
 # ─── Coverage view ───────────────────────────────────────────────────────────
 
 
-def render_coverage(curriculum: list[Problem], ledger: list[Touch]) -> str:
+def render_coverage(
+    curriculum: list[Problem],
+    ledger: list[Touch],
+    mocks: list[Mock] | None = None,
+) -> str:
     """Render the full curriculum grouped by pattern, with variants nested
     under their canonical. Boxes auto-check when the problem is in the ledger.
+    If `mocks` is given, also append a Mocks section with progress + per-mock state.
 
     Same set of problems and same source-tier ordering as `compute_new` —
     this is just the by-pattern view of what the engine draws from."""
@@ -591,6 +713,21 @@ def render_coverage(curriculum: list[Problem], ledger: list[Touch]) -> str:
             )
         lines.append("")
 
+    if mocks is not None:
+        completed = sum(1 for m in mocks if m.status == "completed")
+        scheduled = sum(1 for m in mocks if m.status == "scheduled")
+        total = len(mocks)
+        lines.append(f"## Mocks ({completed}/{total} complete · {scheduled} scheduled)")
+        lines.append("")
+        lines.append(f"{_progress_bar(completed, total)} {completed}/{total}")
+        lines.append("")
+        if mocks:
+            for m in mocks:
+                lines.append(_format_mock_line(m))
+        else:
+            lines.append("_Empty — add mocks to `prep-data/mocks.json` as you book them._")
+        lines.append("")
+
     return "\n".join(lines)
 
 
@@ -605,9 +742,11 @@ def recompute(
     recall_limit: int = DEFAULT_RECALL_LIMIT,
     new_limit: int = DEFAULT_NEW_LIMIT,
     coverage_md_path: Path | None = None,
+    mocks_path: Path | None = None,
 ) -> RecomputeResult:
     """One full cycle: log yesterday's completions, then regenerate today.md.
-    Also regenerates the by-pattern coverage view if `coverage_md_path` is given."""
+    Also regenerates the by-pattern coverage view if `coverage_md_path` is given,
+    and folds mock state from `mocks_path` into both today.md and coverage.md."""
     daily_md = daily_md_path.read_text()
     curriculum = parse_curriculum(daily_md)
     phases = parse_phases(daily_md)
@@ -632,6 +771,11 @@ def recompute(
     touched = {t.problem for t in ledger}
     untouched = sum(1 for p in curriculum if p.text not in touched)
 
+    mocks: list[Mock] = []
+    if mocks_path is not None and mocks_path.exists():
+        mocks = load_mocks(mocks_path)
+    upcoming = upcoming_mocks(mocks, today) if mocks else []
+
     today_md_path.write_text(
         render_today(
             today=today,
@@ -642,12 +786,15 @@ def recompute(
             projection=end,
             projection_rate=rate,
             projection_untouched=untouched,
+            upcoming=upcoming,
         )
     )
 
     if coverage_md_path is not None:
         coverage_md_path.parent.mkdir(parents=True, exist_ok=True)
-        coverage_md_path.write_text(render_coverage(curriculum, ledger))
+        coverage_md_path.write_text(
+            render_coverage(curriculum, ledger, mocks=mocks if mocks_path else None)
+        )
 
     return RecomputeResult(
         new_touches_logged=logged, recall_size=len(recall), new_size=len(new)
@@ -691,10 +838,24 @@ def cli() -> None:
     show_default=True,
     help="Generated by-pattern coverage view. Overwritten on every recompute.",
 )
-def recompute_cmd(daily: Path, today_md: Path, ledger: Path, coverage_md: Path) -> None:
+@click.option(
+    "--mocks",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=Path("prep-data/mocks.json"),
+    show_default=True,
+    help="User-editable list of mock interviews (pending/scheduled/completed).",
+)
+def recompute_cmd(
+    daily: Path, today_md: Path, ledger: Path, coverage_md: Path, mocks: Path
+) -> None:
     """Fold yesterday's checks into the ledger, then regenerate today.md and coverage.md."""
     result = recompute(
-        daily, today_md, ledger, today=date.today(), coverage_md_path=coverage_md
+        daily,
+        today_md,
+        ledger,
+        today=date.today(),
+        coverage_md_path=coverage_md,
+        mocks_path=mocks,
     )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "

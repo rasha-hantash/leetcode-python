@@ -13,6 +13,7 @@ import pytest
 
 from recall_engine import (
     CurriculumPhase,
+    Mock,
     Problem,
     Touch,
     aggregate_touches,
@@ -24,6 +25,7 @@ from recall_engine import (
     due_date,
     interval_for,
     load_ledger,
+    load_mocks,
     overdue_days,
     parse_completions,
     parse_curriculum,
@@ -34,6 +36,7 @@ from recall_engine import (
     render_coverage,
     render_today,
     start_date,
+    upcoming_mocks,
 )
 
 
@@ -1089,3 +1092,169 @@ def test_recompute_writes_coverage_md_when_path_provided(tmp_path: Path) -> None
     )
     assert coverage_md.exists()
     assert "## Arrays & Hashing" in coverage_md.read_text()
+
+
+# ─── Mock tracking ────────────────────────────────────────────────────────────
+
+
+def test_load_mocks_returns_empty_list_when_file_does_not_exist(
+    tmp_path: Path,
+) -> None:
+    assert load_mocks(tmp_path / "nope.json") == []
+
+
+def test_load_mocks_parses_pending_scheduled_completed_states(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "mocks.json"
+    path.write_text(
+        '[{"id": "m1", "status": "pending"}, '
+        '{"id": "m2", "status": "scheduled", "platform": "Pramp", '
+        '"topic": "Trees", "scheduled_date": "2026-05-20"}, '
+        '{"id": "m3", "status": "completed", "completed_date": "2026-05-08", '
+        '"notes": "weak on memo"}]'
+    )
+    mocks = load_mocks(path)
+    assert mocks[0].status == "pending"
+    assert mocks[1].scheduled_date == date(2026, 5, 20)
+    assert mocks[1].platform == "Pramp"
+    assert mocks[2].completed_date == date(2026, 5, 8)
+    assert mocks[2].notes == "weak on memo"
+
+
+def test_load_mocks_rejects_a_non_list_payload(tmp_path: Path) -> None:
+    path = tmp_path / "mocks.json"
+    path.write_text('{"id": "m1", "status": "pending"}')
+    with pytest.raises(ValueError, match="must contain a JSON list"):
+        load_mocks(path)
+
+
+def test_upcoming_mocks_filters_to_scheduled_only_within_window() -> None:
+    today = date(2026, 5, 11)
+    mocks = [
+        Mock(id="m1", status="pending"),
+        Mock(
+            id="m2",
+            status="scheduled",
+            platform="Pramp",
+            scheduled_date=date(2026, 5, 13),
+        ),
+        Mock(
+            id="m3",
+            status="scheduled",
+            platform="Interviewing.io",
+            scheduled_date=date(2026, 6, 1),  # 21 days out — past 14-day window
+        ),
+        Mock(
+            id="m4", status="completed", completed_date=date(2026, 5, 8)
+        ),
+    ]
+    upcoming = upcoming_mocks(mocks, today)
+    assert [m.id for m in upcoming] == ["m2"]
+
+
+def test_upcoming_mocks_surfaces_past_due_scheduled_mocks_so_user_notices() -> None:
+    """A scheduled mock whose date is already past — likely the user forgot
+    to mark it complete. Surface it rather than hiding it."""
+    today = date(2026, 5, 15)
+    mocks = [
+        Mock(
+            id="m1",
+            status="scheduled",
+            platform="Pramp",
+            scheduled_date=date(2026, 5, 10),  # 5 days ago
+        ),
+    ]
+    upcoming = upcoming_mocks(mocks, today)
+    assert [m.id for m in upcoming] == ["m1"]
+
+
+def test_upcoming_mocks_sorts_soonest_first() -> None:
+    today = date(2026, 5, 11)
+    mocks = [
+        Mock(
+            id="later",
+            status="scheduled",
+            scheduled_date=date(2026, 5, 18),
+        ),
+        Mock(
+            id="sooner",
+            status="scheduled",
+            scheduled_date=date(2026, 5, 13),
+        ),
+    ]
+    assert [m.id for m in upcoming_mocks(mocks, today)] == ["sooner", "later"]
+
+
+def test_render_coverage_includes_mock_section_with_progress_bar() -> None:
+    curriculum = [Problem("[A] Foo", source_day=1, difficulty="E")]
+    mocks = [
+        Mock(id="m1", status="completed", completed_date=date(2026, 5, 8)),
+        Mock(id="m2", status="scheduled", scheduled_date=date(2026, 5, 20)),
+        Mock(id="m3", status="pending"),
+    ]
+    out = render_coverage(curriculum, ledger=[], mocks=mocks)
+    assert "## Mocks (1/3 complete · 1 scheduled)" in out
+    # Progress bar present (Unicode block characters)
+    assert "█" in out and "░" in out
+
+
+def test_render_coverage_omits_mocks_section_when_mocks_arg_is_none() -> None:
+    """Backwards-compatible: callers that don't pass mocks get the bare
+    by-pattern view, no Mocks header."""
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)], ledger=[], mocks=None
+    )
+    assert "Mocks" not in out
+
+
+def test_render_today_includes_upcoming_mocks_block_when_provided() -> None:
+    upcoming = [
+        Mock(
+            id="m2",
+            status="scheduled",
+            platform="Pramp",
+            topic="Trees",
+            scheduled_date=date(2026, 5, 13),
+        ),
+    ]
+    out = render_today(
+        today=date(2026, 5, 11), recall=[], new=[], upcoming=upcoming
+    )
+    assert "## Upcoming mocks" in out
+    assert "Pramp" in out
+    assert "Trees" in out
+    # Date formatting + relative-days label
+    assert "in 2d" in out
+
+
+def test_render_today_omits_upcoming_block_when_no_scheduled_mocks() -> None:
+    out = render_today(today=date(2026, 5, 11), recall=[], new=[], upcoming=[])
+    assert "Upcoming mocks" not in out
+
+
+def test_recompute_reads_mocks_file_and_renders_in_both_views(tmp_path: Path) -> None:
+    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md.write_text(
+        "## Phase 1 — X (Days 1–7)\n"
+        "### Day 1\n"
+        "- [ ] [A] -> Foo (E)\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    coverage_md = tmp_path / "coverage.md"
+    mocks_path = tmp_path / "mocks.json"
+    mocks_path.write_text(
+        '[{"id": "m1", "status": "scheduled", "platform": "Pramp", '
+        '"topic": "Trees", "scheduled_date": "2026-05-13"}]'
+    )
+    recompute(
+        daily_md,
+        today_md,
+        ledger,
+        today=date(2026, 5, 11),
+        coverage_md_path=coverage_md,
+        mocks_path=mocks_path,
+    )
+    assert "## Upcoming mocks" in today_md.read_text()
+    assert "## Mocks" in coverage_md.read_text()
