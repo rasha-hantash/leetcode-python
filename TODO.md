@@ -5,15 +5,21 @@ Tracker for deferred prep-system work. Strike items through (`~~text~~`) when do
 ## Pre-D1 (before Mon May 11)
 
 - [x] ~~Push branch to origin.~~ Done 2026-05-07 — 4 PRs created via `gt submit` after repo synced. Stack: <https://app.graphite.com/submit/rasha-hantash/leetcode-python/2>.
-- [ ] **Verify mock dates against actual booking availability.** `prep-plan-daily.md` re-maps mock slots to Tue/Fri pairs (D2, D5, D9, D12, D16, D19, D23, D26, D30, D33, D37, D40, D44, D47, D51, D54). These are tentative — Pramp and Interviewing.io may not have those exact slots open. Book what's actually available; the recall engine doesn't depend on mock dates.
+- [ ] **Book mocks as Pramp/Interviewing.io availability lets you.** The recall engine doesn't depend on calendar mock dates — it just tracks `pending → scheduled (with date) → completed` from `prep-data/mocks.json`. Each mock can carry `prerequisites: {em_problems, sd_chapters}` thresholds; the engine surfaces met/unmet status under each mock. Book what's actually available; the readiness gates and prereq checks will tell you when each one is in scope.
+- [ ] **Seed your tracking files.** Copy `prep-data/mocks.example.json` → `mocks.json`, `sd-chapters.example.json` → `sd-chapters.json`, `behavioral.example.json` → `behavioral.json`. Edit as you progress. The example files stay in git as reference templates; the active files are gitignored as personal state.
 
 ## Mid-prep (when relevant)
 
-- [ ] **Expand D59–D90 day-by-day.** Phase 7 + Phase 8 in `prep-plan-daily.md` describe daily-shape templates rather than day-by-day. Acceptable until you reach D58 and want to plan the mock-heavy + interview-mode phase in detail. Trigger: hit D55 with a plan to enumerate D59 onward.
-- [x] ~~**Build interview-coverage tool.**~~ Done 2026-05-08 — superseded by `prep-data/coverage.md`, generated alongside `today.md` on every recompute. Same source set as the engine, grouped by pattern, variants nested, boxes auto-checked from ledger. The richer 4-diff plan in `interview-coverage-tool-plan.md` is dropped — the simpler view solves the same "what's left, organized by pattern" question without waiting on retention-data signal.
+- [x] ~~**Expand D59–D90 day-by-day.**~~ Done 2026-05-08 — dropped instead of expanded. Phase 7/8 in `prep-plan-daily.md` now use a Calendar milestones list anchored to dates rather than Day-N markers. Pace varies per user; calendar dates remain useful as full-time-pace reference.
+- [x] ~~**Build interview-coverage tool.**~~ Done 2026-05-08 — superseded by `prep-data/coverage.md` (Readiness → Behavioral → Mocks → SD → DSA-by-pattern). Same source set as the engine, grouped by pattern, variants nested, boxes auto-checked from ledger.
 
 ## Reference
 
-- Prep window: Mon May 11 – Sat Aug 8, 2026
-- Job application windows: D45 (stretch companies), D52 (target companies), D58 (fallback companies)
+- Prep window: Mon May 11 – Sat Aug 8, 2026 (full-time pace; the engine projects your actual end date in `today.md`).
+- Job application gates (computed from ledger state, surfaced in today.md Readiness banner):
+  - **Fallback-ready**: all E+M problems touched.
+  - **Target-ready**: above + ≥20 SD chapters complete + ≥8 mocks completed.
+  - **Stretch-ready**: every curriculum problem touched + all SD complete + all mocks complete.
 - 163 problems · 18 NC150 patterns + 7 NC-150+ patterns
+- 28 SD chapters seeded (Alex Xu Vol 1+2 + DDIA Ch 5–9)
+- 13 behavioral prompts seeded (excluded from readiness gates — you can knock these out in a weekend)
