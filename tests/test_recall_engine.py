@@ -17,6 +17,7 @@ from recall_engine import (
     Touch,
     aggregate_touches,
     append_to_ledger,
+    avg_new_per_day,
     compute_new,
     compute_recall,
     day_n_for,
@@ -28,6 +29,7 @@ from recall_engine import (
     parse_curriculum,
     parse_phases,
     phase_for,
+    projected_end_date,
     recompute,
     render_today,
     start_date,
@@ -839,3 +841,127 @@ def test_renderer_header_falls_back_to_day_only_when_phase_is_none() -> None:
     first_line = out.splitlines()[0]
     assert "Day 95" in first_line
     assert "Phase" not in first_line
+
+
+# ─── Pace projection ──────────────────────────────────────────────────────────
+
+
+def test_avg_new_per_day_returns_none_for_empty_ledger() -> None:
+    assert avg_new_per_day([], today=date(2026, 5, 11)) is None
+
+
+def test_avg_new_per_day_is_distinct_problems_over_days_elapsed() -> None:
+    """Day 1 with 3 distinct touches → 3.0/day. Day 2 with 5 distinct → 2.5/day."""
+    ledger = [
+        Touch("[A] Foo", date(2026, 5, 11)),
+        Touch("[A] Bar", date(2026, 5, 11)),
+        Touch("[A] Baz", date(2026, 5, 11)),
+    ]
+    assert avg_new_per_day(ledger, today=date(2026, 5, 11)) == 3.0
+
+    ledger.extend(
+        [
+            Touch("[A] Qux", date(2026, 5, 12)),
+            Touch("[A] Quux", date(2026, 5, 12)),
+        ]
+    )
+    assert avg_new_per_day(ledger, today=date(2026, 5, 12)) == 2.5
+
+
+def test_avg_new_per_day_counts_distinct_problems_not_touch_events() -> None:
+    """Resolving the same problem twice does not inflate the acquisition rate."""
+    ledger = [
+        Touch("[A] Foo", date(2026, 5, 11)),
+        Touch("[A] Foo", date(2026, 5, 12)),  # re-solve, not a new acquisition
+        Touch("[A] Bar", date(2026, 5, 12)),
+    ]
+    # 2 distinct problems / 2 days elapsed = 1.0/day
+    assert avg_new_per_day(ledger, today=date(2026, 5, 12)) == 1.0
+
+
+def test_projected_end_date_returns_none_for_empty_ledger() -> None:
+    curriculum = [Problem("[A] Foo", source_day=1, difficulty="E")]
+    assert projected_end_date([], curriculum, today=date(2026, 5, 11)) is None
+
+
+def test_projected_end_date_returns_today_when_curriculum_is_fully_touched() -> None:
+    curriculum = [Problem("[A] Foo", source_day=1, difficulty="E")]
+    ledger = [Touch("[A] Foo", date(2026, 5, 11))]
+    assert projected_end_date(ledger, curriculum, today=date(2026, 5, 11)) == date(
+        2026, 5, 11
+    )
+
+
+def test_projected_end_date_extrapolates_remaining_problems_at_current_pace() -> None:
+    """Day 1, solved 3 of 9 → rate 3.0/day, 6 untouched → +2 days = May 13."""
+    curriculum = [
+        Problem(f"[A] P{i}", source_day=1, difficulty="E") for i in range(9)
+    ]
+    ledger = [
+        Touch("[A] P0", date(2026, 5, 11)),
+        Touch("[A] P1", date(2026, 5, 11)),
+        Touch("[A] P2", date(2026, 5, 11)),
+    ]
+    assert projected_end_date(
+        ledger, curriculum, today=date(2026, 5, 11)
+    ) == date(2026, 5, 13)
+
+
+def test_projected_end_date_self_corrects_as_pace_data_accrues() -> None:
+    """Pace projections in early days swing wildly — that's OK as long as the
+    function honestly reflects what the ledger says today."""
+    curriculum = [
+        Problem(f"[A] P{i}", source_day=1, difficulty="E") for i in range(20)
+    ]
+    fast_day_one = [Touch(f"[A] P{i}", date(2026, 5, 11)) for i in range(5)]
+    end_after_fast_day = projected_end_date(
+        fast_day_one, curriculum, today=date(2026, 5, 11)
+    )
+    # 5/day pace, 15 left → 3 days
+    assert end_after_fast_day == date(2026, 5, 14)
+
+    slow_day_two = fast_day_one + [Touch("[A] P5", date(2026, 5, 12))]
+    end_after_slow_day = projected_end_date(
+        slow_day_two, curriculum, today=date(2026, 5, 12)
+    )
+    # 6 distinct over 2 days = 3.0/day, 14 left → ceil(14/3) = 5 days
+    assert end_after_slow_day == date(2026, 5, 17)
+
+
+def test_renderer_omits_projection_line_when_no_projection_provided() -> None:
+    out = render_today(today=date(2026, 5, 8), recall=[], new=[])
+    assert "Projected" not in out
+
+
+def test_renderer_includes_projection_line_below_header_when_data_present() -> None:
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[],
+        day_n=1,
+        projection=date(2026, 8, 15),
+        projection_rate=3.0,
+        projection_untouched=160,
+    )
+    lines = out.splitlines()
+    assert "Day 1" in lines[0]
+    # Projection sits on line 2 (zero-indexed: line index 2 after header + blank)
+    assert "Projected acquisition complete" in lines[2]
+    assert "Aug 15" in lines[2]
+    assert "3.0 new/day" in lines[2]
+    assert "160 left" in lines[2]
+
+
+def test_renderer_omits_projection_line_when_curriculum_already_fully_touched() -> None:
+    """Once everything is touched, the projection collapses to today — don't
+    render a noisy '0 left' line; just suppress it."""
+    out = render_today(
+        today=date(2026, 8, 15),
+        recall=[],
+        new=[],
+        day_n=97,
+        projection=date(2026, 8, 15),
+        projection_rate=2.0,
+        projection_untouched=0,
+    )
+    assert "Projected" not in out
