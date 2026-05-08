@@ -16,6 +16,7 @@ from recall_engine import (
     CategoryProgress,
     CurriculumPhase,
     Mock,
+    MockPrereq,
     Problem,
     Readiness,
     ReadinessTier,
@@ -34,6 +35,7 @@ from recall_engine import (
     load_ledger,
     load_mocks,
     load_sd_chapters,
+    mock_prereq_status,
     next_sd_chapter,
     overdue_days,
     parse_completions,
@@ -1650,3 +1652,111 @@ def test_recompute_reads_behavioral_file_and_renders_in_coverage(tmp_path: Path)
         behavioral_path=behavioral_path,
     )
     assert "## Behavioral" in coverage_md.read_text()
+
+
+# ─── Mock prerequisites ───────────────────────────────────────────────────────
+
+
+def test_load_mocks_parses_prerequisites_object_into_dataclass(tmp_path: Path) -> None:
+    path = tmp_path / "mocks.json"
+    path.write_text(
+        '[{"id": "m1", "status": "pending", '
+        '"prerequisites": {"em_problems": 30, "sd_chapters": 5}}]'
+    )
+    mocks = load_mocks(path)
+    assert mocks[0].prerequisites == MockPrereq(em_problems=30, sd_chapters=5)
+
+
+def test_load_mocks_treats_missing_prereqs_as_none() -> None:
+    """Backward-compatible: existing mocks.json files without prerequisites
+    parse fine and just have prerequisites=None."""
+    from io import StringIO
+    import json as _json
+    raw = _json.dumps([{"id": "m1", "status": "pending"}])
+    # Use a tmp path-like bypass via an inline call
+    import tempfile
+
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+        f.write(raw)
+        f.flush()
+        mocks = load_mocks(Path(f.name))
+    assert mocks[0].prerequisites is None
+
+
+def test_mock_prereq_status_marks_each_dimension_as_met_or_unmet() -> None:
+    mock = Mock(
+        id="m1",
+        status="pending",
+        prerequisites=MockPrereq(em_problems=20, sd_chapters=5),
+    )
+    rows = mock_prereq_status(mock, em_done=24, sd_done=2)
+    # First dim met (24 >= 20), second unmet (2 < 5)
+    assert rows[0] == ("E/M problems", True, 24, 20)
+    assert rows[1] == ("SD chapters", False, 2, 5)
+
+
+def test_mock_prereq_status_skips_dimensions_with_zero_threshold() -> None:
+    """If a mock only cares about E/M (no SD threshold), the SD row is omitted."""
+    mock = Mock(
+        id="m1",
+        status="pending",
+        prerequisites=MockPrereq(em_problems=20, sd_chapters=0),
+    )
+    rows = mock_prereq_status(mock, em_done=25, sd_done=0)
+    assert len(rows) == 1
+    assert rows[0][0] == "E/M problems"
+
+
+def test_mock_prereq_status_returns_empty_when_no_prereqs_defined() -> None:
+    mock = Mock(id="m1", status="pending", prerequisites=None)
+    assert mock_prereq_status(mock, em_done=99, sd_done=99) == []
+
+
+def test_render_today_upcoming_block_shows_prereq_subbullet_when_defined() -> None:
+    upcoming = [
+        Mock(
+            id="m1",
+            status="scheduled",
+            platform="Pramp",
+            topic="Trees",
+            scheduled_date=date(2026, 5, 20),
+            prerequisites=MockPrereq(em_problems=25, sd_chapters=4),
+        )
+    ]
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[],
+        upcoming=upcoming,
+        em_done=24,
+        sd_done=5,
+    )
+    # Prereq line shows ❌ for unmet (24 < 25) and ✓ for met (5 >= 4)
+    assert "Prereqs:" in out
+    assert "❌ 25 E/M problems (have 24)" in out
+    assert "✓ 4 SD chapters (have 5)" in out
+
+
+def test_render_coverage_to_schedule_subsection_shows_prereq_subbullet() -> None:
+    mocks = [
+        Mock(
+            id="m1",
+            status="pending",
+            platform="Pramp",
+            topic="Backtracking",
+            prerequisites=MockPrereq(em_problems=50, sd_chapters=10),
+        )
+    ]
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)],
+        ledger=[],
+        today=date(2026, 5, 11),
+        mocks=mocks,
+        em_done=24,
+        sd_done=2,
+    )
+    # In the To-schedule section, the pending mock surfaces its prereqs
+    assert "### To schedule" in out
+    assert "Prereqs:" in out
+    assert "❌ 50 E/M problems (have 24)" in out
+    assert "❌ 10 SD chapters (have 2)" in out

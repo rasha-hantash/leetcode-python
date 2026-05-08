@@ -3,14 +3,22 @@
     "id": "mock-1",
     "platform": "Pramp",
     "topic": "Arrays & Hashing",
-    "status": "pending"
+    "status": "pending",
+    "prerequisites": {
+      "em_problems": 15,
+      "sd_chapters": 2
+    }
   },
   {
     "id": "mock-2",
     "platform": "Interviewing.io",
     "topic": "Trees",
     "status": "scheduled",
-    "scheduled_date": "2026-05-20"
+    "scheduled_date": "2026-05-20",
+    "prerequisites": {
+      "em_problems": 25,
+      "sd_chapters": 4
+    }
   },
   {
     "id": "mock-3",
