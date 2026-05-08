@@ -12,20 +12,25 @@ from pathlib import Path
 import pytest
 
 from recall_engine import (
+    CurriculumPhase,
     Problem,
     Touch,
     aggregate_touches,
     append_to_ledger,
     compute_new,
     compute_recall,
+    day_n_for,
     due_date,
     interval_for,
     load_ledger,
     overdue_days,
     parse_completions,
     parse_curriculum,
+    parse_phases,
+    phase_for,
     recompute,
     render_today,
+    start_date,
 )
 
 
@@ -703,3 +708,134 @@ def test_completion_parser_ignores_empty_writable_checkboxes_on_saturday(tmp_pat
         "- [x]  (just whitespace) ✅ 2026-05-16\n"
     )
     assert parse_completions(md) == []
+
+
+# ─── Sprint day + phase math ──────────────────────────────────────────────────
+
+
+_PHASE_MD = """\
+## Phase 1 — Linear Patterns E+M (Days 1–7)
+
+intro
+
+### Day 1 — Mon May 11
+
+- [ ] [A] Foo (E)
+
+## Phase 2 — Search + Trees (Days 8–17)
+
+### Day 8 — Mon May 18
+
+- [ ] [B] Bar (M)
+
+## Phase 5 — Hard Problems (Days 40–53) — mock-heavy
+
+### Day 40 — Thu Jun 18
+
+- [ ] [C] Baz (H)
+"""
+
+
+def test_parse_phases_extracts_each_phase_heading() -> None:
+    phases = parse_phases(_PHASE_MD)
+    assert len(phases) == 3
+    assert phases[0] == CurriculumPhase(
+        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
+    )
+    assert phases[1] == CurriculumPhase(
+        number=2, name="Search + Trees", days_start=8, days_end=17
+    )
+    # Phase 5 has trailing "— mock-heavy" after the days range; parser ignores it.
+    assert phases[2] == CurriculumPhase(
+        number=5, name="Hard Problems", days_start=40, days_end=53
+    )
+
+
+def test_phase_for_returns_phase_containing_the_day() -> None:
+    phases = parse_phases(_PHASE_MD)
+    assert phase_for(1, phases).number == 1
+    assert phase_for(7, phases).number == 1  # inclusive end
+    assert phase_for(8, phases).number == 2  # next phase begins
+    assert phase_for(40, phases).number == 5
+    assert phase_for(53, phases).number == 5
+
+
+def test_phase_for_returns_none_when_day_falls_outside_known_phases() -> None:
+    phases = parse_phases(_PHASE_MD)
+    assert phase_for(0, phases) is None  # before Day 1
+    assert phase_for(20, phases) is None  # gap between Phase 2 and Phase 5
+    assert phase_for(100, phases) is None  # past last phase
+
+
+def test_curriculum_phase_slug_matches_github_anchor_conventions() -> None:
+    phase = CurriculumPhase(
+        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
+    )
+    # GitHub: lowercase, drop punctuation (— em-dash, +, parens), spaces → hyphens
+    assert phase.slug == "phase-1--linear-patterns-em-days-17"
+
+
+def test_start_date_returns_none_for_empty_ledger() -> None:
+    assert start_date([]) is None
+
+
+def test_start_date_is_the_earliest_touch_in_the_ledger() -> None:
+    """A friend running their own prep with a different start date will get
+    Day 1 anchored to whenever they first checked something off."""
+    ledger = [
+        Touch("[A] Bar", date(2026, 5, 13)),
+        Touch("[A] Foo", date(2026, 5, 11)),  # earliest
+        Touch("[A] Baz", date(2026, 5, 14)),
+    ]
+    assert start_date(ledger) == date(2026, 5, 11)
+
+
+def test_day_n_for_treats_start_date_as_day_one() -> None:
+    start = date(2026, 5, 11)
+    assert day_n_for(date(2026, 5, 11), start) == 1
+    assert day_n_for(date(2026, 5, 12), start) == 2
+    assert day_n_for(date(2026, 5, 18), start) == 8
+
+
+# ─── Header rendering with phase + day ────────────────────────────────────────
+
+
+def test_renderer_header_says_pre_prep_when_no_day_n() -> None:
+    out = render_today(today=date(2026, 5, 8), recall=[], new=[])
+    first_line = out.splitlines()[0]
+    assert "Pre-prep" in first_line
+
+
+def test_renderer_header_includes_day_n_when_provided() -> None:
+    phase = CurriculumPhase(
+        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
+    )
+    out = render_today(
+        today=date(2026, 5, 11), recall=[], new=[], day_n=1, phase=phase
+    )
+    first_line = out.splitlines()[0]
+    assert "Day 1" in first_line
+
+
+def test_renderer_header_includes_linked_phase_heading_with_anchor() -> None:
+    phase = CurriculumPhase(
+        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
+    )
+    out = render_today(
+        today=date(2026, 5, 11), recall=[], new=[], day_n=1, phase=phase
+    )
+    first_line = out.splitlines()[0]
+    # Markdown link to the daily file with the phase slug as anchor
+    assert "[Phase 1 — Linear Patterns E+M (Days 1–7)]" in first_line
+    assert "#phase-1--linear-patterns-em-days-17" in first_line
+
+
+def test_renderer_header_falls_back_to_day_only_when_phase_is_none() -> None:
+    """If day_n is past the last phase (e.g., Day 95 in a 90-day curriculum),
+    render the day number without a phase link rather than crashing."""
+    out = render_today(
+        today=date(2026, 8, 15), recall=[], new=[], day_n=95, phase=None
+    )
+    first_line = out.splitlines()[0]
+    assert "Day 95" in first_line
+    assert "Phase" not in first_line
