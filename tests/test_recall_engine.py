@@ -15,6 +15,7 @@ from recall_engine import (
     CurriculumPhase,
     Mock,
     Problem,
+    SDChapter,
     Touch,
     aggregate_touches,
     append_to_ledger,
@@ -26,6 +27,8 @@ from recall_engine import (
     interval_for,
     load_ledger,
     load_mocks,
+    load_sd_chapters,
+    next_sd_chapter,
     overdue_days,
     parse_completions,
     parse_curriculum,
@@ -1258,3 +1261,133 @@ def test_recompute_reads_mocks_file_and_renders_in_both_views(tmp_path: Path) ->
     )
     assert "## Upcoming mocks" in today_md.read_text()
     assert "## Mocks" in coverage_md.read_text()
+
+
+# ─── System Design chapter tracking ───────────────────────────────────────────
+
+
+def test_load_sd_chapters_returns_empty_list_when_file_does_not_exist(
+    tmp_path: Path,
+) -> None:
+    assert load_sd_chapters(tmp_path / "nope.json") == []
+
+
+def test_load_sd_chapters_parses_pending_and_completed_states(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "sd.json"
+    path.write_text(
+        '[{"id": "ch-1", "title": "Scale from Zero to Millions", '
+        '"book": "Alex Xu Vol 1", "status": "completed", '
+        '"completed_date": "2026-05-12"},'
+        ' {"id": "ch-2", "title": "Back-of-envelope estimation", '
+        '"book": "Alex Xu Vol 1", "status": "pending"}]'
+    )
+    chapters = load_sd_chapters(path)
+    assert chapters[0].status == "completed"
+    assert chapters[0].completed_date == date(2026, 5, 12)
+    assert chapters[1].status == "pending"
+    assert chapters[1].completed_date is None
+
+
+def test_load_sd_chapters_rejects_a_non_list_payload(tmp_path: Path) -> None:
+    path = tmp_path / "sd.json"
+    path.write_text('{"id": "ch-1"}')
+    with pytest.raises(ValueError, match="must contain a JSON list"):
+        load_sd_chapters(path)
+
+
+def test_next_sd_chapter_returns_first_pending_in_document_order() -> None:
+    chapters = [
+        SDChapter(
+            id="ch-1",
+            title="Ch 1",
+            book="Alex Xu Vol 1",
+            status="completed",
+            completed_date=date(2026, 5, 11),
+        ),
+        SDChapter(id="ch-2", title="Ch 2", book="Alex Xu Vol 1", status="pending"),
+        SDChapter(id="ch-3", title="Ch 3", book="Alex Xu Vol 1", status="pending"),
+    ]
+    nxt = next_sd_chapter(chapters)
+    assert nxt is not None and nxt.id == "ch-2"
+
+
+def test_next_sd_chapter_returns_none_when_all_complete() -> None:
+    chapters = [
+        SDChapter(
+            id="ch-1",
+            title="Ch 1",
+            book="Alex Xu Vol 1",
+            status="completed",
+            completed_date=date(2026, 5, 11),
+        ),
+    ]
+    assert next_sd_chapter(chapters) is None
+
+
+def test_render_today_surfaces_next_pending_sd_chapter_until_checked() -> None:
+    nxt = SDChapter(
+        id="ch-1",
+        title="Scale from Zero to Millions",
+        book="Alex Xu Vol 1",
+        status="pending",
+    )
+    out = render_today(today=date(2026, 5, 11), recall=[], new=[], sd_next=nxt)
+    assert "## Today's SD reading" in out
+    assert "Alex Xu Vol 1" in out
+    assert "Scale from Zero to Millions" in out
+
+
+def test_render_today_omits_sd_section_when_no_pending_chapters() -> None:
+    out = render_today(today=date(2026, 5, 11), recall=[], new=[], sd_next=None)
+    assert "Today's SD reading" not in out
+
+
+def test_render_coverage_includes_system_design_section_with_progress_bar() -> None:
+    chapters = [
+        SDChapter(
+            id="ch-1",
+            title="Ch 1",
+            book="Alex Xu Vol 1",
+            status="completed",
+            completed_date=date(2026, 5, 11),
+        ),
+        SDChapter(id="ch-2", title="Ch 2", book="Alex Xu Vol 1", status="pending"),
+    ]
+    out = render_coverage(
+        [Problem("[A] Foo", source_day=1)], ledger=[], sd_chapters=chapters
+    )
+    assert "## System Design (1/2 complete)" in out
+    assert "█" in out and "░" in out
+    assert "- [x] Alex Xu Vol 1 · Ch 1 · ✅ 2026-05-11" in out
+    assert "- [ ] Alex Xu Vol 1 · Ch 2" in out
+
+
+def test_recompute_reads_sd_chapters_and_renders_in_both_views(
+    tmp_path: Path,
+) -> None:
+    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md.write_text(
+        "## Phase 1 — X (Days 1–7)\n"
+        "### Day 1\n"
+        "- [ ] [A] -> Foo (E)\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    coverage_md = tmp_path / "coverage.md"
+    sd_path = tmp_path / "sd.json"
+    sd_path.write_text(
+        '[{"id": "ch-1", "title": "Scale from Zero to Millions", '
+        '"book": "Alex Xu Vol 1", "status": "pending"}]'
+    )
+    recompute(
+        daily_md,
+        today_md,
+        ledger,
+        today=date(2026, 5, 11),
+        coverage_md_path=coverage_md,
+        sd_chapters_path=sd_path,
+    )
+    assert "## Today's SD reading" in today_md.read_text()
+    assert "## System Design" in coverage_md.read_text()
