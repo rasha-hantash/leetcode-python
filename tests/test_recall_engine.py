@@ -564,6 +564,27 @@ def test_completion_parser_strips_source_tag_from_canonical() -> None:
     ]
 
 
+def test_completion_parser_strips_variant_of_tag_from_canonical() -> None:
+    """`(variant of: X)` is human-readable lineage info; ledger keys must
+    match the same problem text whether the tag is present or not."""
+    md = "- [x] [1-D DP] -> House Robber II (M) (variant of: House Robber) (Day 31) ✅ 2026-06-10"
+    assert parse_completions(md) == [
+        Touch("[1-D DP] -> House Robber II", date(2026, 6, 10))
+    ]
+
+
+def test_curriculum_parser_canonical_text_omits_variant_of_tag() -> None:
+    md = """\
+### Day 31 — Wed Jun 10
+
+- **9:00–13:00 DSA New:**
+  - [ ] [1-D DP] -> House Robber II (M) (variant of: House Robber)
+"""
+    problems = parse_curriculum(md)
+    assert len(problems) == 1
+    assert problems[0].text == "[1-D DP] -> House Robber II"
+
+
 # ─── compute_new source-tier ordering ─────────────────────────────────────────
 
 

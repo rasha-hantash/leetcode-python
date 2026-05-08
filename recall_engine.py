@@ -167,6 +167,7 @@ _DAY_ANNOTATION = re.compile(r"\s*\(Day\s+\d+\)\s*")
 _METADATA_SUFFIX = re.compile(r"\s+—\s+.*$")
 _DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
 _SOURCE_TAG = re.compile(r"\s*\((nc-150\+|company question)\)\s*")
+_VARIANT_TAG = re.compile(r"\s*\(variant of:\s*[^)]+\)\s*")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")
 
 
@@ -186,12 +187,14 @@ def _extract_source(text: str) -> Source:
 
 def _canonicalize(text: str) -> str:
     """Strip every non-canonical annotation: done-date stamp, em-dash metadata
-    suffix, (Day N), (E)/(M)/(H), (nc-150+)/(company question), `T2`/`M`."""
+    suffix, (Day N), (E)/(M)/(H), (nc-150+)/(company question), (variant of: X),
+    `T2`/`M`."""
     text = _DONE_DATE.sub("", text)
     text = _METADATA_SUFFIX.sub("", text)
     text = _DAY_ANNOTATION.sub(" ", text)
     text = _DIFFICULTY_TAG.sub(" ", text)
     text = _SOURCE_TAG.sub(" ", text)
+    text = _VARIANT_TAG.sub(" ", text)
     text = _T_MARKER.sub(" ", text)
     return re.sub(r"\s+", " ", text).strip()
 

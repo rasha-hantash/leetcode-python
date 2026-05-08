@@ -93,7 +93,7 @@ Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary Search s
   - [ ] [Arrays & Hashing] -> Longest Consecutive Sequence (M)
   - [ ] [Arrays & Hashing] -> Shift Sign-Up With Max-New Constraint (M) (company question)
   - [ ] [Two Pointers] -> Valid Palindrome (E)
-  - [ ] [Two Pointers] -> Two Sum II (M)
+  - [ ] [Two Pointers] -> Two Sum II (M) (variant of: Two Sum)
   - [ ] [Two Pointers] -> 3Sum (M)
   - [ ] [String Transformation] -> Roman to Integer (E) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
@@ -336,9 +336,9 @@ All Mediums (these patterns have no Easies in NC150).
 - **14:00–15:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 9 (Web Crawler)
 - **15:30–19:30 DSA New (4):**
-  - [ ] [Backtracking] -> Combination Sum II (M)
+  - [ ] [Backtracking] -> Combination Sum II (M) (variant of: Combination Sum)
   - [ ] [Backtracking] -> Permutations (M)
-  - [ ] [Backtracking] -> Subsets II (M)
+  - [ ] [Backtracking] -> Subsets II (M) (variant of: Subsets)
   - [ ] [Backtracking] -> Generate Parentheses (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -411,7 +411,7 @@ Light reading: _Fluent Python_ Ch 3 (dictionaries).
 - **17:30–19:30 DSA New (5):**
   - [ ] [Graphs] -> Surrounded Regions (M)
   - [ ] [Graphs] -> Course Schedule (M)
-  - [ ] [Graphs] -> Course Schedule II (M)
+  - [ ] [Graphs] -> Course Schedule II (M) (variant of: Course Schedule)
   - [ ] [Graphs] -> Graph Valid Tree (M)
   - [ ] [Graphs] -> Grid Reachability Within Max Time (M) (company question)
   - [ ] today's hardest: **_ • didn't click: _**
@@ -464,7 +464,7 @@ E+M only across the remaining patterns. Largest phase. By D39 every NC150 E+M is
 - **16:00–17:30 System Design:**
   - [ ] Alex Xu Vol 1 Ch 16 (Wrap-up + interview tips)
 - **17:30–19:30 DSA New (4):**
-  - [ ] [1-D DP] -> House Robber II (M)
+  - [ ] [1-D DP] -> House Robber II (M) (variant of: House Robber)
   - [ ] [1-D DP] -> Longest Palindromic Substring (M)
   - [ ] [1-D DP] -> Palindromic Substrings (M)
   - [ ] [1-D DP] -> Decode Ways (M)
@@ -520,7 +520,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
   - [ ] DDIA Ch 7 (Transactions) — start
 - **17:30–19:30 DSA New (4):**
   - [ ] [2-D DP] -> Best Time to Buy and Sell Stock With Cooldown (M)
-  - [ ] [2-D DP] -> Coin Change II (M)
+  - [ ] [2-D DP] -> Coin Change II (M) (variant of: Coin Change)
   - [ ] [2-D DP] -> Target Sum (M)
   - [ ] [2-D DP] -> Interleaving String (M)
   - [ ] today's hardest: **_ • didn't click: _**
@@ -538,7 +538,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
 - **15:30–19:30 DSA New (4):**
   - [ ] [Greedy] -> Maximum Subarray (M)
   - [ ] [Greedy] -> Jump Game (M)
-  - [ ] [Greedy] -> Jump Game II (M)
+  - [ ] [Greedy] -> Jump Game II (M) (variant of: Jump Game)
   - [ ] [Greedy] -> Gas Station (M)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -586,7 +586,7 @@ Light reading: _Fluent Python_ Ch 4 (text vs bytes).
 - **14:00–15:30 System Design:**
   - [ ] DDIA Ch 8 — finish
 - **15:30–19:30 DSA New (6):**
-  - [ ] [Intervals] -> Meeting Rooms II (M)
+  - [ ] [Intervals] -> Meeting Rooms II (M) (variant of: Meeting Rooms)
   - [ ] [Intervals] -> Prorated Monthly Subscription Charge (M) (company question)
   - [ ] [Difference Array] -> Car Pooling (M) (nc-150+)
   - [ ] [Difference Array] -> Corporate Flight Bookings (M) (nc-150+)
@@ -649,7 +649,7 @@ Light reading: _Fluent Python_ Ch 5 (functions as objects).
   - [ ] [Bit Manipulation] -> Reverse Bits (E)
   - [ ] [Bit Manipulation] -> Missing Number (E)
   - [ ] [Bit Manipulation] -> Sum of Two Integers (M)
-  - [ ] [Boyer-Moore] -> Majority Element II (M) (nc-150+)
+  - [ ] [Boyer-Moore] -> Majority Element II (M) (nc-150+) (variant of: Majority Element)
   - [ ] [Bit-Trie] -> Maximum XOR (M) (nc-150+)
   - [ ] today's hardest: **_ • didn't click: _**
 
@@ -780,7 +780,7 @@ Light reading: _Fluent Python_ Ch 6.
 - **16:00–17:30 System Design:**
   - [ ] Alex Xu Vol 2 Ch 7 (Hotel Reservation) — start
 - **17:30–19:30 DSA New (2 Hards):**
-  - [ ] [Tries] -> Word Search II (H)
+  - [ ] [Tries] -> Word Search II (H) (variant of: Word Search)
   - [ ] [Graphs] -> Word Ladder (H)
   - [ ] today's hardest: **_ • didn't click: _**
   - [ ] mock notes: \_\_\_
