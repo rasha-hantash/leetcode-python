@@ -234,10 +234,10 @@ At this point engine has both old behavior (still callable without phase) and ne
 
 ## Progress
 
-- [ ] PR 1 — `phases.json` + phase-aware `compute_new` engine logic
-- [ ] PR 2 — Flatten `prep-plan-daily.md` → `curriculum.md`, wire phase-driven recompute, update today.md header
-- [ ] PR 3 — Time blocks in today.md
-- [ ] PR 4 — Cleanup (dead code, doc rationalization, overview audit)
+- [x] PR 1 — `phases.json` + phase-aware `compute_new` engine logic (2026-05-09, PR #45)
+- [x] PR 2 — Flatten `prep-plan-daily.md` → `curriculum.md`, wire phase-driven recompute, update today.md header (2026-05-09)
+- [x] PR 3 — Time blocks in today.md (2026-05-09)
+- [x] PR 4 — Cleanup: deleted `dynamic-recall-system-plan.md` (historical), added stale banner to `prep-plan-overview.md`, updated TODO.md + README.md (2026-05-09)
 
 ## Non-goals
 

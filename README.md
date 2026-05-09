@@ -94,7 +94,6 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 | `curriculum.md`                                 | Flat by-pattern source-of-truth problem list. Hand-edited.                                                                         |
 | `phases.json`                                   | Phase budgets — one record per phase: pattern allowlist + `new_per_day` + difficulty cap/floor.                                    |
 | `prep-plan-overview.md`                         | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.                                           |
-| `dynamic-recall-system-plan.md`                 | History of the dynamic-recall system evolution.                                                                                    |
 | `neetcode-150.md`                               | Original NC150 list (reference).                                                                                                   |
 | `python-gotchas.md`                             | Append-only log of Python language stumbles you hit during the prep.                                                               |
 | `patterns/*.md`                                 | One file per pattern (e.g., `arrays-and-hashing.md`). Mistakes nested under each problem.                                          |
