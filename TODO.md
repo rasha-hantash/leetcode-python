@@ -5,13 +5,13 @@ Tracker for deferred prep-system work. Strike items through (`~~text~~`) when do
 ## Pre-D1 (before Mon May 11)
 
 - [x] ~~Push branch to origin.~~ Done 2026-05-07 — 4 PRs created via `gt submit` after repo synced. Stack: <https://app.graphite.com/submit/rasha-hantash/leetcode-python/2>.
-- [ ] **Book mocks as Pramp/Interviewing.io availability lets you.** The recall engine doesn't depend on calendar mock dates — it just tracks `pending → scheduled (with date) → completed` from `prep-data/mock_interviews.json`. Each mock can carry `prerequisites: {em_problems, sd_chapters}` thresholds (count-based) — or `sd_chapter_ids: [...]` for specific chapters (e.g., `["axu1-4", "axu1-5", "axu1-6"]`); the engine surfaces met/unmet status under each mock. Book what's actually available; the readiness gates and prereq checks will tell you when each one is in scope.
-- [ ] **Seed your tracking files.** Copy `prep-data/mock_interviews.example.json` → `mock_interviews.json`, `system_design_chapters.example.json` → `system_design_chapters.json`, `behavioral_prompts.example.json` → `behavioral_prompts.json`. Edit as you progress. The example files stay in git as reference templates; the active files are gitignored as personal state.
+- [ ] **Book mocks as Pramp/Interviewing.io availability lets you.** The recall engine doesn't depend on calendar mock dates — it just tracks `pending → scheduled (with date) → completed` from the `## Mocks` section in `curriculum.md`. Each mock line can carry `prereq: 15 E+M, 2 SD` (count thresholds) or `prereq: axu1-4, axu1-5, axu1-6` (specific chapter IDs); the engine surfaces met/unmet status. Book what's actually available; the readiness gates and prereq checks will tell you when each one is in scope.
+- [x] ~~**Seed your tracking files.**~~ Done 2026-05-09 — superseded by the unified-curriculum refactor. Mocks, SD chapters, and behavioral prompts now live as inline sections of `curriculum.md`. No JSON files to copy.
 
 ## Mid-prep (when relevant)
 
-- [x] ~~**Expand D59–D90 day-by-day.**~~ Done 2026-05-09 — dropped twice over. First superseded by ledger-derived dates, then by the phase-driven refactor: `phases.json` declares pattern allowlists + `new_per_day` budgets, and the engine advances ledger-driven (no calendar dates anywhere).
-- [x] ~~**Build interview-coverage tool.**~~ Done 2026-05-08 — superseded by `prep-data/coverage.md` (Readiness → Behavioral → Mocks → SD → DSA-by-pattern). Same source set as the engine, grouped by pattern, variants nested, boxes auto-checked from ledger.
+- [x] ~~**Expand D59–D90 day-by-day.**~~ Done 2026-05-09 — dropped twice over. First superseded by ledger-derived dates, then by the phase-driven refactor (phase budgets live inline in `curriculum.md`'s `### Phase N` headings, engine advances ledger-driven, no calendar dates anywhere).
+- [x] ~~**Build interview-coverage tool.**~~ Done 2026-05-08, then collapsed 2026-05-09 — `coverage.md` was superseded by the unified `curriculum.md`. Readiness lives in today.md; the master list IS the dashboard.
 
 ## Reference
 

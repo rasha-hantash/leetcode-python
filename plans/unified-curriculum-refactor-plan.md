@@ -172,7 +172,7 @@ Same as today, except:
 
 ## Progress
 
-- [ ] PR 1 — Restructure curriculum.md + parser updates
-- [ ] PR 2 — Parse SD/Mocks/Behavioral from curriculum.md
-- [ ] PR 3 — Bidirectional sync (curriculum.md writable)
-- [ ] PR 4 — Cleanup + docs
+- [x] PR 1 — Restructure curriculum.md + parser updates (done 2026-05-09)
+- [x] PR 2 — Parse SD/Mocks/Behavioral from curriculum.md (done 2026-05-09)
+- [x] PR 3 — Bidirectional sync (curriculum.md writable) (done 2026-05-09)
+- [x] PR 4 — Cleanup + docs (done 2026-05-09)

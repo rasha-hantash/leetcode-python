@@ -1,6 +1,6 @@
 # Interview Prep — Overview
 
-_System-level reference: daily routine, spaced-repetition rules, mock cadence, risks. The **engine no longer enforces calendar dates** — phase advancement is ledger-driven (`phases.json` defines pattern allowlists + `new_per_day` budgets). The Day-N labels below remain a useful full-time-pace reference, not a schedule the engine is checking against. For the flat curriculum see [`curriculum.md`](./curriculum.md)._
+_System-level reference: daily routine, spaced-repetition rules, mock cadence, risks. The **engine no longer enforces calendar dates** — phase advancement is ledger-driven (phase budgets live inline in `curriculum.md`'s `### Phase N — Name (X new/day)` headings). The Day-N labels below remain a useful full-time-pace reference, not a schedule the engine is checking against. For the master list see [`curriculum.md`](./curriculum.md)._
 
 ## Dashboard
 

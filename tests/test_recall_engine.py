@@ -46,14 +46,13 @@ from recall_engine import (
     parse_curriculum,
     parse_curriculum_dsa_state,
     parse_phases,
-    write_curriculum_dsa,
-    write_curriculum_mocks,
     projected_end_date,
     recompute,
-    render_coverage,
     render_readiness_block,
     render_today,
     start_date,
+    write_curriculum_dsa,
+    write_curriculum_mocks,
 )
 
 
@@ -935,103 +934,6 @@ def test_problem_pattern_and_name_split_on_arrow() -> None:
     assert p.name == "Two Sum"
 
 
-def test_render_coverage_groups_problems_by_pattern() -> None:
-    curriculum = [
-        Problem("[Arrays & Hashing] -> Two Sum", difficulty="E"),
-        Problem("[Two Pointers] -> Valid Palindrome", difficulty="E"),
-        Problem("[Arrays & Hashing] -> Group Anagrams", difficulty="M"),
-    ]
-    out = render_coverage(curriculum, ledger=[])
-    assert "### Arrays & Hashing" in out
-    assert "### Two Pointers" in out
-    # Both Arrays & Hashing problems land under their shared heading
-    section = out.split("### Arrays & Hashing", 1)[1].split("###", 1)[0]
-    assert "Two Sum" in section
-    assert "Group Anagrams" in section
-
-
-def test_render_coverage_checks_box_when_problem_is_in_ledger() -> None:
-    curriculum = [
-        Problem("[Arrays & Hashing] -> Two Sum", difficulty="E"),
-        Problem("[Arrays & Hashing] -> Group Anagrams", difficulty="M"),
-    ]
-    ledger = [Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11))]
-    out = render_coverage(curriculum, ledger)
-    assert "- [x] Two Sum (E)" in out
-    assert "- [ ] Group Anagrams (M)" in out
-
-
-def test_render_coverage_nests_variants_under_their_canonical() -> None:
-    curriculum = [
-        Problem("[1-D DP] -> House Robber", difficulty="M"),
-        Problem(
-            "[1-D DP] -> House Robber II",
-            difficulty="M",
-            variant_of="House Robber",
-        ),
-    ]
-    out = render_coverage(curriculum, ledger=[])
-    assert "- [ ] House Robber (M)" in out
-    # Variant is indented (two-space prefix) under canonical
-    assert "  - [ ] House Robber II (M)" in out
-
-
-def test_render_coverage_orders_patterns_by_source_tier() -> None:
-    """nc-150 patterns surface before nc-150+ ones, regardless of doc order."""
-    curriculum = [
-        Problem(
-            "[Beyond] -> X",
-            difficulty="M",
-            source="nc-150+",
-        ),
-        Problem(
-            "[Core] -> Y",
-            difficulty="M",
-            source="nc-150",
-        ),
-    ]
-    out = render_coverage(curriculum, ledger=[])
-    core_pos = out.find("### Core")
-    beyond_pos = out.find("### Beyond")
-    assert 0 <= core_pos < beyond_pos
-
-
-def test_render_coverage_handles_variant_whose_canonical_is_not_in_curriculum() -> None:
-    """Some II-suffix problems (Basic Calculator II, My Calendar III) have no
-    canonical in the curriculum — render them at top level with a footnote
-    rather than dropping them or crashing."""
-    curriculum = [
-        Problem(
-            "[Stack] -> Basic Calculator II",
-            difficulty="M",
-            variant_of="Basic Calculator",
-        ),
-    ]
-    out = render_coverage(curriculum, ledger=[])
-    assert "Basic Calculator II" in out
-    assert "(variant of Basic Calculator)" in out
-
-
-def test_recompute_writes_coverage_md_when_path_provided(tmp_path: Path) -> None:
-    daily_md = tmp_path / "curriculum.md"
-    daily_md.write_text(
-        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
-        "#### Arrays & Hashing\n\n- [ ] Two Sum (E)\n"
-    )
-    today_md = tmp_path / "today.md"
-    ledger = tmp_path / "completions.jsonl"
-    coverage_md = tmp_path / "coverage.md"
-    recompute(
-        daily_md,
-        today_md,
-        ledger,
-        today=date(2026, 5, 11),
-        coverage_md_path=coverage_md,
-    )
-    assert coverage_md.exists()
-    assert "### Arrays & Hashing" in coverage_md.read_text()
-
-
 # ─── Mock tracking ────────────────────────────────────────────────────────────
 
 
@@ -1054,34 +956,9 @@ def test_parse_mocks_extracts_pending_scheduled_completed_states() -> None:
     assert mocks[2].notes == "weak on memo"
 
 
-def test_render_coverage_includes_mock_section_with_progress_bar() -> None:
-    curriculum = [Problem("[A] Foo", difficulty="E")]
-    mocks = [
-        Mock(id="m1", status="completed", completed_date=date(2026, 5, 8)),
-        Mock(id="m2", status="scheduled", scheduled_date=date(2026, 5, 20)),
-        Mock(id="m3", status="pending"),
-    ]
-    out = render_coverage(curriculum, ledger=[], mocks=mocks)
-    assert "## Mocks (1/3 complete · 1 scheduled · 1 pending)" in out
-    # Progress bar present (Unicode block characters)
-    assert "█" in out and "░" in out
-
-
-def test_render_coverage_omits_mocks_section_when_mocks_arg_is_none() -> None:
-    """Backwards-compatible: callers that don't pass mocks get the bare
-    by-pattern view, no Mocks header."""
-    out = render_coverage(
-        [Problem("[A] Foo")], ledger=[], mocks=None
-    )
-    assert "Mocks" not in out
-
-
-def test_recompute_renders_next_mock_in_today_and_full_mocks_in_coverage(
-    tmp_path: Path,
-) -> None:
+def test_recompute_renders_next_mock_in_today_md(tmp_path: Path) -> None:
     """today.md gets a single 'Next mock' block between Readiness and Recall.
-    coverage.md has the full ## Mocks section (summary + Next + Completed).
-    Mocks now live in curriculum.md, not a separate JSON."""
+    Mocks live in curriculum.md."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
@@ -1091,21 +968,13 @@ def test_recompute_renders_next_mock_in_today_and_full_mocks_in_coverage(
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
-    coverage_md = tmp_path / "coverage.md"
-    recompute(
-        daily_md,
-        today_md,
-        ledger,
-        today=date(2026, 5, 11),
-        coverage_md_path=coverage_md,
-    )
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
     today_text = today_md.read_text()
     assert "## Next mock" in today_text
     readiness_pos = today_text.find("## Readiness")
     next_pos = today_text.find("## Next mock")
     recall_pos = today_text.find("## Recall")
     assert 0 <= readiness_pos < next_pos < recall_pos
-    assert "## Mocks" in coverage_md.read_text()
 
 
 # ─── System Design chapter tracking ───────────────────────────────────────────
@@ -1177,26 +1046,6 @@ def test_render_today_omits_sd_section_when_no_pending_chapters() -> None:
     assert "Today's SD reading" not in out
 
 
-def test_render_coverage_includes_system_design_section_with_progress_bar() -> None:
-    chapters = [
-        SDChapter(
-            id="ch-1",
-            title="Ch 1",
-            book="Alex Xu Vol 1",
-            status="completed",
-            completed_date=date(2026, 5, 11),
-        ),
-        SDChapter(id="ch-2", title="Ch 2", book="Alex Xu Vol 1", status="pending"),
-    ]
-    out = render_coverage(
-        [Problem("[A] Foo")], ledger=[], sd_chapters=chapters
-    )
-    assert "## System Design (1/2 complete)" in out
-    assert "█" in out and "░" in out
-    assert "- [x] Alex Xu Vol 1 · Ch 1 · ✅ 2026-05-11" in out
-    assert "- [ ] Alex Xu Vol 1 · Ch 2" in out
-
-
 def test_recompute_reads_sd_chapters_and_renders_in_both_views(
     tmp_path: Path,
 ) -> None:
@@ -1209,16 +1058,8 @@ def test_recompute_reads_sd_chapters_and_renders_in_both_views(
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
-    coverage_md = tmp_path / "coverage.md"
-    recompute(
-        daily_md,
-        today_md,
-        ledger,
-        today=date(2026, 5, 11),
-        coverage_md_path=coverage_md,
-    )
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
     assert "## Today's SD reading" in today_md.read_text()
-    assert "## System Design" in coverage_md.read_text()
 
 
 # ─── Application-readiness gates ──────────────────────────────────────────────
@@ -1340,77 +1181,6 @@ def test_render_today_renders_readiness_block_above_recall_section() -> None:
 # ─── Coverage.md mocks subsections (folded in from old mocks.md) ──────────────
 
 
-def test_render_coverage_mocks_section_shows_next_and_completed_subsections() -> None:
-    """Mocks section collapses future entries into a single 'Next' (the first
-    non-completed mock). Completed history stays visible. Future pending mocks
-    aren't enumerated — the user works through them sequentially."""
-    today = date(2026, 5, 11)
-    mocks = [
-        Mock(
-            id="m1",
-            platform="Pramp",
-            topic="DP",
-            status="completed",
-            completed_date=date(2026, 5, 8),
-            notes="weak on memo",
-        ),
-        Mock(
-            id="m2",
-            platform="Interviewing.io",
-            topic="Trees",
-            status="scheduled",
-            scheduled_date=date(2026, 5, 13),
-        ),
-        Mock(id="m3", platform="Pramp", topic="Backtracking", status="pending"),
-    ]
-    out = render_coverage(
-        [Problem("[A] Foo", difficulty="E")],
-        ledger=[],
-        today=today,
-        mocks=mocks,
-    )
-    assert "## Mocks (1/3 complete · 1 scheduled · 1 pending)" in out
-    assert "### Next" in out
-    assert "### Completed" in out
-    assert "weak on memo" in out
-    # Next is m2 (first non-completed) — m3 not surfaced individually
-    assert "Trees" in out
-    assert "Backtracking" not in out
-
-
-def test_render_coverage_orders_sections_readiness_behavioral_mocks_sd_dsa() -> None:
-    """coverage.md surfaces high-level state first (Readiness → Behavioral →
-    Mocks → SD), then the DSA pattern drill-down."""
-    em = CategoryProgress(name="E+M problems", done=0, total=1)
-    sd_progress = CategoryProgress(name="System Design", done=0, total=1)
-    mocks_progress = CategoryProgress(name="Mocks", done=0, total=1)
-    readiness = Readiness(
-        em=em,
-        sd=sd_progress,
-        mocks=mocks_progress,
-        tiers=[ReadinessTier(name="Fallback-ready", criteria=[("x", False)])],
-    )
-    out = render_coverage(
-        [Problem("[Trees] -> Foo")],
-        ledger=[],
-        today=date(2026, 5, 11),
-        mocks=[Mock(id="m1", status="pending")],
-        sd_chapters=[
-            SDChapter(id="ch-1", title="T", book="B", status="pending")
-        ],
-        readiness=readiness,
-        behavioral=[
-            BehavioralTopic(id="b1", prompt="Tell me about yourself", status="pending")
-        ],
-    )
-    readiness_pos = out.find("## Readiness")
-    behavioral_pos = out.find("## Behavioral")
-    mocks_pos = out.find("## Mocks")
-    sd_pos = out.find("## System Design")
-    dsa_pos = out.find("## DSA — by pattern")
-    assert 0 <= readiness_pos < behavioral_pos < mocks_pos < sd_pos < dsa_pos
-
-
 # ─── Behavioral tracking ──────────────────────────────────────────────────────
 
 
@@ -1430,33 +1200,8 @@ def test_parse_behavioral_extracts_pending_and_completed_entries() -> None:
     assert topics[1].notes == "use Datadog migration"
 
 
-def test_render_coverage_includes_behavioral_section_with_progress_bar() -> None:
-    topics = [
-        BehavioralTopic(
-            id="b1",
-            prompt="Tell me about yourself",
-            status="completed",
-            completed_date=date(2026, 5, 11),
-        ),
-        BehavioralTopic(id="b2", prompt="Conflict story", status="pending"),
-    ]
-    out = render_coverage(
-        [Problem("[A] Foo")], ledger=[], behavioral=topics
-    )
-    assert "## Behavioral (1/2 complete)" in out
-    assert "█" in out and "░" in out
-    assert "- [x] Tell me about yourself · ✅ 2026-05-11" in out
-    assert "- [ ] Conflict story" in out
-
-
-def test_render_coverage_omits_behavioral_section_when_arg_is_none() -> None:
-    out = render_coverage(
-        [Problem("[A] Foo")], ledger=[], behavioral=None
-    )
-    assert "Behavioral" not in out
-
-
-def test_recompute_reads_behavioral_section_and_renders_in_coverage(tmp_path: Path) -> None:
+def test_recompute_reads_behavioral_section_without_failing(tmp_path: Path) -> None:
+    """Behavioral parsing during recompute is non-fatal even when no UI surfaces it."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
@@ -1465,15 +1210,8 @@ def test_recompute_reads_behavioral_section_and_renders_in_coverage(tmp_path: Pa
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
-    coverage_md = tmp_path / "coverage.md"
-    recompute(
-        daily_md,
-        today_md,
-        ledger,
-        today=date(2026, 5, 11),
-        coverage_md_path=coverage_md,
-    )
-    assert "## Behavioral" in coverage_md.read_text()
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
+    assert today_md.exists()
 
 
 # ─── Mock prerequisites ───────────────────────────────────────────────────────
@@ -1551,32 +1289,6 @@ def test_render_today_next_mock_block_shows_prereq_subbullet_when_defined() -> N
     assert "Prereqs:" in out
     assert "❌ 24/25 E/M problems" in out
     assert "✓ 5/4 SD chapters" in out
-
-
-def test_render_coverage_next_subsection_shows_prereq_subbullet_for_pending_mock() -> None:
-    """The first non-completed mock surfaces its prereqs in coverage.md's
-    ## Mocks → ### Next section. Future pending mocks aren't shown."""
-    mocks = [
-        Mock(
-            id="m1",
-            status="pending",
-            platform="Pramp",
-            topic="Backtracking",
-            prerequisites=MockPrereq(em_problems=50, sd_chapters=10),
-        )
-    ]
-    out = render_coverage(
-        [Problem("[A] Foo")],
-        ledger=[],
-        today=date(2026, 5, 11),
-        mocks=mocks,
-        em_done=24,
-        sd_done=2,
-    )
-    assert "### Next" in out
-    assert "Prereqs:" in out
-    assert "❌ 24/50 E/M problems" in out
-    assert "❌ 2/10 SD chapters" in out
 
 
 def test_parse_mocks_extracts_sd_chapter_ids_into_prerequisites_tuple() -> None:
@@ -1675,78 +1387,39 @@ def test_write_curriculum_mocks_round_trips_sd_chapter_ids() -> None:
     assert mocks_out[0].prerequisites.em_problems == 15
 
 
-def test_render_coverage_next_subsection_skips_completed_to_find_first_open_mock() -> None:
-    """If mock-1 and mock-2 are completed, Next is mock-3 (the first non-completed)."""
-    mocks = [
-        Mock(id="m1", status="completed", completed_date=date(2026, 5, 1)),
-        Mock(id="m2", status="completed", completed_date=date(2026, 5, 5)),
-        Mock(id="m3", status="pending", platform="Pramp", topic="Stack"),
-        Mock(id="m4", status="pending", platform="Pramp", topic="DP"),
-    ]
-    out = render_coverage(
-        [Problem("[A] Foo")],
-        ledger=[],
-        today=date(2026, 5, 11),
-        mocks=mocks,
-    )
-    next_section = out.split("### Next", 1)[1].split("###", 1)[0]
-    assert "Stack" in next_section
-    # mock-4 is also pending but not surfaced — only the immediate next one
-    assert "DP" not in next_section
-
-
 # ─── Mock booking links ───────────────────────────────────────────────────────
 
 
 def test_pending_mock_with_pramp_platform_renders_default_booking_link() -> None:
     """Pramp/Interviewing.io don't expose booking APIs, so we surface the
     platform's dashboard URL as a clickable link on the pending Next mock."""
-    mocks = [Mock(id="m1", status="pending", platform="Pramp", topic="Trees")]
-    out = render_coverage(
-        [Problem("[A] Foo")],
-        ledger=[],
-        today=date(2026, 5, 11),
-        mocks=mocks,
-    )
+    mock = Mock(id="m1", status="pending", platform="Pramp", topic="Trees")
+    out = render_today(today=date(2026, 5, 11), recall=[], new=[], next_up_mock=mock)
     assert "Book: [Pramp](https://www.pramp.com/" in out
 
 
 def test_pending_mock_with_explicit_booking_url_overrides_platform_default() -> None:
-    mocks = [
-        Mock(
-            id="m1",
-            status="pending",
-            platform="Pramp",
-            topic="Trees",
-            booking_url="https://my-custom-booking.example/slot/abc123",
-        )
-    ]
-    out = render_coverage(
-        [Problem("[A] Foo")],
-        ledger=[],
-        today=date(2026, 5, 11),
-        mocks=mocks,
+    mock = Mock(
+        id="m1",
+        status="pending",
+        platform="Pramp",
+        topic="Trees",
+        booking_url="https://my-custom-booking.example/slot/abc123",
     )
+    out = render_today(today=date(2026, 5, 11), recall=[], new=[], next_up_mock=mock)
     assert "https://my-custom-booking.example/slot/abc123" in out
 
 
 def test_scheduled_mock_does_not_show_booking_link() -> None:
     """Already booked — no need to surface the booking URL."""
-    mocks = [
-        Mock(
-            id="m1",
-            status="scheduled",
-            platform="Pramp",
-            topic="Trees",
-            scheduled_date=date(2026, 5, 20),
-        )
-    ]
-    out = render_coverage(
-        [Problem("[A] Foo")],
-        ledger=[],
-        today=date(2026, 5, 11),
-        mocks=mocks,
+    mock = Mock(
+        id="m1",
+        status="scheduled",
+        platform="Pramp",
+        topic="Trees",
+        scheduled_date=date(2026, 5, 20),
     )
+    out = render_today(today=date(2026, 5, 11), recall=[], new=[], next_up_mock=mock)
     assert "Book:" not in out
 
 

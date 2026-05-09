@@ -1,13 +1,13 @@
 # Interview Prep — README
 
-A 90-day NeetCode 150 + system design + behavioral prep system built on top of a snapshot-mode SM-2 lite recall queue. Each morning a Python script generates today's queue into `prep-data/today.md`. You drain it. Tomorrow morning the script regenerates based on what you checked.
+A 90-day NeetCode 150 + system design + behavioral prep system built on top of a snapshot-mode SM-2 lite recall queue. One master file (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral. Each morning a Python script generates today's queue into `prep-data/today.md`. You drain it. Tomorrow morning the script regenerates based on what you checked — and `curriculum.md` stays in sync with the ledger.
 
 ## Daily flow
 
-1. **Morning (one-time, automatic at 8:30 AM):** the LaunchAgent runs `uv run prep recompute`. This logs yesterday's completions into the ledger, then writes a fresh `prep-data/today.md` with today's **Recall** + **New** sections. _If the cron didn't fire, run the command manually — same result._
+1. **Morning (one-time, automatic at 8:30 AM):** the LaunchAgent runs `uv run prep recompute`. This logs yesterday's completions into the ledger, syncs `curriculum.md` ticks, then writes a fresh `prep-data/today.md` with today's **Recall** + **New** sections. _If the cron didn't fire, run the command manually — same result._
 2. **Morning Recall block (9:00–13:00):** open `prep-data/today.md`. Drain **Recall** top-down — click the checkbox of each problem as you re-solve it. Tasks plugin auto-stamps `✅ DATE`. Recall is the highest-leverage work — protecting it with the morning slot keeps it from getting dropped when the day runs long.
-3. **Afternoon System Design (14:00–15:30):** today's chapter is surfaced as `## Today's SD reading` in `prep-data/today.md`. Tick its box when done — recompute folds the touch into `system_design_chapters.json`.
-4. **DSA New block (15:30–19:30):** today's New problems are listed in `prep-data/today.md` under `## New`. Solve them and tick the boxes there. The pool is filtered by your current phase (see `phases.json`); `curriculum.md` is the flat reference list if you want to look ahead.
+3. **Afternoon System Design (14:00–15:30):** today's chapter is surfaced as `## Today's SD reading` in `prep-data/today.md`. Tick the box in either today.md OR directly in curriculum.md's `## System Design` section.
+4. **DSA New block (15:30–19:30):** today's New problems are listed in `prep-data/today.md` under `## New`. Solve them and tick the boxes there (or in `curriculum.md`). Phase + budget come from the heading in curriculum.md (`### Phase 1 — Linear Patterns E+M (5 new/day)`); `curriculum.md` is the master reference if you want to look ahead.
 5. **End the day:** the engine doesn't need anything from you besides the ticked boxes. Pick tomorrow's first re-solve from your private "today's hardest" notes.
 
 That's it. The list you wake up to is the list for the day — it does not reshuffle as you check items off. Whatever you don't finish gets folded into tomorrow's queue with more days overdue.
@@ -23,10 +23,12 @@ Run `uv run prep recompute` any time. It scans `today.md` for new `✅` stamps, 
 **Each recompute call:**
 
 1. Reads `today.md`, finds checked-and-dated lines, appends them to the ledger (deduped by `(problem, date)` so reruns are safe).
-2. Aggregates the ledger by problem → `(touch_count, latest_date)`.
-3. Computes due-ness with SM-2 lite (table below). Items at or past their due date go into Recall, sorted most-overdue first, capped at 10.
-4. Picks `phase.new_per_day` never-touched problems from `curriculum.md` filtered by the current phase's pattern allowlist + difficulty bounds, ordered by source-rank → difficulty → document order.
-5. Rewrites `today.md`.
+2. Reads `curriculum.md`'s DSA tick state. New ticks → log a touch dated today. Unticks → purge ledger entries (warned; preview with `--dry-run`).
+3. Aggregates the ledger by problem → `(touch_count, latest_date)`.
+4. Computes due-ness with SM-2 lite (table below). Items at or past their due date go into Recall, sorted most-overdue first, capped at 10.
+5. Picks `phase.new_per_day` never-touched problems from the current phase in `curriculum.md`, ordered by source-rank → difficulty → document order.
+6. Atomically writes `curriculum.md` so DSA boxes match the ledger and mock state reflects today.md edits.
+7. Rewrites `today.md`.
 
 **Intervals (SM-2 lite):**
 
@@ -75,30 +77,23 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 
 ## Files
 
-| File                                            | What's in it                                                                                                                       |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `recall_engine.py`                              | Snapshot-mode SM-2 lite engine. Run via `uv run prep recompute`.                                                                   |
-| `tests/test_recall_engine.py`                   | Narrative tests — also serve as the spec.                                                                                          |
-| `pyproject.toml`                                | Python project metadata + uv lock. `click` (CLI) + `pytest` (dev).                                                                 |
-| `launchd/com.rasha.recall-engine.plist`         | LaunchAgent template that runs `recompute` daily at 8:30 AM.                                                                       |
-| `prep-data/today.md`                            | _(generated)_ Today's frozen Recall + New queue. Tick boxes here.                                                                  |
-| `prep-data/coverage.md`                         | _(generated)_ Comprehensive overview — Readiness banner → Mocks (Upcoming/Completed/To-schedule) → System Design → DSA by pattern. |
-| `prep-data/completions.jsonl`                   | _(generated)_ Append-only completion ledger. Source of truth.                                                                      |
-| `prep-data/mock_interviews.json`                | _(user-edited)_ Mock interview list — `pending → scheduled (with date) → completed`. Schema in `mock_interviews.example.json`.     |
-| `prep-data/mock_interviews.example.json`        | Starter template for `mock_interviews.json`. Copy and edit as you book/complete mocks.                                             |
-| `prep-data/system_design_chapters.json`         | _(user-edited)_ System Design chapter list — `pending → completed`. Schema in `system_design_chapters.example.json`.               |
-| `prep-data/system_design_chapters.example.json` | Starter template for `system_design_chapters.json`, seeded with Alex Xu Vol 1+2 + DDIA chapters in read order.                     |
-| `prep-data/behavioral_prompts.json`             | _(user-edited)_ Behavioral interview prompt list — `pending → completed`. Schema in `behavioral_prompts.example.json`.             |
-| `prep-data/behavioral_prompts.example.json`     | Starter template for `behavioral_prompts.json`, seeded with 13 common prompts.                                                     |
-| `setup.md`                                      | Day-0 setup guide — Obsidian, Anki, Python, books, mocks, GCal, slash commands.                                                    |
-| `curriculum.md`                                 | Flat by-pattern source-of-truth problem list. Hand-edited.                                                                         |
-| `phases.json`                                   | Phase budgets — one record per phase: pattern allowlist + `new_per_day` + difficulty cap/floor.                                    |
-| `prep-plan-overview.md`                         | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.                                           |
-| `neetcode-150.md`                               | Original NC150 list (reference).                                                                                                   |
-| `python-gotchas.md`                             | Append-only log of Python language stumbles you hit during the prep.                                                               |
-| `patterns/*.md`                                 | One file per pattern (e.g., `arrays-and-hashing.md`). Mistakes nested under each problem.                                          |
-| `anki/`                                         | Four decks: code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total.                                      |
-| `problems/<pattern>/<diff>-<n>.py`              | Your actual solution code, organized by pattern + difficulty.                                                                      |
+| File                                    | What's in it                                                                                                    |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `curriculum.md`                         | **Master list** — DSA (by phase → pattern), System Design, Mocks, Behavioral. Tick boxes here OR in `today.md`. |
+| `recall_engine.py`                      | Snapshot-mode SM-2 lite engine. Run via `uv run prep recompute`.                                                |
+| `tests/test_recall_engine.py`           | Narrative tests — also serve as the spec.                                                                       |
+| `pyproject.toml`                        | Python project metadata + uv lock. `click` (CLI) + `pytest` (dev).                                              |
+| `launchd/com.rasha.recall-engine.plist` | LaunchAgent template that runs `recompute` daily at 8:30 AM.                                                    |
+| `prep-data/today.md`                    | _(generated, bidirectionally synced)_ Today's frozen Recall + New queue. Tick boxes here OR in curriculum.md.   |
+| `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth for DSA touches.                                   |
+| `setup.md`                              | Day-0 setup guide — Obsidian, Anki, Python, books, mocks, GCal, slash commands.                                 |
+| `prep-plan-overview.md`                 | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.                        |
+| `neetcode-150.md`                       | Original NC150 list (reference).                                                                                |
+| `python-gotchas.md`                     | Append-only log of Python language stumbles you hit during the prep.                                            |
+| `patterns/*.md`                         | One file per pattern (e.g., `arrays-and-hashing.md`). Mistakes nested under each problem.                       |
+| `anki/`                                 | Four decks: code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total.                   |
+| `problems/<pattern>/<diff>-<n>.py`      | Your actual solution code, organized by pattern + difficulty.                                                   |
+| `plans/`                                | Plan files for major refactors — living documents that document what's planned and what's done.                 |
 
 ## Glossary
 
