@@ -647,6 +647,22 @@ def test_compute_new_within_a_source_tier_preserves_document_order() -> None:
     assert [p.text for p in new] == ["[X] P3", "[X] P1", "[X] P2"]
 
 
+def test_compute_new_within_a_source_tier_surfaces_easies_before_mediums_before_hards() -> None:
+    """Within the same source tier, drain by difficulty (E → M → H) so the queue
+    serves easier warm-ups first, even when later in document order."""
+    curriculum = [
+        Problem("[Two Pointers] -> 3Sum", source_day=3, difficulty="M", source="nc-150"),
+        Problem("[Two Pointers] -> Container With Most Water", source_day=4, difficulty="M", source="nc-150"),
+        Problem("[Sliding Window] -> Best Time to Buy and Sell Stock", source_day=4, difficulty="E", source="nc-150"),
+    ]
+    new = compute_new(curriculum, ledger=[], limit=3)
+    assert [p.text for p in new] == [
+        "[Sliding Window] -> Best Time to Buy and Sell Stock",
+        "[Two Pointers] -> 3Sum",
+        "[Two Pointers] -> Container With Most Water",
+    ]
+
+
 # ─── Difficulty surfaced in renderer ───────────────────────────────────────────
 
 

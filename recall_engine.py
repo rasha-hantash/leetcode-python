@@ -34,6 +34,7 @@ Difficulty = Literal["E", "M", "H"]
 Source = Literal["nc-150", "nc-150+", "company question"]
 
 _SOURCE_RANK: dict[str, int] = {"nc-150": 0, "nc-150+": 1, "company question": 2}
+_DIFFICULTY_RANK: dict[str, int] = {"E": 0, "M": 1, "H": 2}
 
 
 # ─── Data types ──────────────────────────────────────────────────────────────
@@ -360,10 +361,17 @@ def compute_new(
     curriculum: list[Problem], ledger: list[Touch], limit: int = DEFAULT_NEW_LIMIT
 ) -> list[Problem]:
     """The next N never-touched problems, ordered by source provenance
-    (nc-150 > nc-150+ > company question) then document order."""
+    (nc-150 > nc-150+ > company question), then difficulty (E → M → H),
+    then document order."""
     touched = {t.problem for t in ledger}
     untouched = [p for p in curriculum if p.text not in touched]
-    return sorted(untouched, key=lambda p: _SOURCE_RANK.get(p.source, 0))[:limit]
+    return sorted(
+        untouched,
+        key=lambda p: (
+            _SOURCE_RANK.get(p.source, 0),
+            _DIFFICULTY_RANK.get(p.difficulty or "M", 1),
+        ),
+    )[:limit]
 
 
 # ─── Parsers ─────────────────────────────────────────────────────────────────
