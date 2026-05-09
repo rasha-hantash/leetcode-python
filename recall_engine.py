@@ -1144,22 +1144,18 @@ def recompute(
     sd_chapters_path: Path | None = None,
     behavioral_path: Path | None = None,
 ) -> RecomputeResult:
-    """One full cycle: log yesterday's completions, then regenerate today.md
-    (with the readiness banner at the top) and the comprehensive coverage.md
-    overview — Readiness → Mocks → SD → DSA-by-pattern."""
+    """One full cycle: log new completions, fold mock edits, regenerate today.md + coverage.md."""
     daily_md = daily_md_path.read_text()
     curriculum = parse_curriculum(daily_md)
     phases = parse_phases(daily_md)
 
-    new_touches: list[Touch] = []
-    if today_md_path.exists():
-        new_touches = parse_completions(today_md_path.read_text())
+    new_touches = (
+        parse_completions(today_md_path.read_text()) if today_md_path.exists() else []
+    )
     logged = append_to_ledger(ledger_path, new_touches)
 
     ledger = load_ledger(ledger_path)
-    recall = compute_recall(
-        ledger, today=today, limit=recall_limit, curriculum=curriculum
-    )
+    recall = compute_recall(ledger, today=today, limit=recall_limit, curriculum=curriculum)
     new = compute_new(curriculum, ledger, limit=new_limit)
 
     start = start_date(ledger)
@@ -1171,70 +1167,58 @@ def recompute(
     touched = {t.problem for t in ledger}
     untouched = sum(1 for p in curriculum if p.text not in touched)
 
-    mocks: list[Mock] = []
-    if mocks_path is not None and mocks_path.exists():
-        mocks = load_mocks(mocks_path)
-        # Fold any 📅/✅ edits in today.md back into mock_interviews.json before
-        # regenerating views. Same pattern as DSA touches → completions.jsonl.
-        if today_md_path.exists() and mocks:
-            known_ids = {m.id for m in mocks}
-            mock_updates = parse_mock_updates(
-                today_md_path.read_text(), known_ids
-            )
-            if mock_updates:
-                mocks, changed = apply_mock_updates(mocks, mock_updates)
-                if changed:
-                    save_mocks(mocks_path, mocks)
-    next_up_mock = next_mock(mocks) if mocks else None
+    mocks = load_mocks(mocks_path) if mocks_path and mocks_path.exists() else []
+    if mocks and today_md_path.exists():
+        updates = parse_mock_updates(today_md_path.read_text(), {m.id for m in mocks})
+        if updates:
+            mocks, changed = apply_mock_updates(mocks, updates)
+            if changed:
+                save_mocks(mocks_path, mocks)
 
-    sd_chapters: list[SDChapter] = []
-    if sd_chapters_path is not None and sd_chapters_path.exists():
-        sd_chapters = load_sd_chapters(sd_chapters_path)
-    sd_next = next_sd_chapter(sd_chapters) if sd_chapters else None
-
-    behavioral: list[BehavioralTopic] = []
-    if behavioral_path is not None and behavioral_path.exists():
-        behavioral = load_behavioral(behavioral_path)
+    sd_chapters = (
+        load_sd_chapters(sd_chapters_path)
+        if sd_chapters_path and sd_chapters_path.exists()
+        else []
+    )
+    behavioral = (
+        load_behavioral(behavioral_path)
+        if behavioral_path and behavioral_path.exists()
+        else []
+    )
 
     readiness = compute_readiness(curriculum, ledger, sd_chapters, mocks)
+    em_done, sd_done = readiness.em.done, readiness.sd.done
 
-    em_done_count = readiness.em.done
-    sd_done_count = readiness.sd.done
-
-    today_md_path.write_text(
-        render_today(
-            today=today,
-            recall=recall,
-            new=new,
-            day_n=day_n,
-            phase=phase,
-            projection=end,
-            projection_rate=rate,
-            projection_untouched=untouched,
-            sd_next=sd_next,
-            readiness=readiness,
-            next_up_mock=next_up_mock,
-            em_done=em_done_count,
-            sd_done=sd_done_count,
-            sd_chapters=sd_chapters,
-        )
-    )
+    today_md_path.write_text(render_today(
+        today=today,
+        recall=recall,
+        new=new,
+        day_n=day_n,
+        phase=phase,
+        projection=end,
+        projection_rate=rate,
+        projection_untouched=untouched,
+        sd_next=next_sd_chapter(sd_chapters),
+        readiness=readiness,
+        next_up_mock=next_mock(mocks),
+        em_done=em_done,
+        sd_done=sd_done,
+        sd_chapters=sd_chapters,
+    ))
 
     if coverage_md_path is not None:
         coverage_md_path.parent.mkdir(parents=True, exist_ok=True)
-        coverage_md_path.write_text(
-            render_coverage(
-                curriculum,
-                ledger,
-                today=today,
-                mocks=mocks if mocks_path else None,
-                sd_chapters=sd_chapters if sd_chapters_path else None,
-                readiness=readiness,
-                behavioral=behavioral if behavioral_path else None,
-                em_done=em_done_count,
-                sd_done=sd_done_count,
-            )
-        )
+        coverage_md_path.write_text(render_coverage(
+            curriculum,
+            ledger,
+            today=today,
+            mocks=mocks if mocks_path else None,
+            sd_chapters=sd_chapters if sd_chapters_path else None,
+            readiness=readiness,
+            behavioral=behavioral if behavioral_path else None,
+            em_done=em_done,
+            sd_done=sd_done,
+        ))
 
     return RecomputeResult(
         new_touches_logged=logged, recall_size=len(recall), new_size=len(new)
@@ -1326,46 +1310,25 @@ def recompute_cmd(
 
 
 @cli.command(name="reset")
-@click.option("--dsa", is_flag=True, help="Delete the DSA completion ledger.")
-@click.option(
-    "--sd",
-    is_flag=True,
-    help="Delete the system-design ledger (reserved — no SD ledger exists yet).",
-)
-@click.option(
-    "--all", "all_", is_flag=True, help="Delete every ledger this command knows about."
-)
 @click.option("--yes", is_flag=True, help="Skip the confirmation prompt.")
 @click.option(
     "--ledger-dir",
     type=click.Path(file_okay=False, path_type=Path),
     default=Path("prep-data"),
     show_default=True,
-    help="Directory containing the ledger files.",
+    help="Directory containing the ledger.",
 )
-def reset_cmd(dsa: bool, sd: bool, all_: bool, yes: bool, ledger_dir: Path) -> None:
-    """Delete one or more ledgers. Deletion = the next recompute treats you as pre-prep."""
-    targets: list[tuple[str, Path]] = []
-    if dsa or all_:
-        targets.append(("DSA ledger", ledger_dir / "completions.jsonl"))
-    if sd or all_:
-        targets.append(
-            ("SD ledger (not yet in use)", ledger_dir / "sd-completions.jsonl")
-        )
-    if not targets:
-        click.echo("Nothing to reset. Pass --dsa, --sd, or --all.")
-        return
-    click.echo("Will delete:")
-    for label, path in targets:
-        existence = "exists" if path.exists() else "does not exist (no-op)"
-        click.echo(f"  - {label}: {path} ({existence})")
+def reset_cmd(yes: bool, ledger_dir: Path) -> None:
+    """Delete the DSA completion ledger. Next recompute treats you as pre-prep."""
+    path = ledger_dir / "completions.jsonl"
+    existence = "exists" if path.exists() else "does not exist (no-op)"
+    click.echo(f"Will delete: {path} ({existence})")
     if not yes and not click.confirm("Proceed?", default=False):
         click.echo("Aborted.")
         return
-    for _label, path in targets:
-        if path.exists():
-            path.unlink()
-    click.echo("Reset complete. Run `recompute` to regenerate today.md.")
+    if path.exists():
+        path.unlink()
+    click.echo("Reset complete. Run `prep recompute` to regenerate today.md.")
 
 
 if __name__ == "__main__":
