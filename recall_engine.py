@@ -816,6 +816,25 @@ def _render_new_line(problem: Problem) -> str:
     return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)}"
 
 
+def _render_time_blocks(mock_today: bool) -> list[str]:
+    """`## Time blocks` section. On mock days, the SD slot shifts after the mock."""
+    blocks = (
+        [
+            "- 9:00–13:00  Recall",
+            "- 14:00–16:00 Mock",
+            "- 16:00–17:30 System Design",
+            "- 17:30–19:30 DSA New",
+        ]
+        if mock_today
+        else [
+            "- 9:00–13:00  Recall",
+            "- 14:00–15:30 System Design",
+            "- 15:30–19:30 DSA New",
+        ]
+    )
+    return ["## Time blocks", "", *blocks, ""]
+
+
 def _format_projection_line(
     end: date, rate: float, untouched: int, today: date
 ) -> str:
@@ -842,6 +861,7 @@ def render_today(
     em_done: int = 0,
     sd_done: int = 0,
     sd_chapters: list[SDChapter] | None = None,
+    mock_today: bool = False,
 ) -> str:
     """Produce the markdown for today.md."""
     base = f"# Today — {_format_date(today, weekday=True)}, {today.year}"
@@ -868,6 +888,8 @@ def render_today(
         lines += ["## Next mock", ""]
         lines += _render_next_mock_block(next_up_mock, today, em_done, sd_done, sd_chapters)
         lines.append("")
+
+    lines += _render_time_blocks(mock_today)
 
     lines += ["## Recall — most overdue first", ""]
     lines += (
@@ -1203,6 +1225,7 @@ def recompute(
     readiness = compute_readiness(curriculum, ledger, sd_chapters, mocks)
     em_done, sd_done = readiness.em.done, readiness.sd.done
 
+    mock_today = any(m.scheduled_date == today for m in mocks)
     today_md_path.write_text(render_today(
         today=today,
         recall=recall,
@@ -1218,6 +1241,7 @@ def recompute(
         em_done=em_done,
         sd_done=sd_done,
         sd_chapters=sd_chapters,
+        mock_today=mock_today,
     ))
 
     if coverage_md_path is not None:

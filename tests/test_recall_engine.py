@@ -2073,3 +2073,24 @@ def test_load_phases_reads_json_into_phase_dataclasses(tmp_path: Path) -> None:
     assert phases[1] == Phase(
         number=2, name="Y", patterns=None, new_per_day=0
     )
+
+
+# ─── Time blocks in today.md ─────────────────────────────────────────────────
+
+
+def test_time_blocks_show_default_schedule_on_non_mock_day() -> None:
+    out = render_today(today=date(2026, 5, 11), recall=[], new=[], day_n=1, mock_today=False)
+    assert "## Time blocks" in out
+    assert "9:00–13:00  Recall" in out
+    assert "14:00–15:30 System Design" in out
+    assert "15:30–19:30 DSA New" in out
+    assert "Mock" not in out  # no mock block on a non-mock day
+
+
+def test_time_blocks_shift_sd_when_today_is_a_mock_day() -> None:
+    """Mock day: 14:00–16:00 Mock pushes SD to 16:00–17:30 and DSA New to 17:30–19:30."""
+    out = render_today(today=date(2026, 5, 12), recall=[], new=[], day_n=2, mock_today=True)
+    blocks = out.split("## Time blocks", 1)[1]
+    assert "14:00–16:00 Mock" in blocks
+    assert "16:00–17:30 System Design" in blocks
+    assert "17:30–19:30 DSA New" in blocks
