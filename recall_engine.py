@@ -540,71 +540,270 @@ def load_ledger(path: Path) -> list[Touch]:
     return touches
 
 
-def load_sd_chapters(path: Path) -> list[SDChapter]:
-    """Read the SD chapter list. Empty list if the file does not exist."""
-    if not path.exists():
-        return []
-    return [
-        SDChapter(
-            id=r["id"],
-            title=r["title"],
-            book=r["book"],
-            status=r["status"],
-            completed_date=_opt_date(r.get("completed_date")),
-        )
-        for r in json.loads(path.read_text())
-    ]
-
-
 def next_sd_chapter(chapters: list[SDChapter]) -> SDChapter | None:
     """First pending chapter, or None if all complete."""
     return next((ch for ch in chapters if ch.status == "pending"), None)
 
 
-def load_behavioral(path: Path) -> list[BehavioralTopic]:
-    """Read the behavioral prep list. Empty list if the file does not exist."""
-    if not path.exists():
-        return []
-    return [
-        BehavioralTopic(
-            id=r["id"],
-            prompt=r["prompt"],
-            status=r["status"],
-            completed_date=_opt_date(r.get("completed_date")),
-            notes=r.get("notes"),
-        )
-        for r in json.loads(path.read_text())
-    ]
+# ─── Curriculum-MD section parsers (SD / Mocks / Behavioral) ──────────────────
 
 
-def _parse_mock_prereq(data: dict[str, Any] | None) -> MockPrereq | None:
-    if not data:
-        return None
-    return MockPrereq(
-        em_problems=int(data.get("em_problems", 0)),
-        sd_chapters=int(data.get("sd_chapters", 0)),
-        sd_chapter_ids=tuple(data.get("sd_chapter_ids", ())),
-    )
+_ID_PREFIX = re.compile(r"^\[([^\]]+)\]\s+(.*)$")
+_BOOK_LINK = re.compile(r"\[book\]\([^)]+\)")
+_BOOKING_URL = re.compile(r"\[book\]\(([^)]+)\)")
+_PREREQ = re.compile(r"prereq:\s*(.*)")
+_NOTE = re.compile(r"note:\s*(.*)")
+_PENDING = re.compile(r"_pending_")
+_SECTION_H2 = re.compile(r"^##\s+(.+?)\s*$")
 
 
-def load_mocks(path: Path) -> list[Mock]:
-    """Read the mocks JSON file. Empty list if the file does not exist."""
-    if not path.exists():
-        return []
-    return [
-        Mock(
-            id=r["id"],
-            status=r["status"],
-            platform=r.get("platform"),
-            topic=r.get("topic"),
-            scheduled_date=_opt_date(r.get("scheduled_date")),
-            completed_date=_opt_date(r.get("completed_date")),
-            notes=r.get("notes"),
-            prerequisites=_parse_mock_prereq(r.get("prerequisites")),
-            booking_url=r.get("booking_url"),
-        )
-        for r in json.loads(path.read_text())
-    ]
+def _section_lines(md: str, name: str) -> list[str]:
+    """Lines under `## <name>` up to the next `## ` heading or EOF."""
+    out: list[str] = []
+    in_section = False
+    for line in md.splitlines():
+        h = _SECTION_H2.match(line)
+        if h:
+            in_section = h.group(1).strip() == name
+            continue
+        if in_section:
+            out.append(line)
+    return out
+
+
+def parse_sd_chapters(md: str) -> list[SDChapter]:
+    """Parse the `## System Design` section of curriculum.md.
+    Format: `- [ ] [id] Book · Title [✅ DATE]`."""
+    out: list[SDChapter] = []
+    for line in _section_lines(md, "System Design"):
+        m = _PROBLEM_LINE.match(line)
+        if not m:
+            continue
+        body = m.group(1)
+        is_done = bool(_CHECKED_LINE.match(line))
+        date_m = _DONE_DATE.search(body)
+        body = _DONE_DATE.sub("", body).strip()
+        id_m = _ID_PREFIX.match(body)
+        if not id_m:
+            continue
+        cid, rest = id_m.group(1), id_m.group(2)
+        if " · " in rest:
+            book, title = rest.split(" · ", 1)
+        else:
+            book, title = "", rest
+        out.append(SDChapter(
+            id=cid,
+            book=book.strip(),
+            title=title.strip(),
+            status="completed" if is_done else "pending",
+            completed_date=date.fromisoformat(date_m.group(1)) if date_m else None,
+        ))
+    return out
+
+
+def parse_behavioral(md: str) -> list[BehavioralTopic]:
+    """Parse the `## Behavioral` section. Format: `- [ ] [id] prompt [✅ DATE] [· note: ...]`."""
+    out: list[BehavioralTopic] = []
+    for line in _section_lines(md, "Behavioral"):
+        m = _PROBLEM_LINE.match(line)
+        if not m:
+            continue
+        body = m.group(1)
+        is_done = bool(_CHECKED_LINE.match(line))
+        date_m = _DONE_DATE.search(body)
+        # Extract optional note suffix.
+        note: str | None = None
+        if " · note: " in body:
+            body, note = body.split(" · note: ", 1)
+            note = note.strip()
+        body = _DONE_DATE.sub("", body).strip()
+        id_m = _ID_PREFIX.match(body)
+        if not id_m:
+            continue
+        out.append(BehavioralTopic(
+            id=id_m.group(1),
+            prompt=id_m.group(2).strip(),
+            status="completed" if is_done else "pending",
+            completed_date=date.fromisoformat(date_m.group(1)) if date_m else None,
+            notes=note,
+        ))
+    return out
+
+
+def parse_mocks(md: str) -> list[Mock]:
+    """Parse the `## Mocks` section.
+    Format: `- [ ] [mock-id] Platform · Topic · {📅 DATE | _pending_ | ✅ DATE} · [book](url) · prereq: ... · note: ...`
+    Segments after the first two are ` · `-delimited and order-independent."""
+    out: list[Mock] = []
+    for line in _section_lines(md, "Mocks"):
+        m = _PROBLEM_LINE.match(line)
+        if not m:
+            continue
+        body = m.group(1).strip()
+        id_m = _ID_PREFIX.match(body)
+        if not id_m:
+            continue
+        mock_id = id_m.group(1)
+        rest = id_m.group(2)
+        segments = [s.strip() for s in rest.split(" · ")]
+        # First two segments are platform · topic (when present and not metadata).
+        platform: str | None = None
+        topic: str | None = None
+        booking_url: str | None = None
+        prereq_text: str | None = None
+        note: str | None = None
+        scheduled_date: date | None = None
+        completed_date: date | None = None
+
+        def is_meta(seg: str) -> bool:
+            return bool(
+                _BOOKING_URL.search(seg) or _DONE_DATE.search(seg) or
+                _BOOKED_DATE.search(seg) or _PREREQ.match(seg) or
+                _NOTE.match(seg) or _PENDING.search(seg)
+            )
+
+        head: list[str] = []
+        for seg in segments:
+            if not is_meta(seg) and len(head) < 2:
+                head.append(seg)
+                continue
+            if (mh := _BOOKING_URL.search(seg)):
+                booking_url = mh.group(1)
+                continue
+            if (dm := _DONE_DATE.search(seg)):
+                completed_date = date.fromisoformat(dm.group(1))
+                continue
+            if (sm := _BOOKED_DATE.search(seg)):
+                scheduled_date = date.fromisoformat(sm.group(1))
+                continue
+            if (pm := _PREREQ.match(seg)):
+                prereq_text = pm.group(1).strip()
+                continue
+            if (nm := _NOTE.match(seg)):
+                note = nm.group(1).strip()
+                continue
+
+        platform = head[0] if head else None
+        topic = head[1] if len(head) > 1 else None
+
+        is_done = bool(_CHECKED_LINE.match(line))
+        if is_done:
+            status: MockStatus = "completed"
+        elif scheduled_date is not None:
+            status = "scheduled"
+        else:
+            status = "pending"
+
+        prereq = _parse_inline_prereq(prereq_text) if prereq_text else None
+
+        out.append(Mock(
+            id=mock_id,
+            status=status,
+            platform=platform,
+            topic=topic,
+            scheduled_date=scheduled_date,
+            completed_date=completed_date,
+            notes=note,
+            prerequisites=prereq,
+            booking_url=booking_url,
+        ))
+    return out
+
+
+_INLINE_EM = re.compile(r"^(\d+)\s+E\+M$")
+_INLINE_SD_COUNT = re.compile(r"^(\d+)\s+SD$")
+
+
+def _parse_inline_prereq(text: str) -> MockPrereq | None:
+    """Parse `15 E+M, 2 SD` or `25 E+M, axu1-4, axu1-5` into a MockPrereq."""
+    em = 0
+    sd_count = 0
+    sd_ids: list[str] = []
+    for raw in (s.strip() for s in text.split(",")):
+        if not raw:
+            continue
+        if (m := _INLINE_EM.match(raw)):
+            em = int(m.group(1))
+        elif (m := _INLINE_SD_COUNT.match(raw)):
+            sd_count = int(m.group(1))
+        else:
+            sd_ids.append(raw)
+    pre = MockPrereq(em_problems=em, sd_chapters=sd_count, sd_chapter_ids=tuple(sd_ids))
+    return pre if pre.has_any else None
+
+
+def _render_mock_line(m: Mock) -> str:
+    """One bullet for the `## Mocks` section."""
+    if m.status == "completed":
+        check = "x"
+    else:
+        check = " "
+    head_bits = [f"[{m.id}]"]
+    if m.platform:
+        head_bits.append(m.platform)
+    if m.topic:
+        head_bits.append(m.topic)
+    if len(head_bits) == 1:
+        head = head_bits[0]
+    else:
+        head = f"{head_bits[0]} {' · '.join(head_bits[1:])}"
+    suffix: list[str] = []
+    if m.status == "scheduled" and m.scheduled_date:
+        suffix.append(f"📅 {m.scheduled_date.isoformat()}")
+    elif m.status == "pending":
+        suffix.append("_pending_")
+    elif m.status == "completed" and m.completed_date:
+        suffix.append(f"✅ {m.completed_date.isoformat()}")
+    if m.status != "completed" and (url := m.effective_booking_url):
+        suffix.append(f"[book]({url})")
+    if m.prerequisites and m.prerequisites.has_any:
+        bits: list[str] = []
+        if m.prerequisites.em_problems:
+            bits.append(f"{m.prerequisites.em_problems} E+M")
+        if m.prerequisites.sd_chapter_ids:
+            bits.append(", ".join(m.prerequisites.sd_chapter_ids))
+        elif m.prerequisites.sd_chapters:
+            bits.append(f"{m.prerequisites.sd_chapters} SD")
+        if bits:
+            suffix.append(f"prereq: {', '.join(bits)}")
+    if m.notes:
+        suffix.append(f"note: {m.notes}")
+    line = f"- [{check}] {head}"
+    if suffix:
+        line += " · " + " · ".join(suffix)
+    return line
+
+
+def write_curriculum_mocks(md: str, mocks: list[Mock]) -> str:
+    """Surgically replace each mock line in curriculum.md by id (preserves any
+    user-added headers/notes outside the bullet lines)."""
+    by_id = {m.id: m for m in mocks}
+    out: list[str] = []
+    in_mocks = False
+    for line in md.splitlines():
+        h = _SECTION_H2.match(line)
+        if h:
+            in_mocks = h.group(1).strip() == "Mocks"
+            out.append(line)
+            continue
+        if in_mocks:
+            pm = _PROBLEM_LINE.match(line)
+            if pm:
+                body = pm.group(1).strip()
+                idm = _ID_PREFIX.match(body)
+                if idm and idm.group(1) in by_id:
+                    out.append(_render_mock_line(by_id[idm.group(1)]))
+                    continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def _atomic_write(path: Path, content: str) -> None:
+    """Write via a sibling tmp file + os.replace — atomic on POSIX."""
+    import os
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(content)
+    os.replace(tmp, path)
 
 
 _MOCK_LINE = re.compile(r"^\s*-\s+\[([ xX])\]\s+\[([^\]]+)\]\s+(.*)$")
@@ -650,37 +849,6 @@ def apply_mock_updates(
             by_id[mock_id] = replace(existing, status="scheduled", scheduled_date=dt)
             changes += 1
     return list(by_id.values()), changes
-
-
-def _mock_to_record(m: Mock) -> dict[str, Any]:
-    rec: dict[str, Any] = {"id": m.id, "status": m.status}
-    for key, val in (
-        ("platform", m.platform),
-        ("topic", m.topic),
-        ("scheduled_date", m.scheduled_date.isoformat() if m.scheduled_date else None),
-        ("completed_date", m.completed_date.isoformat() if m.completed_date else None),
-        ("notes", m.notes),
-    ):
-        if val:
-            rec[key] = val
-    if m.prerequisites and m.prerequisites.has_any:
-        prereqs: dict[str, Any] = {
-            "em_problems": m.prerequisites.em_problems,
-            "sd_chapters": m.prerequisites.sd_chapters,
-        }
-        if m.prerequisites.sd_chapter_ids:
-            prereqs["sd_chapter_ids"] = list(m.prerequisites.sd_chapter_ids)
-        rec["prerequisites"] = prereqs
-    if m.booking_url:
-        rec["booking_url"] = m.booking_url
-    return rec
-
-
-def save_mocks(path: Path, mocks: list[Mock]) -> None:
-    """Write mocks back to JSON. Used by recompute to fold today.md edits."""
-    path.write_text(
-        json.dumps([_mock_to_record(m) for m in mocks], indent=2) + "\n"
-    )
 
 
 def mock_prereq_status(
@@ -751,7 +919,7 @@ def _render_next_mock_block(
     """Editable checkbox for the next mock, tagged `[mock-id]`.
     Pending: user appends `📅 DATE` after booking. Scheduled: user ticks box on
     completion (Tasks plugin auto-stamps ✅). Recompute folds either edit back
-    into mock_interviews.json."""
+    into the `## Mocks` section of curriculum.md."""
     if mock.status == "scheduled" and mock.scheduled_date is not None:
         delta = (mock.scheduled_date - today).days
         line = (
@@ -1186,14 +1354,18 @@ def recompute(
     today: date,
     recall_limit: int = DEFAULT_RECALL_LIMIT,
     coverage_md_path: Path | None = None,
-    mocks_path: Path | None = None,
-    sd_chapters_path: Path | None = None,
-    behavioral_path: Path | None = None,
 ) -> RecomputeResult:
-    """One full cycle: log new completions, fold mock edits, regenerate today.md + coverage.md."""
+    """One full cycle: log new completions, fold mock edits, regenerate today.md + coverage.md.
+
+    Reads everything (DSA, SD, Mocks, Behavioral) from curriculum.md. When
+    today.md ticks update mock state, the change is written back to
+    curriculum.md atomically."""
     curriculum_md = curriculum_md_path.read_text()
     curriculum = parse_curriculum(curriculum_md)
     phases = parse_phases(curriculum_md)
+    sd_chapters = parse_sd_chapters(curriculum_md)
+    mocks = parse_mocks(curriculum_md)
+    behavioral = parse_behavioral(curriculum_md)
 
     today_md = today_md_path.read_text() if today_md_path.exists() else ""
     logged = append_to_ledger(ledger_path, parse_completions(today_md))
@@ -1214,24 +1386,15 @@ def recompute(
     touched = {t.problem for t in ledger}
     untouched = sum(1 for p in curriculum if p.text not in touched)
 
-    mocks = load_mocks(mocks_path) if mocks_path and mocks_path.exists() else []
     if mocks:
         updates = parse_mock_updates(today_md, {m.id for m in mocks})
         if updates:
             mocks, changed = apply_mock_updates(mocks, updates)
             if changed:
-                save_mocks(mocks_path, mocks)
-
-    sd_chapters = (
-        load_sd_chapters(sd_chapters_path)
-        if sd_chapters_path and sd_chapters_path.exists()
-        else []
-    )
-    behavioral = (
-        load_behavioral(behavioral_path)
-        if behavioral_path and behavioral_path.exists()
-        else []
-    )
+                _atomic_write(
+                    curriculum_md_path,
+                    write_curriculum_mocks(curriculum_md, mocks),
+                )
 
     readiness = compute_readiness(curriculum, ledger, sd_chapters, mocks)
     em_done, sd_done = readiness.em.done, readiness.sd.done
@@ -1262,10 +1425,10 @@ def recompute(
             curriculum,
             ledger,
             today=today,
-            mocks=mocks if mocks_path else None,
-            sd_chapters=sd_chapters if sd_chapters_path else None,
+            mocks=mocks,
+            sd_chapters=sd_chapters,
             readiness=readiness,
-            behavioral=behavioral if behavioral_path else None,
+            behavioral=behavioral,
             em_done=em_done,
             sd_done=sd_done,
         ))
@@ -1312,35 +1475,11 @@ def cli() -> None:
     show_default=True,
     help="Generated by-pattern coverage view. Overwritten on every recompute.",
 )
-@click.option(
-    "--mocks",
-    type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("prep-data/mock_interviews.json"),
-    show_default=True,
-    help="User-editable list of mock interviews (pending/scheduled/completed).",
-)
-@click.option(
-    "--sd-chapters",
-    type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("prep-data/system_design_chapters.json"),
-    show_default=True,
-    help="User-editable list of System Design chapters (pending/completed).",
-)
-@click.option(
-    "--behavioral",
-    type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("prep-data/behavioral_prompts.json"),
-    show_default=True,
-    help="User-editable list of behavioral interview prompts (pending/completed).",
-)
 def recompute_cmd(
     curriculum: Path,
     today_md: Path,
     ledger: Path,
     coverage_md: Path,
-    mocks: Path,
-    sd_chapters: Path,
-    behavioral: Path,
 ) -> None:
     """Fold yesterday's checks into the ledger, then regenerate today.md and coverage.md."""
     result = recompute(
@@ -1349,9 +1488,6 @@ def recompute_cmd(
         ledger,
         today=date.today(),
         coverage_md_path=coverage_md,
-        mocks_path=mocks,
-        sd_chapters_path=sd_chapters,
-        behavioral_path=behavioral,
     )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "

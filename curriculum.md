@@ -333,4 +333,63 @@ _`prep-data/today.md` — `prep recompute` keeps both in sync._
 
 - [ ] Partition K Equal Subsets (M) (nc-150+)
 
+## System Design
+
+_Read in order. Tick a box here or in `prep-data/today.md`._
+
+- [ ] [axu1-1] Alex Xu Vol 1 · Ch 1 — Scale from Zero to Millions
+- [ ] [axu1-2] Alex Xu Vol 1 · Ch 2 — Back-of-envelope estimation
+- [ ] [axu1-3] Alex Xu Vol 1 · Ch 3 — Framework for SD interviews
+- [ ] [axu1-4] Alex Xu Vol 1 · Ch 4 — Rate Limiter
+- [ ] [axu1-5] Alex Xu Vol 1 · Ch 5 — Consistent Hashing
+- [ ] [axu1-6] Alex Xu Vol 1 · Ch 6 — Key-Value Store
+- [ ] [ddia-5] DDIA · Ch 5 — Replication
+- [ ] [axu1-7] Alex Xu Vol 1 · Ch 7 — Unique ID Generator
+- [ ] [axu1-8] Alex Xu Vol 1 · Ch 8 — URL Shortener
+- [ ] [axu1-9] Alex Xu Vol 1 · Ch 9 — Web Crawler
+- [ ] [ddia-6] DDIA · Ch 6 — Partitioning
+- [ ] [axu1-10] Alex Xu Vol 1 · Ch 10 — Notification System
+- [ ] [axu1-11] Alex Xu Vol 1 · Ch 11 — News Feed System
+- [ ] [axu1-12] Alex Xu Vol 1 · Ch 12 — Chat System
+- [ ] [ddia-7] DDIA · Ch 7 — Transactions
+- [ ] [axu1-13] Alex Xu Vol 1 · Ch 13 — Search Autocomplete
+- [ ] [axu1-14] Alex Xu Vol 1 · Ch 14 — YouTube
+- [ ] [axu1-15] Alex Xu Vol 1 · Ch 15 — Google Drive
+- [ ] [ddia-8] DDIA · Ch 8 — The Trouble with Distributed Systems
+- [ ] [axu1-16] Alex Xu Vol 1 · Ch 16 — Wrap-up + interview tips
+- [ ] [axu2-1] Alex Xu Vol 2 · Ch 1 — Proximity Service
+- [ ] [axu2-2] Alex Xu Vol 2 · Ch 2 — Nearby Friends
+- [ ] [ddia-9] DDIA · Ch 9 — Consistency and Consensus
+- [ ] [axu2-3] Alex Xu Vol 2 · Ch 3 — Google Maps
+- [ ] [axu2-4] Alex Xu Vol 2 · Ch 4 — Distributed Message Queue
+- [ ] [axu2-5] Alex Xu Vol 2 · Ch 5 — Metrics monitoring
+- [ ] [axu2-6] Alex Xu Vol 2 · Ch 6 — Ad Click aggregation
+- [ ] [axu2-7] Alex Xu Vol 2 · Ch 7 — Hotel Reservation
+
+## Mocks
+
+_Edit `📅 DATE` to schedule. Tick to complete (Tasks plugin auto-stamps ✅)._
+
+- [ ] [mock-1] Pramp · Arrays & Hashing · _pending_ · [book](https://www.pramp.com/dashboard/upcoming-sessions) · prereq: 15 E+M, 2 SD
+- [ ] [mock-2] Interviewing.io · Trees · 📅 2026-05-20 · [book](https://interviewing.io/dashboard) · prereq: 25 E+M, axu1-4, axu1-5, axu1-6
+- [x] [mock-3] Pramp · DP · ✅ 2026-05-08 · note: Weak on memoization — practice top-down vs bottom-up
+
+## Behavioral
+
+_Self-paced — knock these out in a weekend._
+
+- [ ] [b1] Tell me about yourself / walk me through your background
+- [ ] [b2] Why this company / why are you looking
+- [ ] [b3] Most impactful project you've owned end-to-end
+- [ ] [b4] Conflict with a teammate or stakeholder
+- [ ] [b5] Time you disagreed with your manager
+- [ ] [b6] Hardest technical decision you've made
+- [ ] [b7] Failure or mistake — what you learned
+- [ ] [b8] Time you had to learn something new fast
+- [ ] [b9] Mentoring or onboarding someone
+- [ ] [b10] Ambiguous problem you scoped from scratch
+- [ ] [b11] Trade-off between quality and speed
+- [ ] [b12] Most proud-of accomplishment
+- [ ] [b13] Questions to ask the interviewer (per round)
+
 _Total: 182 problems across 41 pattern-phase groups._
