@@ -36,7 +36,6 @@ from recall_engine import (
     load_behavioral,
     load_ledger,
     load_mocks,
-    load_phases,
     load_sd_chapters,
     mock_prereq_status,
     next_sd_chapter,
@@ -45,6 +44,7 @@ from recall_engine import (
     save_mocks,
     parse_completions,
     parse_curriculum,
+    parse_phases,
     projected_end_date,
     recompute,
     render_coverage,
@@ -224,7 +224,7 @@ def test_new_returns_fewer_than_limit_when_curriculum_is_exhausted() -> None:
 SAMPLE_CURRICULUM_MD = """\
 # NeetCode Curriculum
 
-Source of truth — flat by-pattern list.
+Source of truth — by-phase, by-pattern list.
 
 ## Legend
 
@@ -232,13 +232,19 @@ Source of truth — flat by-pattern list.
 
 ---
 
-## Arrays & Hashing
+## DSA
+
+### Phase 1 — Linear Patterns E+M (5 new/day)
+
+#### Arrays & Hashing
 
 - [ ] Contains Duplicate (E)
 - [ ] Valid Anagram (E)
 - [ ] Two Sum (E)
 
-## Two Pointers
+### Phase 5 — Hard Problems (2 new/day)
+
+#### Two Pointers
 
 - [ ] Trapping Rain Water `T2` (H)
 """
@@ -356,7 +362,11 @@ def test_ledger_returns_empty_list_when_no_file_exists(tmp_path: Path) -> None:
 
 
 THREE_DAY_CURRICULUM_MD = """\
-## A
+## DSA
+
+### Phase 1 — Linear (5 new/day)
+
+#### A
 
 - [ ] P1 (E)
 - [ ] P2 (E)
@@ -479,23 +489,31 @@ def test_renderer_includes_a_dated_header_for_orientation() -> None:
 
 
 _TAGGED_DAILY_MD = """\
-## Arrays & Hashing
+## DSA
+
+### Phase 1 — Linear (5 new/day)
+
+#### Arrays & Hashing
 
 - [ ] Contains Duplicate (E)
 - [ ] Group Anagrams (M)
 - [ ] Customers With 2-Day 2-Page Visits (M) (company question)
 
-## Two Pointers
+### Phase 5 — Hards (2 new/day)
+
+#### Two Pointers
 
 - [ ] Trapping Rain Water (H)
 
-## Boyer-Moore
-
-- [ ] Majority Element II (M) (nc-150+)
-
-## Segment Tree
+#### Segment Tree
 
 - [ ] Count of Smaller After Self (H) (nc-150+)
+
+### Phase 7 — NC-150+ (3 new/day)
+
+#### Boyer-Moore
+
+- [ ] Majority Element II (M) (nc-150+)
 """
 
 
@@ -561,7 +579,10 @@ def test_completion_parser_strips_variant_of_tag_from_canonical() -> None:
 
 
 def test_curriculum_parser_canonical_text_omits_variant_of_tag() -> None:
-    md = "## 1-D DP\n\n- [ ] House Robber II (M) (variant of: House Robber)\n"
+    md = (
+        "## DSA\n\n### Phase 4 — DP (4 new/day)\n\n"
+        "#### 1-D DP\n\n- [ ] House Robber II (M) (variant of: House Robber)\n"
+    )
     problems = parse_curriculum(md)
     assert len(problems) == 1
     assert problems[0].text == "[1-D DP] -> House Robber II"
@@ -722,9 +743,7 @@ def test_renderer_header_says_pre_prep_when_no_day_n() -> None:
 
 
 def test_renderer_header_includes_day_n_when_provided() -> None:
-    phase = Phase(
-        number=1, name="Linear Patterns E+M", patterns=("A",), new_per_day=5
-    )
+    phase = Phase(number=1, name="Linear Patterns E+M", new_per_day=5)
     out = render_today(
         today=date(2026, 5, 11), recall=[], new=[], day_n=1, phase=phase
     )
@@ -734,18 +753,29 @@ def test_renderer_header_includes_day_n_when_provided() -> None:
 
 def test_renderer_header_includes_phase_name_and_budget() -> None:
     """Phase header lists name + new/day budget so the reader sees the cap."""
-    phase = Phase(
-        number=1,
-        name="Linear Patterns E+M",
-        patterns=("Arrays & Hashing",),
-        new_per_day=5,
-    )
+    phase = Phase(number=1, name="Linear Patterns E+M", new_per_day=5)
     out = render_today(
         today=date(2026, 5, 11), recall=[], new=[], day_n=1, phase=phase
     )
     first_line = out.splitlines()[0]
-    assert "Phase 1 — Linear Patterns E+M" in first_line
+    assert "Phase 1" in first_line
+    assert "Linear Patterns E+M" in first_line
     assert "5 new/day" in first_line
+
+
+def test_renderer_header_includes_phase_progress_when_total_phases_provided() -> None:
+    """`Phase 2/7` shows current phase out of total at a glance."""
+    phase = Phase(number=2, name="Linked List + Trees", new_per_day=4)
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[],
+        day_n=1,
+        phase=phase,
+        total_phases=7,
+    )
+    first_line = out.splitlines()[0]
+    assert "Phase 2/7" in first_line
 
 
 def test_renderer_header_falls_back_to_day_only_when_phase_is_none() -> None:
@@ -887,7 +917,7 @@ def test_renderer_omits_projection_line_when_curriculum_already_fully_touched() 
 
 def test_curriculum_parser_captures_variant_of_relationship() -> None:
     md = (
-        "## 1-D DP\n\n"
+        "## DSA\n\n### Phase 4 — DP (4 new/day)\n\n#### 1-D DP\n\n"
         "- [ ] House Robber (M)\n"
         "- [ ] House Robber II (M) (variant of: House Robber)\n"
     )
@@ -982,7 +1012,8 @@ def test_render_coverage_handles_variant_whose_canonical_is_not_in_curriculum() 
 def test_recompute_writes_coverage_md_when_path_provided(tmp_path: Path) -> None:
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## Arrays & Hashing\n\n- [ ] Two Sum (E)\n"
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- [ ] Two Sum (E)\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
@@ -1950,56 +1981,36 @@ def test_recompute_folds_today_md_completion_check_into_mock_interviews_json(
 
 # ─── Phase model + phase-aware compute_new ───────────────────────────────────
 
-PHASE_LINEAR = Phase(
-    number=1,
-    name="Linear Patterns E+M",
-    patterns=("Arrays & Hashing", "Two Pointers"),
-    new_per_day=5,
-    difficulty_cap="M",
-)
-PHASE_TREES = Phase(
-    number=2,
-    name="Trees",
-    patterns=("Trees",),
-    new_per_day=4,
-    difficulty_cap="M",
-)
-PHASE_HARD = Phase(
-    number=3,
-    name="Hard Problems",
-    patterns=None,
-    new_per_day=2,
-    difficulty_cap="H",
-    difficulty_floor="H",
-)
-PHASE_REINFORCE = Phase(
-    number=8,
-    name="Reinforcement",
-    patterns=None,
-    new_per_day=0,
-)
+PHASE_LINEAR = Phase(number=1, name="Linear Patterns E+M", new_per_day=5)
+PHASE_TREES = Phase(number=2, name="Trees", new_per_day=4)
+PHASE_HARD = Phase(number=3, name="Hard Problems", new_per_day=2)
+PHASE_REINFORCE = Phase(number=8, name="Reinforcement", new_per_day=0)
 
 
-def _p(text: str, diff: str = "M", source: str = "nc-150") -> Problem:
-    return Problem(text=text, difficulty=diff, source=source)  # type: ignore[arg-type]
+def _p(
+    text: str,
+    diff: str = "M",
+    source: str = "nc-150",
+    phase: int | None = None,
+) -> Problem:
+    return Problem(text=text, difficulty=diff, source=source, phase=phase)  # type: ignore[arg-type]
 
 
 def test_current_phase_picks_first_phase_with_untouched_problems() -> None:
     curriculum = [
-        _p("[Arrays & Hashing] -> Two Sum", "E"),
-        _p("[Trees] -> Invert Binary Tree", "E"),
+        _p("[Arrays & Hashing] -> Two Sum", "E", phase=1),
+        _p("[Trees] -> Invert Binary Tree", "E", phase=2),
     ]
     ledger: list[Touch] = []
     assert current_phase(curriculum, ledger, [PHASE_LINEAR, PHASE_TREES]).number == 1
 
 
 def test_current_phase_advances_when_phase_patterns_drained() -> None:
-    """All Phase 1 problems touched → current phase rolls to Phase 2 even though
-    Phase 2 also has untouched work. Advancement is by the lowest unfinished phase."""
+    """All Phase 1 problems touched → current phase rolls to Phase 2."""
     curriculum = [
-        _p("[Arrays & Hashing] -> Two Sum", "E"),
-        _p("[Two Pointers] -> Valid Palindrome", "E"),
-        _p("[Trees] -> Invert Binary Tree", "E"),
+        _p("[Arrays & Hashing] -> Two Sum", "E", phase=1),
+        _p("[Two Pointers] -> Valid Palindrome", "E", phase=1),
+        _p("[Trees] -> Invert Binary Tree", "E", phase=2),
     ]
     ledger = [
         Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 9)),
@@ -2008,71 +2019,65 @@ def test_current_phase_advances_when_phase_patterns_drained() -> None:
     assert current_phase(curriculum, ledger, [PHASE_LINEAR, PHASE_TREES]).number == 2
 
 
-def test_compute_new_respects_phase_pattern_allowlist() -> None:
+def test_compute_new_filters_to_problems_assigned_to_current_phase() -> None:
+    """Phase membership is encoded on Problem.phase; compute_new filters by it."""
     curriculum = [
-        _p("[Arrays & Hashing] -> Two Sum", "E"),
-        _p("[Trees] -> Invert Binary Tree", "E"),
-        _p("[Two Pointers] -> 3Sum", "M"),
+        _p("[Arrays & Hashing] -> Two Sum", "E", phase=1),
+        _p("[Trees] -> Invert Binary Tree", "E", phase=2),
+        _p("[Two Pointers] -> 3Sum", "M", phase=1),
     ]
     new = compute_new(curriculum, ledger=[], phase=PHASE_LINEAR)
-    assert all(p.pattern in PHASE_LINEAR.patterns for p in new)
+    assert all(p.phase == 1 for p in new)
     assert "[Trees] -> Invert Binary Tree" not in {p.text for p in new}
-
-
-def test_compute_new_respects_phase_difficulty_cap() -> None:
-    curriculum = [
-        _p("[Arrays & Hashing] -> Two Sum", "E"),
-        _p("[Arrays & Hashing] -> 3Sum", "M"),
-        _p("[Arrays & Hashing] -> Trapping Rain Water", "H"),
-    ]
-    new = compute_new(curriculum, ledger=[], phase=PHASE_LINEAR)
-    assert "[Arrays & Hashing] -> Trapping Rain Water" not in {p.text for p in new}
-    assert {p.difficulty for p in new} <= {"E", "M"}
-
-
-def test_compute_new_respects_phase_difficulty_floor_for_hard_phase() -> None:
-    """Phase 5 (Hards-only) skips E/M problems even though they're untouched."""
-    curriculum = [
-        _p("[Arrays & Hashing] -> Two Sum", "E"),
-        _p("[Arrays & Hashing] -> 3Sum", "M"),
-        _p("[Arrays & Hashing] -> Trapping Rain Water", "H"),
-    ]
-    new = compute_new(curriculum, ledger=[], phase=PHASE_HARD)
-    assert [p.text for p in new] == ["[Arrays & Hashing] -> Trapping Rain Water"]
 
 
 def test_compute_new_returns_empty_when_phase_new_per_day_is_zero() -> None:
     """Reinforcement phase: ledger is full, no acquisition wanted."""
-    curriculum = [_p("[Arrays & Hashing] -> Two Sum", "E")]
+    curriculum = [_p("[Arrays & Hashing] -> Two Sum", "E", phase=8)]
     assert compute_new(curriculum, ledger=[], phase=PHASE_REINFORCE) == []
 
 
-def test_compute_new_with_null_patterns_allows_any_pattern() -> None:
-    """Phase 5 has `patterns=None` — any pattern is eligible (subject to floor)."""
-    curriculum = [
-        _p("[Arrays & Hashing] -> Trapping Rain Water", "H"),
-        _p("[Trees] -> Binary Tree Maximum Path Sum", "H"),
-        _p("[Graphs] -> Word Ladder", "H"),
+def test_parse_phases_extracts_phase_metadata_from_curriculum_md() -> None:
+    """Phase budgets live inline in `### Phase N — Name (X new/day)` headings."""
+    md = (
+        "## DSA\n\n"
+        "### Phase 1 — Linear (5 new/day)\n\n"
+        "#### A\n\n- [ ] X (E)\n\n"
+        "### Phase 5 — Hards (2 new/day)\n\n"
+        "#### B\n\n- [ ] Y (H)\n"
+    )
+    phases = parse_phases(md)
+    assert phases == [
+        Phase(number=1, name="Linear", new_per_day=5),
+        Phase(number=5, name="Hards", new_per_day=2),
     ]
-    new = compute_new(curriculum, ledger=[], phase=PHASE_HARD)
-    assert {p.pattern for p in new} == {"Arrays & Hashing", "Trees"}  # capped at 2
 
 
-def test_load_phases_reads_json_into_phase_dataclasses(tmp_path: Path) -> None:
-    """Sanity check the JSON loader matches the seeded `phases.json` shape."""
-    p = tmp_path / "phases.json"
-    p.write_text(
-        '[{"number": 1, "name": "X", "patterns": ["A"], "new_per_day": 3, '
-        '"difficulty_cap": "M"}, '
-        '{"number": 2, "name": "Y", "patterns": null, "new_per_day": 0}]'
+def test_parse_curriculum_assigns_phase_to_each_problem() -> None:
+    md = (
+        "## DSA\n\n"
+        "### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- [ ] Two Sum (E)\n\n"
+        "### Phase 5 — Hards (2 new/day)\n\n"
+        "#### Two Pointers\n\n- [ ] Trapping Rain Water (H)\n"
     )
-    phases = load_phases(p)
-    assert phases[0] == Phase(
-        number=1, name="X", patterns=("A",), new_per_day=3, difficulty_cap="M"
+    problems = parse_curriculum(md)
+    by_text = {p.text: p for p in problems}
+    assert by_text["[Arrays & Hashing] -> Two Sum"].phase == 1
+    assert by_text["[Two Pointers] -> Trapping Rain Water"].phase == 5
+
+
+def test_parse_curriculum_ignores_problems_outside_dsa_section() -> None:
+    """Problems under `## System Design`, `## Mocks`, etc. are not DSA."""
+    md = (
+        "## DSA\n\n"
+        "### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- [ ] Two Sum (E)\n\n"
+        "## System Design\n\n- [ ] axu1-1 · Alex Xu Vol 1 · Ch 1\n\n"
+        "## Mocks\n\n- [ ] [mock-1] Pramp · Trees — pending\n"
     )
-    assert phases[1] == Phase(
-        number=2, name="Y", patterns=None, new_per_day=0
-    )
+    problems = parse_curriculum(md)
+    assert [p.text for p in problems] == ["[Arrays & Hashing] -> Two Sum"]
 
 
 # ─── Time blocks in today.md ─────────────────────────────────────────────────

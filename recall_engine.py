@@ -1,11 +1,11 @@
 """Recall engine: snapshot-mode SM-2 lite scheduler for the NeetCode 150 curriculum.
 
-Reads `curriculum.md` (flat by-pattern problem list) + `phases.json` (phase
-budgets — pattern allowlist + daily new-problem cap + difficulty bounds) and
-the previous `today.md` (yesterday's checked-off items), folds new completions
-into an append-only JSONL ledger, then regenerates `today.md` with today's
-Recall and New sections. Phase advancement is ledger-driven: the current phase
-is the lowest-numbered one with eligible untouched problems.
+Reads `curriculum.md` (single master list — DSA grouped by phase → pattern,
+plus System Design / Mocks / Behavioral sections) and the previous `today.md`
+(yesterday's checked-off items), folds new completions into an append-only
+JSONL ledger, then regenerates `today.md` with today's Recall and New sections.
+Phase advancement is ledger-driven: the current phase is the lowest-numbered
+one with eligible untouched problems.
 
 Designed to run once per morning (LaunchAgent) or on-demand (`prep recompute`).
 There is no live daemon — today's set is frozen until the next recompute call.
@@ -45,12 +45,17 @@ _DIFFICULTY_RANK: dict[str, int] = {"E": 0, "M": 1, "H": 2}
 
 @dataclass(frozen=True)
 class Problem:
-    """A curriculum entry: canonical problem text + optional metadata tags."""
+    """A curriculum entry: canonical problem text + optional metadata tags.
+
+    `phase` is the phase number this problem was placed under in
+    `curriculum.md` (set by `parse_curriculum`). None means the problem was
+    parsed from a file without phase headings (legacy or test fixtures)."""
 
     text: str
     difficulty: Difficulty | None = None
     source: Source = "nc-150"
     variant_of: str | None = None
+    phase: int | None = None
 
     @property
     def pattern(self) -> str:
@@ -84,19 +89,14 @@ class RecallItem:
 
 @dataclass(frozen=True)
 class Phase:
-    """A curriculum phase: pattern allowlist + daily new-problem budget + difficulty bounds.
-
-    `patterns=None` means any pattern is eligible. `difficulty_cap` limits the
-    upper bound (e.g. `M` blocks Hards). `difficulty_floor` limits the lower
-    bound (e.g. `H` for the Hard-only phase). `new_per_day=0` puts the phase in
-    recall-only mode."""
+    """A curriculum phase: an ordinal section in `curriculum.md` with a
+    daily new-problem budget. Phase membership lives on the Problem itself
+    (set by `parse_curriculum` from the `### Phase N — Name (X new/day)`
+    headings). `new_per_day=0` puts the phase in recall-only mode."""
 
     number: int
     name: str
-    patterns: tuple[str, ...] | None
     new_per_day: int
-    difficulty_cap: Difficulty | None = None
-    difficulty_floor: Difficulty | None = None
 
 
 MockStatus = Literal["pending", "scheduled", "completed"]
@@ -340,18 +340,6 @@ def compute_recall(
     return items[:limit]
 
 
-def _problem_eligible_for_phase(p: Problem, phase: Phase) -> bool:
-    """True if the problem's pattern + difficulty fall inside the phase's filters."""
-    if phase.patterns is not None and p.pattern not in phase.patterns:
-        return False
-    diff = p.difficulty or "M"
-    if phase.difficulty_cap and _DIFFICULTY_RANK[diff] > _DIFFICULTY_RANK[phase.difficulty_cap]:
-        return False
-    if phase.difficulty_floor and _DIFFICULTY_RANK[diff] < _DIFFICULTY_RANK[phase.difficulty_floor]:
-        return False
-    return True
-
-
 def compute_new(
     curriculum: list[Problem],
     ledger: list[Touch],
@@ -360,13 +348,13 @@ def compute_new(
 ) -> list[Problem]:
     """The next N never-touched problems, ordered by source provenance
     (nc-150 > nc-150+ > company question), then difficulty (E → M → H),
-    then document order. When `phase` is given, the pool is filtered to its
-    pattern allowlist + difficulty cap/floor and the limit defaults to
-    `phase.new_per_day` (so a phase with `new_per_day=0` returns nothing)."""
+    then document order. When `phase` is given, the pool is filtered to
+    problems assigned to that phase number in curriculum.md and the limit
+    defaults to `phase.new_per_day` (so `new_per_day=0` returns nothing)."""
     touched = {t.problem for t in ledger}
     pool = [p for p in curriculum if p.text not in touched]
     if phase is not None:
-        pool = [p for p in pool if _problem_eligible_for_phase(p, phase)]
+        pool = [p for p in pool if p.phase == phase.number]
         limit = phase.new_per_day
     return sorted(
         pool,
@@ -380,9 +368,9 @@ def compute_new(
 def current_phase(
     curriculum: list[Problem], ledger: list[Touch], phases: list[Phase]
 ) -> Phase | None:
-    """The lowest-numbered phase that still has untouched eligible problems.
-    Falls through to the last phase (typically Reinforcement, `new_per_day=0`)
-    when every prior phase is drained. Returns None if `phases` is empty."""
+    """The lowest-numbered phase that still has untouched problems assigned to
+    it. Falls through to the last phase when every prior phase is drained.
+    Returns None if `phases` is empty."""
     if not phases:
         return None
     touched = {t.problem for t in ledger}
@@ -390,36 +378,19 @@ def current_phase(
     return next(
         (
             ph for ph in ordered
-            if any(
-                p.text not in touched and _problem_eligible_for_phase(p, ph)
-                for p in curriculum
-            )
+            if any(p.phase == ph.number and p.text not in touched for p in curriculum)
         ),
         ordered[-1],
     )
 
 
-def load_phases(path: Path) -> list[Phase]:
-    """Read `phases.json` (list of phase records). Empty list if file missing."""
-    if not path.exists():
-        return []
-    return [
-        Phase(
-            number=int(r["number"]),
-            name=r["name"],
-            patterns=tuple(r["patterns"]) if r.get("patterns") else None,
-            new_per_day=int(r["new_per_day"]),
-            difficulty_cap=r.get("difficulty_cap"),
-            difficulty_floor=r.get("difficulty_floor"),
-        )
-        for r in json.loads(path.read_text())
-    ]
-
-
 # ─── Parsers ─────────────────────────────────────────────────────────────────
 
 
-_PATTERN_HEADING = re.compile(r"^##\s+(.+?)\s*$")
+_DSA_HEADING = re.compile(r"^##\s+DSA\s*$")
+_PHASE_HEADING = re.compile(r"^###\s+Phase\s+(\d+)\s+—\s+(.+?)\s+\((\d+)\s+new/day\)\s*$")
+_PATTERN_SUBHEADING = re.compile(r"^####\s+(.+?)\s*$")
+_OTHER_H2 = re.compile(r"^##\s+(.+?)\s*$")
 _PROBLEM_LINE = re.compile(r"^\s*-\s+\[[ xX]\]\s+(.*)$")
 _CHECKED_LINE = re.compile(r"^\s*-\s+\[[xX]\]\s+(.*)$")
 _DONE_DATE = re.compile(r"\s*✅\s*(\d{4}-\d{2}-\d{2}).*$")
@@ -446,24 +417,38 @@ def _canonicalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-_NON_PATTERN_HEADINGS = {"Legend", "Today"}
-
-
 def parse_curriculum(curriculum_md: str) -> list[Problem]:
-    """Walk `curriculum.md`, emit one Problem per checkbox line under a
-    `## <Pattern>` heading. Canonical text is reconstructed as `[Pattern] -> Name`
-    (the on-disk line is just `- [ ] Name (E)`; the pattern lives in the heading).
-    Headings in `_NON_PATTERN_HEADINGS` are ignored."""
+    """Walk the `## DSA` section of `curriculum.md`, emit one Problem per
+    checkbox line under `### Phase N — Name (X new/day)` → `#### Pattern`
+    headings. Canonical text is reconstructed as `[Pattern] -> Name`."""
     problems: list[Problem] = []
-    current_pattern: str | None = None
+    in_dsa = False
+    phase_num: int | None = None
+    pattern: str | None = None
 
     for line in curriculum_md.splitlines():
-        heading = _PATTERN_HEADING.match(line)
-        if heading:
-            name = heading.group(1).strip()
-            current_pattern = None if name in _NON_PATTERN_HEADINGS else name
+        if _DSA_HEADING.match(line):
+            in_dsa = True
+            phase_num = None
+            pattern = None
             continue
-        if current_pattern is None:
+        # Any other top-level heading exits the DSA section.
+        h2 = _OTHER_H2.match(line)
+        if h2 and not _DSA_HEADING.match(line):
+            in_dsa = False
+            phase_num = None
+            pattern = None
+            continue
+        if not in_dsa:
+            continue
+        if (m := _PHASE_HEADING.match(line)):
+            phase_num = int(m.group(1))
+            pattern = None
+            continue
+        if (m := _PATTERN_SUBHEADING.match(line)):
+            pattern = m.group(1).strip()
+            continue
+        if pattern is None:
             continue
         problem_match = _PROBLEM_LINE.match(line)
         if not problem_match:
@@ -472,24 +457,48 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
         diff_m = _DIFFICULTY_TAG.search(raw)
         src_m = _SOURCE_TAG.search(raw)
         var_m = _VARIANT_TAG.search(raw)
-        # Strip tags from the displayed name to get the canonical name.
         name = _DIFFICULTY_TAG.sub(" ", raw)
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
         name = _T_MARKER.sub(" ", name)
+        name = _DONE_DATE.sub("", name)
         name = re.sub(r"\s+", " ", name).strip()
         if not name:
             continue
         problems.append(
             Problem(
-                text=f"[{current_pattern}] -> {name}",
+                text=f"[{pattern}] -> {name}",
                 difficulty=diff_m.group(1) if diff_m else None,  # type: ignore[arg-type]
                 source=src_m.group(1) if src_m else "nc-150",  # type: ignore[arg-type]
                 variant_of=var_m.group(1).strip() if var_m else None,
+                phase=phase_num,
             )
         )
 
     return problems
+
+
+def parse_phases(curriculum_md: str) -> list[Phase]:
+    """Walk the `## DSA` section, return one Phase per `### Phase N — Name (X new/day)` heading."""
+    phases: list[Phase] = []
+    in_dsa = False
+    for line in curriculum_md.splitlines():
+        if _DSA_HEADING.match(line):
+            in_dsa = True
+            continue
+        h2 = _OTHER_H2.match(line)
+        if h2 and not _DSA_HEADING.match(line):
+            in_dsa = False
+            continue
+        if not in_dsa:
+            continue
+        if (m := _PHASE_HEADING.match(line)):
+            phases.append(Phase(
+                number=int(m.group(1)),
+                name=m.group(2).strip(),
+                new_per_day=int(m.group(3)),
+            ))
+    return phases
 
 
 def parse_completions(today_md: str) -> list[Touch]:
@@ -852,6 +861,7 @@ def render_today(
     *,
     day_n: int | None = None,
     phase: Phase | None = None,
+    total_phases: int | None = None,
     projection: date | None = None,
     projection_rate: float | None = None,
     projection_untouched: int | None = None,
@@ -870,8 +880,9 @@ def render_today(
     elif phase is None:
         header = f"{base} · Day {day_n}"
     else:
+        progress = f"{phase.number}/{total_phases}" if total_phases else str(phase.number)
         header = (
-            f"{base} · Phase {phase.number} — {phase.name} · "
+            f"{base} · Phase {progress} — {phase.name} · "
             f"Day {day_n} · {phase.new_per_day} new/day"
         )
 
@@ -1178,11 +1189,11 @@ def recompute(
     mocks_path: Path | None = None,
     sd_chapters_path: Path | None = None,
     behavioral_path: Path | None = None,
-    phases_json_path: Path | None = None,
 ) -> RecomputeResult:
     """One full cycle: log new completions, fold mock edits, regenerate today.md + coverage.md."""
-    curriculum = parse_curriculum(curriculum_md_path.read_text())
-    phases = load_phases(phases_json_path) if phases_json_path else []
+    curriculum_md = curriculum_md_path.read_text()
+    curriculum = parse_curriculum(curriculum_md)
+    phases = parse_phases(curriculum_md)
 
     today_md = today_md_path.read_text() if today_md_path.exists() else ""
     logged = append_to_ledger(ledger_path, parse_completions(today_md))
@@ -1232,6 +1243,7 @@ def recompute(
         new=new,
         day_n=day_n,
         phase=phase,
+        total_phases=len(phases) if phases else None,
         projection=end,
         projection_rate=rate,
         projection_untouched=untouched,
@@ -1277,14 +1289,7 @@ def cli() -> None:
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default=Path("curriculum.md"),
     show_default=True,
-    help="Flat by-pattern curriculum markdown (source of truth).",
-)
-@click.option(
-    "--phases",
-    type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("phases.json"),
-    show_default=True,
-    help="Phase budgets (pattern allowlist + new_per_day + difficulty bounds).",
+    help="Master curriculum markdown (DSA by phase + SD/Mocks/Behavioral).",
 )
 @click.option(
     "--today-md",
@@ -1330,7 +1335,6 @@ def cli() -> None:
 )
 def recompute_cmd(
     curriculum: Path,
-    phases: Path,
     today_md: Path,
     ledger: Path,
     coverage_md: Path,
@@ -1348,7 +1352,6 @@ def recompute_cmd(
         mocks_path=mocks,
         sd_chapters_path=sd_chapters,
         behavioral_path=behavioral,
-        phases_json_path=phases,
     )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "
