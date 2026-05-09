@@ -18,320 +18,320 @@ _`prep-data/today.md` — `prep recompute` keeps both in sync._
 
 #### Arrays & Hashing
 
-- [ ] Contains Duplicate (E)
-- [ ] Valid Anagram (E)
-- [ ] Two Sum (E)
-- [ ] Group Anagrams (M)
-- [ ] Top K Frequent Elements (M)
-- [ ] Encode and Decode Strings (M)
-- [ ] Product of Array Except Self (M)
-- [ ] Valid Sudoku (M)
-- [ ] Longest Consecutive Sequence (M)
-- [ ] Customers With 2-Day 2-Page Visits (M) (company question)
-- [ ] Shift Sign-Up With Max-New Constraint (M) (company question)
-- [ ] Referral Bonus Event Correlation (M) (company question)
+- Contains Duplicate (E) · 0/5
+- Valid Anagram (E) · 0/5
+- Two Sum (E) · 0/5
+- Group Anagrams (M) · 0/5
+- Top K Frequent Elements (M) · 0/5
+- Encode and Decode Strings (M) · 0/5
+- Product of Array Except Self (M) · 0/5
+- Valid Sudoku (M) · 0/5
+- Longest Consecutive Sequence (M) · 0/5
+- Customers With 2-Day 2-Page Visits (M) (company question) · 0/5
+- Shift Sign-Up With Max-New Constraint (M) (company question) · 0/5
+- Referral Bonus Event Correlation (M) (company question) · 0/5
 
 #### Two Pointers
 
-- [ ] Valid Palindrome (E)
-- [ ] Two Sum II (M) (variant of: Two Sum)
-- [ ] 3Sum (M)
-- [ ] Container With Most Water (M)
+- Valid Palindrome (E) · 0/5
+- Two Sum II (M) (variant of: Two Sum) · 0/5
+- 3Sum (M) · 0/5
+- Container With Most Water (M) · 0/5
 
 #### Sliding Window
 
-- [ ] Best Time to Buy and Sell Stock (E)
-- [ ] Count Binary Substrings (E)
-- [ ] Longest Substring Without Repeating Characters (M)
-- [ ] Longest Repeating Character Replacement (M)
-- [ ] Permutation in String (M)
+- Best Time to Buy and Sell Stock (E) · 0/5
+- Count Binary Substrings (E) · 0/5
+- Longest Substring Without Repeating Characters (M) · 0/5
+- Longest Repeating Character Replacement (M) · 0/5
+- Permutation in String (M) · 0/5
 
 #### Stack
 
-- [ ] Valid Parentheses (E)
-- [ ] Min Stack (E)
-- [ ] Evaluate Reverse Polish Notation (M)
-- [ ] Daily Temperatures (M)
-- [ ] Car Fleet (M)
+- Valid Parentheses (E) · 0/5
+- Min Stack (E) · 0/5
+- Evaluate Reverse Polish Notation (M) · 0/5
+- Daily Temperatures (M) · 0/5
+- Car Fleet (M) · 0/5
 
 #### Binary Search
 
-- [ ] Binary Search (E)
-- [ ] Search a 2D Matrix (M)
-- [ ] Koko Eating Bananas (M)
-- [ ] Find Minimum in Rotated Sorted Array (M)
-- [ ] Search in Rotated Sorted Array (M)
-- [ ] Time Based Key Value Store (M)
+- Binary Search (E) · 0/5
+- Search a 2D Matrix (M) · 0/5
+- Koko Eating Bananas (M) · 0/5
+- Find Minimum in Rotated Sorted Array (M) · 0/5
+- Search in Rotated Sorted Array (M) · 0/5
+- Time Based Key Value Store (M) · 0/5
 
 ### Phase 2 — Linked List + Trees (4 new/day)
 
 #### Linked List
 
-- [ ] Reverse Linked List (E)
-- [ ] Merge Two Sorted Lists (E)
-- [ ] Linked List Cycle (E)
-- [ ] Reorder List (M)
-- [ ] Remove Nth Node From End of List (M)
-- [ ] Copy List With Random Pointer (M)
-- [ ] Add Two Numbers (M)
-- [ ] Find The Duplicate Number (M)
-- [ ] LRU Cache (M)
+- Reverse Linked List (E) · 0/5
+- Merge Two Sorted Lists (E) · 0/5
+- Linked List Cycle (E) · 0/5
+- Reorder List (M) · 0/5
+- Remove Nth Node From End of List (M) · 0/5
+- Copy List With Random Pointer (M) · 0/5
+- Add Two Numbers (M) · 0/5
+- Find The Duplicate Number (M) · 0/5
+- LRU Cache (M) · 0/5
 
 #### Trees
 
-- [ ] Invert Binary Tree (E)
-- [ ] Maximum Depth of Binary Tree (E)
-- [ ] Diameter of Binary Tree (E)
-- [ ] Balanced Binary Tree (E)
-- [ ] Same Tree (E)
-- [ ] Subtree of Another Tree (E)
-- [ ] Lowest Common Ancestor of a BST (E)
-- [ ] Binary Tree Level Order Traversal (M)
-- [ ] Binary Tree Right Side View (M)
-- [ ] Count Good Nodes in Binary Tree (M)
-- [ ] Validate Binary Search Tree (M)
-- [ ] Kth Smallest Element in a BST (M)
-- [ ] Construct Binary Tree from Preorder and Inorder Traversal (M)
-- [ ] Build Binary Tree From Char Frequencies (M) (company question)
+- Invert Binary Tree (E) · 0/5
+- Maximum Depth of Binary Tree (E) · 0/5
+- Diameter of Binary Tree (E) · 0/5
+- Balanced Binary Tree (E) · 0/5
+- Same Tree (E) · 0/5
+- Subtree of Another Tree (E) · 0/5
+- Lowest Common Ancestor of a BST (E) · 0/5
+- Binary Tree Level Order Traversal (M) · 0/5
+- Binary Tree Right Side View (M) · 0/5
+- Count Good Nodes in Binary Tree (M) · 0/5
+- Validate Binary Search Tree (M) · 0/5
+- Kth Smallest Element in a BST (M) · 0/5
+- Construct Binary Tree from Preorder and Inorder Traversal (M) · 0/5
+- Build Binary Tree From Char Frequencies (M) (company question) · 0/5
 
 ### Phase 3 — Heap + Backtracking (4 new/day)
 
 #### Heap
 
-- [ ] Kth Largest Element in a Stream (E)
-- [ ] Last Stone Weight (E)
-- [ ] K Closest Points to Origin (M)
-- [ ] Kth Largest Element in an Array (M)
-- [ ] Task Scheduler (M)
-- [ ] Design Twitter (M)
+- Kth Largest Element in a Stream (E) · 0/5
+- Last Stone Weight (E) · 0/5
+- K Closest Points to Origin (M) · 0/5
+- Kth Largest Element in an Array (M) · 0/5
+- Task Scheduler (M) · 0/5
+- Design Twitter (M) · 0/5
 
 #### Backtracking
 
-- [ ] Subsets (M)
-- [ ] Combination Sum (M)
-- [ ] Combination Sum II (M) (variant of: Combination Sum)
-- [ ] Permutations (M)
-- [ ] Subsets II (M) (variant of: Subsets)
-- [ ] Generate Parentheses (M)
-- [ ] Word Search (M)
-- [ ] Palindrome Partitioning (M)
-- [ ] Letter Combinations of a Phone Number (M)
+- Subsets (M) · 0/5
+- Combination Sum (M) · 0/5
+- Combination Sum II (M) (variant of: Combination Sum) · 0/5
+- Permutations (M) · 0/5
+- Subsets II (M) (variant of: Subsets) · 0/5
+- Generate Parentheses (M) · 0/5
+- Word Search (M) · 0/5
+- Palindrome Partitioning (M) · 0/5
+- Letter Combinations of a Phone Number (M) · 0/5
 
 #### Tries
 
-- [ ] Implement Trie Prefix Tree (M)
-- [ ] Design Add and Search Words Data Structure (M)
+- Implement Trie Prefix Tree (M) · 0/5
+- Design Add and Search Words Data Structure (M) · 0/5
 
 ### Phase 4 — Graphs + DP (4 new/day)
 
 #### Graphs
 
-- [ ] Number of Islands (M)
-- [ ] Max Area of Island (M)
-- [ ] Clone Graph (M)
-- [ ] Walls and Gates (M)
-- [ ] Rotting Oranges (M)
-- [ ] Pacific Atlantic Water Flow (M)
-- [ ] Surrounded Regions (M)
-- [ ] Course Schedule (M)
-- [ ] Course Schedule II (M) (variant of: Course Schedule)
-- [ ] Graph Valid Tree (M)
-- [ ] Number of Connected Components in an Undirected Graph (M)
-- [ ] Redundant Connection (M)
-- [ ] Find All Possible Recipes (M) (company question)
-- [ ] Grid Reachability Within Max Time (M) (company question)
+- Number of Islands (M) · 0/5
+- Max Area of Island (M) · 0/5
+- Clone Graph (M) · 0/5
+- Walls and Gates (M) · 0/5
+- Rotting Oranges (M) · 0/5
+- Pacific Atlantic Water Flow (M) · 0/5
+- Surrounded Regions (M) · 0/5
+- Course Schedule (M) · 0/5
+- Course Schedule II (M) (variant of: Course Schedule) · 0/5
+- Graph Valid Tree (M) · 0/5
+- Number of Connected Components in an Undirected Graph (M) · 0/5
+- Redundant Connection (M) · 0/5
+- Find All Possible Recipes (M) (company question) · 0/5
+- Grid Reachability Within Max Time (M) (company question) · 0/5
 
 #### Advanced Graphs
 
-- [ ] Network Delay Time (M)
-- [ ] Min Cost to Connect All Points (M)
-- [ ] Cheapest Flights Within K Stops (M)
+- Network Delay Time (M) · 0/5
+- Min Cost to Connect All Points (M) · 0/5
+- Cheapest Flights Within K Stops (M) · 0/5
 
 #### 1-D DP
 
-- [ ] Climbing Stairs (E)
-- [ ] Min Cost Climbing Stairs (E)
-- [ ] House Robber (M)
-- [ ] House Robber II (M) (variant of: House Robber)
-- [ ] Longest Palindromic Substring (M)
-- [ ] Palindromic Substrings (M)
-- [ ] Decode Ways (M)
-- [ ] Coin Change (M)
-- [ ] Maximum Product Subarray (M)
-- [ ] Word Break (M)
-- [ ] Longest Increasing Subsequence (M)
-- [ ] Partition Equal Subset Sum (M)
+- Climbing Stairs (E) · 0/5
+- Min Cost Climbing Stairs (E) · 0/5
+- House Robber (M) · 0/5
+- House Robber II (M) (variant of: House Robber) · 0/5
+- Longest Palindromic Substring (M) · 0/5
+- Palindromic Substrings (M) · 0/5
+- Decode Ways (M) · 0/5
+- Coin Change (M) · 0/5
+- Maximum Product Subarray (M) · 0/5
+- Word Break (M) · 0/5
+- Longest Increasing Subsequence (M) · 0/5
+- Partition Equal Subset Sum (M) · 0/5
 
 #### 2-D DP
 
-- [ ] Unique Paths (M)
-- [ ] Longest Common Subsequence (M)
-- [ ] Best Time to Buy and Sell Stock With Cooldown (M)
-- [ ] Coin Change II (M) (variant of: Coin Change)
-- [ ] Target Sum (M)
-- [ ] Interleaving String (M)
+- Unique Paths (M) · 0/5
+- Longest Common Subsequence (M) · 0/5
+- Best Time to Buy and Sell Stock With Cooldown (M) · 0/5
+- Coin Change II (M) (variant of: Coin Change) · 0/5
+- Target Sum (M) · 0/5
+- Interleaving String (M) · 0/5
 
 ### Phase 5 — Hard Problems (2 new/day)
 
 #### 2-D DP
 
-- [ ] Longest Increasing Path In a Matrix (H)
-- [ ] Distinct Subsequences (H)
-- [ ] Edit Distance (H)
-- [ ] Burst Balloons (H)
-- [ ] Regular Expression Matching (H)
+- Longest Increasing Path In a Matrix (H) · 0/5
+- Distinct Subsequences (H) · 0/5
+- Edit Distance (H) · 0/5
+- Burst Balloons (H) · 0/5
+- Regular Expression Matching (H) · 0/5
 
 #### Advanced Graphs
 
-- [ ] Reconstruct Itinerary (H)
-- [ ] Swim In Rising Water (H)
-- [ ] Alien Dictionary (H)
+- Reconstruct Itinerary (H) · 0/5
+- Swim In Rising Water (H) · 0/5
+- Alien Dictionary (H) · 0/5
 
 #### Backtracking
 
-- [ ] N Queens (H)
+- N Queens (H) · 0/5
 
 #### Binary Search
 
-- [ ] Median of Two Sorted Arrays (H)
+- Median of Two Sorted Arrays (H) · 0/5
 
 #### Bitmask DP
 
-- [ ] Shortest Path Visiting All Nodes (H) (nc-150+)
+- Shortest Path Visiting All Nodes (H) (nc-150+) · 0/5
 
 #### Graphs
 
-- [ ] Word Ladder (H)
+- Word Ladder (H) · 0/5
 
 #### Heap
 
-- [ ] Find Median From Data Stream (H)
+- Find Median From Data Stream (H) · 0/5
 
 #### Intervals
 
-- [ ] Minimum Interval to Include Each Query (H)
-- [ ] Employee Free Time (H) (company question)
+- Minimum Interval to Include Each Query (H) · 0/5
+- Employee Free Time (H) (company question) · 0/5
 
 #### Linked List
 
-- [ ] Merge K Sorted Lists (H)
-- [ ] Reverse Nodes In K Group (H)
+- Merge K Sorted Lists (H) · 0/5
+- Reverse Nodes In K Group (H) · 0/5
 
 #### Segment Tree
 
-- [ ] Count of Smaller Numbers After Self (H) (nc-150+)
+- Count of Smaller Numbers After Self (H) (nc-150+) · 0/5
 
 #### Sliding Window
 
-- [ ] Minimum Window Substring (H)
-- [ ] Sliding Window Maximum (H)
+- Minimum Window Substring (H) · 0/5
+- Sliding Window Maximum (H) · 0/5
 
 #### Stack
 
-- [ ] Largest Rectangle in Histogram (H)
+- Largest Rectangle in Histogram (H) · 0/5
 
 #### Sweep Line
 
-- [ ] My Calendar III (H) (nc-150+)
-- [ ] Skyline (H) (nc-150+)
+- My Calendar III (H) (nc-150+) · 0/5
+- Skyline (H) (nc-150+) · 0/5
 
 #### Trees
 
-- [ ] Binary Tree Maximum Path Sum (H)
-- [ ] Serialize and Deserialize Binary Tree (H)
+- Binary Tree Maximum Path Sum (H) · 0/5
+- Serialize and Deserialize Binary Tree (H) · 0/5
 
 #### Tries
 
-- [ ] Word Search II (H) (variant of: Word Search)
+- Word Search II (H) (variant of: Word Search) · 0/5
 
 #### Two Pointers
 
-- [ ] Trapping Rain Water (H)
+- Trapping Rain Water (H) · 0/5
 
 ### Phase 6 — Closing Patterns (4 new/day)
 
 #### Greedy
 
-- [ ] Maximum Subarray (M)
-- [ ] Jump Game (M)
-- [ ] Jump Game II (M) (variant of: Jump Game)
-- [ ] Gas Station (M)
-- [ ] Hand of Straights (M)
-- [ ] Merge Triplets to Form Target Triplet (M)
-- [ ] Partition Labels (M)
-- [ ] Valid Parenthesis String (M)
+- Maximum Subarray (M) · 0/5
+- Jump Game (M) · 0/5
+- Jump Game II (M) (variant of: Jump Game) · 0/5
+- Gas Station (M) · 0/5
+- Hand of Straights (M) · 0/5
+- Merge Triplets to Form Target Triplet (M) · 0/5
+- Partition Labels (M) · 0/5
+- Valid Parenthesis String (M) · 0/5
 
 #### Intervals
 
-- [ ] Meeting Rooms (E)
-- [ ] Insert Interval (M)
-- [ ] Merge Intervals (M)
-- [ ] Non Overlapping Intervals (M)
-- [ ] Meeting Rooms II (M) (variant of: Meeting Rooms)
-- [ ] Prorated Monthly Subscription Charge (M) (company question)
+- Meeting Rooms (E) · 0/5
+- Insert Interval (M) · 0/5
+- Merge Intervals (M) · 0/5
+- Non Overlapping Intervals (M) · 0/5
+- Meeting Rooms II (M) (variant of: Meeting Rooms) · 0/5
+- Prorated Monthly Subscription Charge (M) (company question) · 0/5
 
 #### Math & Geometry
 
-- [ ] Plus One (E)
-- [ ] Happy Number (E)
-- [ ] Rotate Image (M)
-- [ ] Spiral Matrix (M)
-- [ ] Set Matrix Zeroes (M)
-- [ ] Pow(x, n) (M)
-- [ ] Multiply Strings (M)
-- [ ] Detect Squares (M)
+- Plus One (E) · 0/5
+- Happy Number (E) · 0/5
+- Rotate Image (M) · 0/5
+- Spiral Matrix (M) · 0/5
+- Set Matrix Zeroes (M) · 0/5
+- Pow(x, n) (M) · 0/5
+- Multiply Strings (M) · 0/5
+- Detect Squares (M) · 0/5
 
 #### Bit Manipulation
 
-- [ ] Single Number (E)
-- [ ] Number of 1 Bits (E)
-- [ ] Counting Bits (E)
-- [ ] Reverse Bits (E)
-- [ ] Missing Number (E)
-- [ ] Sum of Two Integers (M)
-- [ ] Reverse Integer (M)
+- Single Number (E) · 0/5
+- Number of 1 Bits (E) · 0/5
+- Counting Bits (E) · 0/5
+- Reverse Bits (E) · 0/5
+- Missing Number (E) · 0/5
+- Sum of Two Integers (M) · 0/5
+- Reverse Integer (M) · 0/5
 
 ### Phase 7 — NC150+ Extras (3 new/day)
 
 #### String Transformation
 
-- [ ] Longest Common Prefix (E) (nc-150+)
-- [ ] Valid Word Abbreviation (E) (nc-150+)
-- [ ] Roman to Integer (E) (nc-150+)
-- [ ] Add Binary (E) (nc-150+)
-- [ ] snake_case → camelCase (E) (nc-150+) (company question)
-- [ ] String Compression (M) (nc-150+)
-- [ ] Decode String (M) (nc-150+)
-- [ ] Basic Calculator II (M) (nc-150+)
-- [ ] String to Integer atoi (M) (nc-150+)
+- Longest Common Prefix (E) (nc-150+) · 0/5
+- Valid Word Abbreviation (E) (nc-150+) · 0/5
+- Roman to Integer (E) (nc-150+) · 0/5
+- Add Binary (E) (nc-150+) · 0/5
+- snake_case → camelCase (E) (nc-150+) (company question) · 0/5
+- String Compression (M) (nc-150+) · 0/5
+- Decode String (M) (nc-150+) · 0/5
+- Basic Calculator II (M) (nc-150+) · 0/5
+- String to Integer atoi (M) (nc-150+) · 0/5
 
 #### Difference Array
 
-- [ ] Car Pooling (M) (nc-150+)
-- [ ] Corporate Flight Bookings (M) (nc-150+)
+- Car Pooling (M) (nc-150+) · 0/5
+- Corporate Flight Bookings (M) (nc-150+) · 0/5
 
 #### Boyer-Moore
 
-- [ ] Majority Element (E) (nc-150+)
-- [ ] Majority Element II (M) (nc-150+) (variant of: Majority Element)
+- Majority Element (E) (nc-150+) · 0/5
+- Majority Element II (M) (nc-150+) (variant of: Majority Element) · 0/5
 
 #### Bit-Trie
 
-- [ ] Maximum XOR (M) (nc-150+)
+- Maximum XOR (M) (nc-150+) · 0/5
 
 #### Reservoir Sampling
 
-- [ ] Random Pick with Weight (M) (nc-150+)
-- [ ] Wordler Random Get/Remove/Has (M) (nc-150+) (company question)
-- [ ] Linked List Random Node (M) (nc-150+)
+- Random Pick with Weight (M) (nc-150+) · 0/5
+- Wordler Random Get/Remove/Has (M) (nc-150+) (company question) · 0/5
+- Linked List Random Node (M) (nc-150+) · 0/5
 
 #### Segment Tree
 
-- [ ] Range Sum Query - Mutable (M) (nc-150+)
+- Range Sum Query - Mutable (M) (nc-150+) · 0/5
 
 #### Bitmask DP
 
-- [ ] Partition K Equal Subsets (M) (nc-150+)
+- Partition K Equal Subsets (M) (nc-150+) · 0/5
 
 ## System Design
 

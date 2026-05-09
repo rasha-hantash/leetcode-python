@@ -17,6 +17,8 @@ import calendar
 import json
 import math
 import re
+import sys
+from collections import defaultdict
 from dataclasses import dataclass, replace
 from datetime import date, timedelta
 from pathlib import Path
@@ -391,8 +393,15 @@ _DSA_HEADING = re.compile(r"^##\s+DSA\s*$")
 _PHASE_HEADING = re.compile(r"^###\s+Phase\s+(\d+)\s+—\s+(.+?)\s+\((\d+)\s+new/day\)\s*$")
 _PATTERN_SUBHEADING = re.compile(r"^####\s+(.+?)\s*$")
 _OTHER_H2 = re.compile(r"^##\s+(.+?)\s*$")
+# Top-level DSA problem line. Accepts the new format (no parent checkbox,
+# `- Two Sum (E) · 4/5 (next due 2026-06-25)`), and tolerates the legacy
+# format `- [ ] Two Sum (E)` for migration. The legacy `_PROBLEM_LINE` /
+# `_CHECKED_LINE` patterns are kept for parsing today.md completions.
 _PROBLEM_LINE = re.compile(r"^\s*-\s+\[[ xX]\]\s+(.*)$")
 _CHECKED_LINE = re.compile(r"^\s*-\s+\[[xX]\]\s+(.*)$")
+_DSA_PROBLEM_PARENT = re.compile(r"^-\s+(?:\[[ xX]\]\s+)?(.+?)\s*$")
+_DSA_COUNTER_ANNOTATION = re.compile(r"\s+·\s+\d+/5(?:\s+\([^)]+\))?\s*$")
+_DSA_SUBBULLET = re.compile(r"^\s+-\s+\[([ xX])\](?:\s+✅\s*(\S*))?\s*$")
 _DONE_DATE = re.compile(r"\s*✅\s*(\d{4}-\d{2}-\d{2}).*$")
 _T_MARKER = re.compile(r"\s*`[A-Z]\d?`\s*")
 _DAY_ANNOTATION = re.compile(r"\s*\(Day\s+\d+\)\s*")
@@ -417,10 +426,21 @@ def _canonicalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def _strip_problem_parent_annotations(body: str) -> str:
+    """Strip the `· N/5 (next due ...)` / `· N/5 (overdue ...)` counter and
+    any `✅ DATE` stamp from a parent problem line body, leaving only the
+    name + difficulty/source/variant tags."""
+    body = _DSA_COUNTER_ANNOTATION.sub("", body)
+    body = _DONE_DATE.sub("", body)
+    return body.rstrip()
+
+
 def parse_curriculum(curriculum_md: str) -> list[Problem]:
     """Walk the `## DSA` section of `curriculum.md`, emit one Problem per
-    checkbox line under `### Phase N — Name (X new/day)` → `#### Pattern`
-    headings. Canonical text is reconstructed as `[Pattern] -> Name`."""
+    top-level `- ...` line under `### Phase N — Name (X new/day)` → `#### Pattern`
+    headings. Accepts the new format (`- Two Sum (E) · 4/5`) and the legacy
+    checkbox format (`- [ ] Two Sum (E)`) for migration. Canonical text is
+    reconstructed as `[Pattern] -> Name`."""
     problems: list[Problem] = []
     in_dsa = False
     phase_num: int | None = None
@@ -450,10 +470,10 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
             continue
         if pattern is None:
             continue
-        problem_match = _PROBLEM_LINE.match(line)
+        problem_match = _DSA_PROBLEM_PARENT.match(line)
         if not problem_match:
             continue
-        raw = problem_match.group(1)
+        raw = _strip_problem_parent_annotations(problem_match.group(1))
         diff_m = _DIFFICULTY_TAG.search(raw)
         src_m = _SOURCE_TAG.search(raw)
         var_m = _VARIANT_TAG.search(raw)
@@ -461,7 +481,6 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
         name = _T_MARKER.sub(" ", name)
-        name = _DONE_DATE.sub("", name)
         name = re.sub(r"\s+", " ", name).strip()
         if not name:
             continue
@@ -478,47 +497,91 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
     return problems
 
 
-def parse_curriculum_dsa_state(curriculum_md: str) -> dict[str, bool]:
-    """Walk the `## DSA` section, return `{problem_text: checked?}`.
+def parse_curriculum_dsa_state(curriculum_md: str) -> dict[str, set[date]]:
+    """Walk the `## DSA` section, return `{problem_text: {touch_date, ...}}`.
+    Each ticked sub-bullet `- [x] ✅ YYYY-MM-DD` adds one date to the set.
+    Empty padding sub-bullets `- [ ]` are skipped silently. Sub-bullets with
+    a malformed date emit a stderr warning and are skipped (non-destructive).
+
+    Legacy migration: a `- [x] Name (E) ✅ YYYY-MM-DD` parent line is treated
+    as a single touch on that date so first-recompute migration preserves
+    existing ledger linkage even before sub-bullets are rendered.
+
     Used to sync curriculum.md ticks ↔ ledger."""
-    state: dict[str, bool] = {}
+    state: dict[str, set[date]] = {}
     in_dsa = False
     pattern: str | None = None
+    current_key: str | None = None
 
     for line in curriculum_md.splitlines():
         if _DSA_HEADING.match(line):
             in_dsa = True
             pattern = None
+            current_key = None
             continue
         h2 = _OTHER_H2.match(line)
         if h2 and not _DSA_HEADING.match(line):
             in_dsa = False
             pattern = None
+            current_key = None
             continue
         if not in_dsa:
             continue
         if _PHASE_HEADING.match(line):
             pattern = None
+            current_key = None
             continue
         if (m := _PATTERN_SUBHEADING.match(line)):
             pattern = m.group(1).strip()
+            current_key = None
             continue
         if pattern is None:
+            current_key = None
             continue
-        problem_match = _PROBLEM_LINE.match(line)
+
+        # Sub-bullet: indented `- [x]` or `- [ ]` under the current problem.
+        if (sb := _DSA_SUBBULLET.match(line)):
+            if current_key is None:
+                continue  # orphan sub-bullet; ignore
+            checked = sb.group(1).lower() == "x"
+            if not checked:
+                continue  # empty padding slot — silent
+            date_str = sb.group(2) or ""
+            try:
+                state[current_key].add(date.fromisoformat(date_str))
+            except ValueError:
+                print(
+                    f"⚠️  malformed date in sub-bullet for {current_key}: "
+                    f"{line.strip()!r}",
+                    file=sys.stderr,
+                )
+            continue
+
+        # Top-level problem line. Accept legacy checkbox format with or
+        # without a `✅ DATE` stamp.
+        problem_match = _DSA_PROBLEM_PARENT.match(line)
         if not problem_match:
+            current_key = None
             continue
-        is_checked = bool(_CHECKED_LINE.match(line))
         raw = problem_match.group(1)
-        name = _DIFFICULTY_TAG.sub(" ", raw)
+        legacy_date_m = _DONE_DATE.search(raw)
+        is_legacy_checked = bool(_CHECKED_LINE.match(line))
+        body = _strip_problem_parent_annotations(raw)
+        name = _DIFFICULTY_TAG.sub(" ", body)
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
         name = _T_MARKER.sub(" ", name)
-        name = _DONE_DATE.sub("", name)
         name = re.sub(r"\s+", " ", name).strip()
         if not name:
+            current_key = None
             continue
-        state[f"[{pattern}] -> {name}"] = is_checked
+        current_key = f"[{pattern}] -> {name}"
+        state.setdefault(current_key, set())
+        if is_legacy_checked and legacy_date_m:
+            try:
+                state[current_key].add(date.fromisoformat(legacy_date_m.group(1)))
+            except ValueError:
+                pass
     return state
 
 
@@ -855,41 +918,74 @@ def _atomic_write(path: Path, content: str) -> None:
 
 @dataclass(frozen=True)
 class DSASyncPlan:
-    """Pending changes computed from comparing curriculum.md DSA state with the ledger."""
+    """Pending changes computed from comparing curriculum.md DSA state with the ledger.
+
+    `purges` are specific `(problem, date)` Touches to remove — single-touch
+    granularity, NOT a problem-wide wipe. `full_purge_problems` flags any
+    problems whose entire touch history was removed in this diff, so recompute
+    can keep the loud "destructive" warning for the all-sub-bullets-removed
+    case."""
     additions: list[Touch]
-    purges: list[str]
+    purges: list[Touch]
+    full_purge_problems: list[str]
 
 
 def diff_dsa_state(
-    state: dict[str, bool], ledger: list[Touch], today: date
+    state: dict[str, set[date]], ledger: list[Touch], today: date
 ) -> DSASyncPlan:
-    """Compare curriculum.md DSA tick state with the ledger.
+    """Compare curriculum.md DSA tick state with the ledger at per-touch granularity.
 
-    - Box ticked but no ledger entries → schedule a touch dated `today`.
-    - Box unticked but ledger has entries → schedule a purge of all entries
-      for that problem (destructive — the engine will warn before applying).
+    - Sub-bullet date in state but missing from ledger → schedule a touch on
+      that date (covers fresh ticks via today.md, ticked padding slots, AND
+      hand-typed backdated sub-bullets).
+    - Sub-bullet date in ledger but missing from state → schedule that single
+      `(problem, date)` for purge. Other touches on the same problem are
+      preserved.
+    - When ALL ledger entries for a problem are dropped (state[problem] = ∅
+      while ledger had touches), the problem name is added to
+      `full_purge_problems` so recompute keeps the destructive warning.
 
-    Migration safeguard: if EVERY box is unticked, skip purges entirely. This
-    catches the common case of a fresh curriculum.md restructure where the
-    user's ledger predates the new format — recompute's render pass will
-    re-sync the ticks from the ledger. To genuinely wipe DSA progress, untick
-    everything except one box (or use `prep recompute` after deleting the
-    ledger directly)."""
-    touched = {t.problem for t in ledger}
+    Migration safeguard: if EVERY problem in `state` has an empty date set
+    AND the ledger has any touches, skip purges entirely — this catches the
+    common case of a fresh curriculum.md restructure where the file was
+    re-rendered from a stale snapshot. To genuinely wipe DSA progress,
+    leave at least one problem's sub-bullets in place (or delete the ledger
+    directly)."""
+    ledger_by_problem: dict[str, set[date]] = defaultdict(set)
+    for t in ledger:
+        ledger_by_problem[t.problem].add(t.on)
+
+    pristine = (
+        bool(state)
+        and all(len(d) == 0 for d in state.values())
+        and any(ledger_by_problem.values())
+    )
+
     additions: list[Touch] = []
-    purges: list[str] = []
-    pristine = state and all(not c for c in state.values())
-    for problem, checked in state.items():
-        if checked and problem not in touched:
-            additions.append(Touch(problem=problem, on=today))
-        elif not checked and problem in touched and not pristine:
-            purges.append(problem)
-    return DSASyncPlan(additions=additions, purges=purges)
+    purges: list[Touch] = []
+    full_purge_problems: list[str] = []
+    for problem, dates in state.items():
+        ledger_dates = ledger_by_problem.get(problem, set())
+        for d in sorted(dates - ledger_dates):
+            additions.append(Touch(problem=problem, on=d))
+        if pristine:
+            continue
+        missing = ledger_dates - dates
+        if missing:
+            for d in sorted(missing):
+                purges.append(Touch(problem=problem, on=d))
+            if not dates and ledger_dates:
+                full_purge_problems.append(problem)
+    return DSASyncPlan(
+        additions=additions, purges=purges, full_purge_problems=full_purge_problems
+    )
 
 
-def purge_ledger_entries(ledger_path: Path, purge: set[str]) -> int:
-    """Remove every Touch whose `problem` is in `purge`. Returns count removed."""
-    if not ledger_path.exists() or not purge:
+def purge_ledger_entries(ledger_path: Path, purge: Iterable[Touch]) -> int:
+    """Remove specific `(problem, date)` Touches from the ledger. Returns
+    count removed. Other touches on the same problem are preserved."""
+    purge_set = {(t.problem, t.on.isoformat()) for t in purge}
+    if not ledger_path.exists() or not purge_set:
         return 0
     keep: list[str] = []
     removed = 0
@@ -897,7 +993,7 @@ def purge_ledger_entries(ledger_path: Path, purge: set[str]) -> int:
         if not line.strip():
             continue
         r = json.loads(line)
-        if r["problem"] in purge:
+        if (r["problem"], r["on"]) in purge_set:
             removed += 1
             continue
         keep.append(line)
@@ -906,11 +1002,44 @@ def purge_ledger_entries(ledger_path: Path, purge: set[str]) -> int:
     return removed
 
 
-def write_curriculum_dsa(curriculum_md: str, ledger: list[Touch]) -> str:
-    """Surgically update DSA `[ ] / [x]` boxes in curriculum.md to reflect the ledger.
-    Touched problem → `[x] ... ✅ <latest_date>`. Untouched → `[ ] ...` with any
-    stale ✅ stamp stripped. Phase/pattern headings and non-DSA sections untouched."""
-    summary = aggregate_touches(ledger)  # {problem -> (count, latest)}
+_SLOT_LIMIT = len(INTERVALS_DAYS)
+"""Number of mastery slots rendered per touched problem (matches SM-2 lite saturation)."""
+
+
+def _annotate_due(touches: list[date], today: date) -> str:
+    """Build the `(next due YYYY-MM-DD)` / `(overdue Nd)` suffix for a touched
+    problem. Empty string for untouched."""
+    if not touches:
+        return ""
+    next_due = due_date(len(touches), max(touches))
+    delta = (today - next_due).days
+    if delta > 0:
+        return f" (overdue {delta}d)"
+    return f" (next due {next_due.isoformat()})"
+
+
+def write_curriculum_dsa(
+    curriculum_md: str, ledger: list[Touch], today: date
+) -> str:
+    """Re-render every DSA problem in `curriculum.md` from the ledger.
+
+    Each problem becomes:
+
+        - Name (E) · {min(N, 5)}/5 (next due YYYY-MM-DD)
+          - [x] ✅ DATE        (one per ledger touch, oldest → newest)
+          - [ ]                (empty padding up to 5 slots, only while N < 5)
+
+    Untouched problems (`N == 0`) render as `- Name (E) · 0/5` with no
+    sub-bullets. Past saturation (`N > 5`), all touches render and there is
+    no padding. Existing sub-bullets in the source are dropped — the ledger
+    is the source of truth. Phase/pattern headings and non-DSA sections are
+    preserved verbatim."""
+    by_problem: dict[str, list[date]] = defaultdict(list)
+    for t in ledger:
+        by_problem[t.problem].append(t.on)
+    for k in by_problem:
+        by_problem[k].sort()
+
     out: list[str] = []
     in_dsa = False
     pattern: str | None = None
@@ -941,14 +1070,17 @@ def write_curriculum_dsa(curriculum_md: str, ledger: list[Touch]) -> str:
         if pattern is None:
             out.append(line)
             continue
-        problem_match = _PROBLEM_LINE.match(line)
+
+        # Drop existing sub-bullets; they'll be re-rendered from the ledger.
+        if _DSA_SUBBULLET.match(line):
+            continue
+
+        problem_match = _DSA_PROBLEM_PARENT.match(line)
         if not problem_match:
             out.append(line)
             continue
-        raw = problem_match.group(1)
-        # Strip any existing ✅ stamp before deciding the new state.
-        body = _DONE_DATE.sub("", raw).rstrip()
-        # Reconstruct canonical key to look up ledger.
+
+        body = _strip_problem_parent_annotations(problem_match.group(1))
         name = _DIFFICULTY_TAG.sub(" ", body)
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
@@ -957,15 +1089,14 @@ def write_curriculum_dsa(curriculum_md: str, ledger: list[Touch]) -> str:
         if not name:
             out.append(line)
             continue
-        key = f"[{pattern}] -> {name}"
-        # Preserve original leading whitespace.
-        indent_m = re.match(r"^(\s*)-\s+\[", line)
-        indent = indent_m.group(1) if indent_m else ""
-        if (entry := summary.get(key)):
-            _, latest = entry
-            out.append(f"{indent}- [x] {body} ✅ {latest.isoformat()}")
-        else:
-            out.append(f"{indent}- [ ] {body}")
+
+        touches = by_problem.get(f"[{pattern}] -> {name}", [])
+        n = len(touches)
+        out.append(f"- {body} · {min(n, _SLOT_LIMIT)}/5{_annotate_due(touches, today)}")
+        for d in touches:
+            out.append(f"  - [x] ✅ {d.isoformat()}")
+        for _ in range(_SLOT_LIMIT - n if 0 < n < _SLOT_LIMIT else 0):
+            out.append("  - [ ]")
     return "\n".join(out)
 
 
@@ -1389,26 +1520,33 @@ def recompute(
     prev_ledger = load_ledger(ledger_path)
     dsa_state = parse_curriculum_dsa_state(curriculum_md)
     plan = diff_dsa_state(dsa_state, prev_ledger, today)
-    if plan.purges:
+    if plan.full_purge_problems:
+        # The destructive path: a problem's entire touch history was removed
+        # by deleting all its sub-bullets. Loud warning, even on dry-run.
         if dry_run:
-            would = sum(1 for t in prev_ledger if t.problem in set(plan.purges))
             click.echo(
-                f"[dry-run] Would purge {would} ledger entries for "
-                f"{len(plan.purges)} unticked problem(s):",
+                f"[dry-run] Would fully purge {len(plan.full_purge_problems)} "
+                f"problem(s):",
                 err=True,
             )
-            for p in plan.purges:
-                click.echo(f"  - {p}", err=True)
         else:
-            removed = purge_ledger_entries(ledger_path, set(plan.purges))
             click.echo(
-                f"⚠️  Purged {removed} ledger entries for {len(plan.purges)} "
-                f"unticked DSA problem(s). To preview before applying, "
+                f"⚠️  Full purge: {len(plan.full_purge_problems)} problem(s) "
+                f"had every ledger entry removed. To preview before applying, "
                 f"use `prep recompute --dry-run`.",
                 err=True,
             )
-            for p in plan.purges:
-                click.echo(f"  - {p}", err=True)
+        for p in plan.full_purge_problems:
+            click.echo(f"  - {p}", err=True)
+
+    if plan.purges and not dry_run:
+        purge_ledger_entries(ledger_path, plan.purges)
+    elif plan.purges and dry_run:
+        click.echo(
+            f"[dry-run] Would remove {len(plan.purges)} individual touch(es) "
+            f"from the ledger.",
+            err=True,
+        )
 
     logged = append_to_ledger(ledger_path, parse_completions(today_md))
     if plan.additions and not dry_run:
@@ -1438,7 +1576,7 @@ def recompute(
     # One atomic write covers mock state + DSA tick state. Preserve the
     # original trailing newline (or lack thereof) to avoid spurious diffs.
     new_md = write_curriculum_mocks(curriculum_md, mocks) if mocks else curriculum_md
-    new_md = write_curriculum_dsa(new_md, ledger)
+    new_md = write_curriculum_dsa(new_md, ledger, today)
     if curriculum_md.endswith("\n") and not new_md.endswith("\n"):
         new_md += "\n"
     if not dry_run and new_md != curriculum_md:

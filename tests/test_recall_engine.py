@@ -7,7 +7,7 @@ a user-visible behavior of the snapshot-mode SM-2 lite recall queue.
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -1738,74 +1738,175 @@ def test_time_blocks_shift_sd_when_today_is_a_mock_day() -> None:
 # ─── DSA bidirectional sync (curriculum.md ↔ ledger) ─────────────────────────
 
 
-def _dsa_md(*, two_sum_checked: bool = False) -> str:
-    box = "x" if two_sum_checked else " "
+def _dsa_md(*, two_sum_touch: date | None = None) -> str:
+    """Compose a minimal DSA section. If `two_sum_touch` is set, render Two
+    Sum as touched on that date with one ticked sub-bullet + 4 padding slots."""
+    if two_sum_touch is None:
+        return (
+            "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+            "#### Arrays & Hashing\n\n- Two Sum (E) · 0/5\n"
+        )
     return (
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
-        f"#### Arrays & Hashing\n\n- [{box}] Two Sum (E)\n"
+        "#### Arrays & Hashing\n\n"
+        f"- Two Sum (E) · 1/5 (next due {(two_sum_touch + timedelta(days=1)).isoformat()})\n"
+        f"  - [x] ✅ {two_sum_touch.isoformat()}\n"
+        "  - [ ]\n"
+        "  - [ ]\n"
+        "  - [ ]\n"
+        "  - [ ]\n"
     )
 
 
-def test_parse_curriculum_dsa_state_returns_checked_state_per_problem() -> None:
+def test_parse_curriculum_dsa_state_returns_set_of_touch_dates_per_problem() -> None:
     md = (
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
-        "#### Arrays & Hashing\n\n- [x] Two Sum (E)\n- [ ] 3Sum (M)\n"
+        "#### Arrays & Hashing\n\n"
+        "- Two Sum (E) · 2/5\n"
+        "  - [x] ✅ 2026-05-11\n"
+        "  - [x] ✅ 2026-05-14\n"
+        "  - [ ]\n"
+        "  - [ ]\n"
+        "  - [ ]\n"
+        "- 3Sum (M) · 0/5\n"
     )
     state = parse_curriculum_dsa_state(md)
     assert state == {
-        "[Arrays & Hashing] -> Two Sum": True,
-        "[Arrays & Hashing] -> 3Sum": False,
+        "[Arrays & Hashing] -> Two Sum": {date(2026, 5, 11), date(2026, 5, 14)},
+        "[Arrays & Hashing] -> 3Sum": set(),
     }
 
 
-def test_recompute_logs_curriculum_md_dsa_tick_as_a_ledger_touch(
+def test_parse_curriculum_dsa_state_skips_empty_padding_subbullets() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n"
+        "- Two Sum (E) · 0/5\n"
+        "  - [ ]\n  - [ ]\n  - [ ]\n  - [ ]\n  - [ ]\n"
+    )
+    state = parse_curriculum_dsa_state(md)
+    assert state == {"[Arrays & Hashing] -> Two Sum": set()}
+
+
+def test_parse_curriculum_dsa_state_warns_on_malformed_subbullet_date(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n"
+        "- Two Sum (E) · 1/5\n"
+        "  - [x] ✅ 2/2/26\n"
+        "  - [x] ✅ 2026-05-11\n"
+    )
+    state = parse_curriculum_dsa_state(md)
+    captured = capsys.readouterr()
+    assert state == {"[Arrays & Hashing] -> Two Sum": {date(2026, 5, 11)}}
+    assert "malformed" in captured.err.lower()
+    assert "Two Sum" in captured.err
+
+
+def test_parse_curriculum_dsa_state_treats_legacy_checked_parent_as_one_touch() -> None:
+    """Migration: a legacy `- [x] Name (E) ✅ DATE` line (no sub-bullets yet)
+    counts as a single touch on that date so the first recompute round-trip
+    matches the ledger and won't purge."""
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- [x] Two Sum (E) ✅ 2026-05-09\n"
+    )
+    assert parse_curriculum_dsa_state(md) == {
+        "[Arrays & Hashing] -> Two Sum": {date(2026, 5, 9)}
+    }
+
+
+def test_recompute_logs_curriculum_md_dsa_subbullet_as_a_ledger_touch(
     tmp_path: Path,
 ) -> None:
-    """User ticks `[x] Two Sum` directly in curriculum.md → recompute appends a touch."""
+    """User adds a sub-bullet `- [x] ✅ DATE` directly in curriculum.md →
+    recompute appends a touch dated DATE (covers backdated hand-typing)."""
     daily_md = tmp_path / "curriculum.md"
-    daily_md.write_text(_dsa_md(two_sum_checked=True))
+    daily_md.write_text(_dsa_md(two_sum_touch=date(2026, 5, 11)))
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
     recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
     touches = [json.loads(l) for l in ledger.read_text().splitlines() if l]
-    assert any(t["problem"] == "[Arrays & Hashing] -> Two Sum" for t in touches)
+    assert any(
+        t["problem"] == "[Arrays & Hashing] -> Two Sum" and t["on"] == "2026-05-11"
+        for t in touches
+    )
 
 
-def test_recompute_purges_ledger_when_curriculum_md_dsa_box_is_unchecked(
+def test_recompute_purges_specific_touch_when_subbullet_removed(
     tmp_path: Path,
 ) -> None:
-    """User unchecks a previously-touched box in curriculum.md → ledger entries
-    for that problem are removed (destructive, with a warning)."""
+    """User deletes one `- [x] ✅ DATE` sub-bullet → only that specific
+    `(problem, date)` is removed from the ledger; other touches preserved."""
     daily_md = tmp_path / "curriculum.md"
-    # Two problems: one ticked (so this isn't pristine all-unchecked → migration
-    # safeguard doesn't apply), one unticked but in the ledger.
+    # Two ticks remaining (May 11 + May 14) — May 9 was deleted by the user.
     daily_md.write_text(
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
-        "- [x] Two Sum (E)\n- [ ] Group Anagrams (M)\n"
+        "- Two Sum (E) · 2/5\n"
+        "  - [x] ✅ 2026-05-11\n"
+        "  - [x] ✅ 2026-05-14\n"
+        "  - [ ]\n  - [ ]\n  - [ ]\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
     ledger.write_text(
-        '{"problem": "[Arrays & Hashing] -> Group Anagrams", "on": "2026-05-09"}\n'
+        '{"problem": "[Arrays & Hashing] -> Two Sum", "on": "2026-05-09"}\n'
+        '{"problem": "[Arrays & Hashing] -> Two Sum", "on": "2026-05-11"}\n'
+        '{"problem": "[Arrays & Hashing] -> Two Sum", "on": "2026-05-14"}\n'
     )
-    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
-    remaining = ledger.read_text()
-    assert "Group Anagrams" not in remaining
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 14))
+    touches = [json.loads(l) for l in ledger.read_text().splitlines() if l]
+    on_dates = {t["on"] for t in touches}
+    assert on_dates == {"2026-05-11", "2026-05-14"}
 
 
-def test_recompute_dry_run_does_not_purge_ledger(tmp_path: Path) -> None:
-    """`dry_run=True` must not mutate the ledger when a curriculum.md uncheck
-    would otherwise be destructive."""
+def test_recompute_full_purge_when_all_subbullets_removed(
+    tmp_path: Path,
+) -> None:
+    """When the user removes every sub-bullet for a problem (counter 0/5)
+    while OTHER problems still have ticks, treat as a destructive full
+    purge: drop all of that problem's ledger entries and warn."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
-        "- [x] Two Sum (E)\n- [ ] Group Anagrams (M)\n"
+        "- Two Sum (E) · 1/5\n"
+        "  - [x] ✅ 2026-05-11\n"
+        "  - [ ]\n  - [ ]\n  - [ ]\n  - [ ]\n"
+        "- Group Anagrams (M) · 0/5\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
-    original = '{"problem": "[Arrays & Hashing] -> Group Anagrams", "on": "2026-05-09"}\n'
+    ledger.write_text(
+        '{"problem": "[Arrays & Hashing] -> Two Sum", "on": "2026-05-11"}\n'
+        '{"problem": "[Arrays & Hashing] -> Group Anagrams", "on": "2026-05-09"}\n'
+    )
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 14))
+    remaining = ledger.read_text()
+    assert "Group Anagrams" not in remaining
+    assert "Two Sum" in remaining
+
+
+def test_recompute_dry_run_does_not_purge_ledger(tmp_path: Path) -> None:
+    """`dry_run=True` must not mutate the ledger when a curriculum.md
+    sub-bullet uncheck would otherwise remove a touch."""
+    daily_md = tmp_path / "curriculum.md"
+    daily_md.write_text(
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
+        "- Two Sum (E) · 1/5\n"
+        "  - [x] ✅ 2026-05-11\n"
+        "  - [ ]\n  - [ ]\n  - [ ]\n  - [ ]\n"
+        "- Group Anagrams (M) · 0/5\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    original = (
+        '{"problem": "[Arrays & Hashing] -> Two Sum", "on": "2026-05-11"}\n'
+        '{"problem": "[Arrays & Hashing] -> Group Anagrams", "on": "2026-05-09"}\n'
+    )
     ledger.write_text(original)
-    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11), dry_run=True)
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 14), dry_run=True)
     assert ledger.read_text() == original
 
 
@@ -1813,12 +1914,13 @@ def test_recompute_skips_purge_on_pristine_all_unchecked_curriculum_migration(
     tmp_path: Path,
 ) -> None:
     """Migration safeguard: when curriculum.md is freshly restructured (every
-    DSA box unticked) but the ledger has entries, treat as a migration. Don't
-    purge — recompute's render pass re-syncs the ticks from the ledger."""
+    problem at `0/5`, no sub-bullets) but the ledger has entries, treat as a
+    migration. Don't purge — recompute's render pass re-syncs the ticks from
+    the ledger."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
-        "- [ ] Two Sum (E)\n"
+        "- Two Sum (E) · 0/5\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
@@ -1826,41 +1928,108 @@ def test_recompute_skips_purge_on_pristine_all_unchecked_curriculum_migration(
         '{"problem": "[Arrays & Hashing] -> Two Sum", "on": "2026-05-09"}\n'
     )
     recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
-    # Ledger preserved
     assert "Two Sum" in ledger.read_text()
-    # curriculum.md re-synced to show the touch
-    assert "- [x] Two Sum (E) ✅ 2026-05-09" in daily_md.read_text()
+    rendered = daily_md.read_text()
+    # curriculum.md re-renders with sub-bullets reflecting the ledger.
+    assert "- Two Sum (E) · 1/5" in rendered
+    assert "  - [x] ✅ 2026-05-09" in rendered
 
 
-def test_write_curriculum_dsa_marks_touched_problems_with_latest_date() -> None:
-    md = _dsa_md(two_sum_checked=False)
+def test_write_curriculum_dsa_renders_5_slots_with_padding_for_partial_progress() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- Two Sum (E)\n"
+    )
     ledger = [
         Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 9)),
         Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11)),
     ]
-    out = write_curriculum_dsa(md, ledger)
-    assert "- [x] Two Sum (E) ✅ 2026-05-11" in out
+    out = write_curriculum_dsa(md, ledger, today=date(2026, 5, 11))
+    assert "- Two Sum (E) · 2/5 (next due 2026-05-14)" in out
+    # Both ticks render in chronological order, plus 3 empty padding slots.
+    assert "  - [x] ✅ 2026-05-09" in out
+    assert "  - [x] ✅ 2026-05-11" in out
+    assert out.count("  - [ ]") == 3
 
 
-def test_write_curriculum_dsa_clears_stamp_on_untouched_problem() -> None:
-    """Re-rendering DSA from a ledger that no longer has a problem strips
-    its stale ✅ stamp (consistent with uncheck-as-purge)."""
+def test_write_curriculum_dsa_renders_5_slots_no_padding_at_saturation() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- Two Sum (E)\n"
+    )
+    ledger = [
+        Touch("[Arrays & Hashing] -> Two Sum", date(2026, m, d))
+        for (m, d) in [(5, 9), (5, 12), (5, 19), (6, 9), (8, 8)]
+    ]
+    out = write_curriculum_dsa(md, ledger, today=date(2026, 8, 8))
+    assert "- Two Sum (E) · 5/5" in out
+    # 5 ticks, no empty padding.
+    assert "  - [ ]" not in out
+
+
+def test_write_curriculum_dsa_renders_all_touches_past_saturation_no_truncation() -> None:
+    """Past 5/5, the counter saturates but every touch still renders — full
+    history is preserved, not truncated."""
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- Two Sum (E)\n"
+    )
+    dates_ = [date(2026, 5, 9), date(2026, 5, 12), date(2026, 5, 19),
+              date(2026, 6, 9), date(2026, 8, 8), date(2026, 10, 7)]
+    ledger = [Touch("[Arrays & Hashing] -> Two Sum", d) for d in dates_]
+    out = write_curriculum_dsa(md, ledger, today=date(2026, 10, 7))
+    assert "- Two Sum (E) · 5/5" in out  # counter saturates at 5/5
+    for d in dates_:
+        assert f"  - [x] ✅ {d.isoformat()}" in out
+    assert "  - [ ]" not in out
+
+
+def test_write_curriculum_dsa_renders_no_subbullets_for_untouched_problem() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- Two Sum (E)\n"
+    )
+    out = write_curriculum_dsa(md, ledger=[], today=date(2026, 5, 11))
+    assert "- Two Sum (E) · 0/5" in out
+    assert "✅" not in out
+    assert "  - [ ]" not in out  # untouched: no padding slots either
+    assert "(next due" not in out
+    assert "(overdue" not in out
+
+
+def test_write_curriculum_dsa_renders_overdue_when_today_past_due_date() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- Two Sum (E)\n"
+    )
+    ledger = [Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11))]
+    # 1 touch → next due May 12; today May 18 → overdue 6d.
+    out = write_curriculum_dsa(md, ledger, today=date(2026, 5, 18))
+    assert "- Two Sum (E) · 1/5 (overdue 6d)" in out
+
+
+def test_write_curriculum_dsa_drops_legacy_checked_stamp_in_re_render() -> None:
+    """Re-rendering from a ledger that has no entries for a problem strips
+    the legacy `[x] ... ✅ DATE` form and produces the new `· 0/5` shape."""
     md = (
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
         "#### Arrays & Hashing\n\n- [x] Two Sum (E) ✅ 2026-05-08\n"
     )
-    out = write_curriculum_dsa(md, ledger=[])
-    assert "- [ ] Two Sum (E)" in out
+    out = write_curriculum_dsa(md, ledger=[], today=date(2026, 5, 11))
+    assert "- Two Sum (E) · 0/5" in out
     assert "✅" not in out
 
 
 def test_recompute_writes_back_curriculum_md_to_match_ledger(tmp_path: Path) -> None:
-    """After today.md ticks log a touch, curriculum.md's DSA box gets `[x] ✅ DATE`."""
+    """After today.md ticks log a touch, curriculum.md's DSA problem becomes
+    `· 1/5` with one ticked sub-bullet + 4 empty padding slots."""
     daily_md = tmp_path / "curriculum.md"
-    daily_md.write_text(_dsa_md(two_sum_checked=False))
+    daily_md.write_text(_dsa_md(two_sum_touch=None))
     today_md = tmp_path / "today.md"
     today_md.write_text("- [x] [Arrays & Hashing] -> Two Sum ✅ 2026-05-11\n")
     ledger = tmp_path / "completions.jsonl"
     recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
     text = daily_md.read_text()
-    assert "- [x] Two Sum (E) ✅ 2026-05-11" in text
+    assert "- Two Sum (E) · 1/5 (next due 2026-05-12)" in text
+    assert "  - [x] ✅ 2026-05-11" in text
+    assert text.count("  - [ ]") == 4
