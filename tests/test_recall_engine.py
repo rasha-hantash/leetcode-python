@@ -33,18 +33,18 @@ from recall_engine import (
     due_date,
     interval_for,
     apply_mock_updates,
-    load_behavioral,
     load_ledger,
-    load_mocks,
-    load_sd_chapters,
     mock_prereq_status,
     next_sd_chapter,
     overdue_days,
+    parse_behavioral,
     parse_mock_updates,
-    save_mocks,
+    parse_mocks,
+    parse_sd_chapters,
     parse_completions,
     parse_curriculum,
     parse_phases,
+    write_curriculum_mocks,
     projected_end_date,
     recompute,
     render_coverage,
@@ -1032,24 +1032,18 @@ def test_recompute_writes_coverage_md_when_path_provided(tmp_path: Path) -> None
 # ─── Mock tracking ────────────────────────────────────────────────────────────
 
 
-def test_load_mocks_returns_empty_list_when_file_does_not_exist(
-    tmp_path: Path,
-) -> None:
-    assert load_mocks(tmp_path / "nope.json") == []
+def test_parse_mocks_returns_empty_list_when_section_missing() -> None:
+    assert parse_mocks("# No mocks section here") == []
 
 
-def test_load_mocks_parses_pending_scheduled_completed_states(
-    tmp_path: Path,
-) -> None:
-    path = tmp_path / "mocks.json"
-    path.write_text(
-        '[{"id": "m1", "status": "pending"}, '
-        '{"id": "m2", "status": "scheduled", "platform": "Pramp", '
-        '"topic": "Trees", "scheduled_date": "2026-05-20"}, '
-        '{"id": "m3", "status": "completed", "completed_date": "2026-05-08", '
-        '"notes": "weak on memo"}]'
+def test_parse_mocks_extracts_pending_scheduled_completed_states() -> None:
+    md = (
+        "## Mocks\n\n"
+        "- [ ] [m1] _pending_\n"
+        "- [ ] [m2] Pramp · Trees · 📅 2026-05-20\n"
+        "- [x] [m3] ✅ 2026-05-08 · note: weak on memo\n"
     )
-    mocks = load_mocks(path)
+    mocks = parse_mocks(md)
     assert mocks[0].status == "pending"
     assert mocks[1].scheduled_date == date(2026, 5, 20)
     assert mocks[1].platform == "Pramp"
@@ -1083,26 +1077,24 @@ def test_recompute_renders_next_mock_in_today_and_full_mocks_in_coverage(
     tmp_path: Path,
 ) -> None:
     """today.md gets a single 'Next mock' block between Readiness and Recall.
-    coverage.md has the full ## Mocks section (summary + Next + Completed)."""
+    coverage.md has the full ## Mocks section (summary + Next + Completed).
+    Mocks now live in curriculum.md, not a separate JSON."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## A\n\n- [ ] Foo (E)\n"
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### A\n\n- [ ] Foo (E)\n\n"
+        "## Mocks\n\n"
+        "- [ ] [m1] Pramp · Trees · 📅 2026-05-13\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
     coverage_md = tmp_path / "coverage.md"
-    mocks_path = tmp_path / "mocks.json"
-    mocks_path.write_text(
-        '[{"id": "m1", "status": "scheduled", "platform": "Pramp", '
-        '"topic": "Trees", "scheduled_date": "2026-05-13"}]'
-    )
     recompute(
         daily_md,
         today_md,
         ledger,
         today=date(2026, 5, 11),
         coverage_md_path=coverage_md,
-        mocks_path=mocks_path,
     )
     today_text = today_md.read_text()
     assert "## Next mock" in today_text
@@ -1116,26 +1108,21 @@ def test_recompute_renders_next_mock_in_today_and_full_mocks_in_coverage(
 # ─── System Design chapter tracking ───────────────────────────────────────────
 
 
-def test_load_sd_chapters_returns_empty_list_when_file_does_not_exist(
-    tmp_path: Path,
-) -> None:
-    assert load_sd_chapters(tmp_path / "nope.json") == []
+def test_parse_sd_chapters_returns_empty_list_when_section_missing() -> None:
+    assert parse_sd_chapters("# No SD section") == []
 
 
-def test_load_sd_chapters_parses_pending_and_completed_states(
-    tmp_path: Path,
-) -> None:
-    path = tmp_path / "sd.json"
-    path.write_text(
-        '[{"id": "ch-1", "title": "Scale from Zero to Millions", '
-        '"book": "Alex Xu Vol 1", "status": "completed", '
-        '"completed_date": "2026-05-12"},'
-        ' {"id": "ch-2", "title": "Back-of-envelope estimation", '
-        '"book": "Alex Xu Vol 1", "status": "pending"}]'
+def test_parse_sd_chapters_extracts_pending_and_completed_states() -> None:
+    md = (
+        "## System Design\n\n"
+        "- [x] [ch-1] Alex Xu Vol 1 · Scale from Zero to Millions ✅ 2026-05-12\n"
+        "- [ ] [ch-2] Alex Xu Vol 1 · Back-of-envelope estimation\n"
     )
-    chapters = load_sd_chapters(path)
+    chapters = parse_sd_chapters(md)
     assert chapters[0].status == "completed"
     assert chapters[0].completed_date == date(2026, 5, 12)
+    assert chapters[0].title == "Scale from Zero to Millions"
+    assert chapters[0].book == "Alex Xu Vol 1"
     assert chapters[1].status == "pending"
     assert chapters[1].completed_date is None
 
@@ -1212,23 +1199,20 @@ def test_recompute_reads_sd_chapters_and_renders_in_both_views(
 ) -> None:
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## A\n\n- [ ] Foo (E)\n"
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### A\n\n- [ ] Foo (E)\n\n"
+        "## System Design\n\n"
+        "- [ ] [ch-1] Alex Xu Vol 1 · Scale from Zero to Millions\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
     coverage_md = tmp_path / "coverage.md"
-    sd_path = tmp_path / "sd.json"
-    sd_path.write_text(
-        '[{"id": "ch-1", "title": "Scale from Zero to Millions", '
-        '"book": "Alex Xu Vol 1", "status": "pending"}]'
-    )
     recompute(
         daily_md,
         today_md,
         ledger,
         today=date(2026, 5, 11),
         coverage_md_path=coverage_md,
-        sd_chapters_path=sd_path,
     )
     assert "## Today's SD reading" in today_md.read_text()
     assert "## System Design" in coverage_md.read_text()
@@ -1427,20 +1411,17 @@ def test_render_coverage_orders_sections_readiness_behavioral_mocks_sd_dsa() -> 
 # ─── Behavioral tracking ──────────────────────────────────────────────────────
 
 
-def test_load_behavioral_returns_empty_list_when_file_does_not_exist(
-    tmp_path: Path,
-) -> None:
-    assert load_behavioral(tmp_path / "nope.json") == []
+def test_parse_behavioral_returns_empty_list_when_section_missing() -> None:
+    assert parse_behavioral("# No behavioral section") == []
 
 
-def test_load_behavioral_parses_pending_and_completed_entries(tmp_path: Path) -> None:
-    path = tmp_path / "b.json"
-    path.write_text(
-        '[{"id": "b1", "prompt": "Tell me about yourself", "status": "pending"},'
-        ' {"id": "b2", "prompt": "Conflict story", "status": "completed", '
-        '"completed_date": "2026-05-12", "notes": "use Datadog migration"}]'
+def test_parse_behavioral_extracts_pending_and_completed_entries() -> None:
+    md = (
+        "## Behavioral\n\n"
+        "- [ ] [b1] Tell me about yourself\n"
+        "- [x] [b2] Conflict story ✅ 2026-05-12 · note: use Datadog migration\n"
     )
-    topics = load_behavioral(path)
+    topics = parse_behavioral(md)
     assert topics[0].status == "pending"
     assert topics[1].completed_date == date(2026, 5, 12)
     assert topics[1].notes == "use Datadog migration"
@@ -1472,25 +1453,22 @@ def test_render_coverage_omits_behavioral_section_when_arg_is_none() -> None:
     assert "Behavioral" not in out
 
 
-def test_recompute_reads_behavioral_file_and_renders_in_coverage(tmp_path: Path) -> None:
+def test_recompute_reads_behavioral_section_and_renders_in_coverage(tmp_path: Path) -> None:
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## A\n\n- [ ] Foo (E)\n"
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### A\n\n- [ ] Foo (E)\n\n"
+        "## Behavioral\n\n- [ ] [b1] Tell me about yourself\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
     coverage_md = tmp_path / "coverage.md"
-    behavioral_path = tmp_path / "b.json"
-    behavioral_path.write_text(
-        '[{"id": "b1", "prompt": "Tell me about yourself", "status": "pending"}]'
-    )
     recompute(
         daily_md,
         today_md,
         ledger,
         today=date(2026, 5, 11),
         coverage_md_path=coverage_md,
-        behavioral_path=behavioral_path,
     )
     assert "## Behavioral" in coverage_md.read_text()
 
@@ -1498,29 +1476,19 @@ def test_recompute_reads_behavioral_file_and_renders_in_coverage(tmp_path: Path)
 # ─── Mock prerequisites ───────────────────────────────────────────────────────
 
 
-def test_load_mocks_parses_prerequisites_object_into_dataclass(tmp_path: Path) -> None:
-    path = tmp_path / "mocks.json"
-    path.write_text(
-        '[{"id": "m1", "status": "pending", '
-        '"prerequisites": {"em_problems": 30, "sd_chapters": 5}}]'
+def test_parse_mocks_extracts_em_and_sd_count_prereqs() -> None:
+    md = (
+        "## Mocks\n\n"
+        "- [ ] [m1] _pending_ · prereq: 30 E+M, 5 SD\n"
     )
-    mocks = load_mocks(path)
+    mocks = parse_mocks(md)
     assert mocks[0].prerequisites == MockPrereq(em_problems=30, sd_chapters=5)
 
 
-def test_load_mocks_treats_missing_prereqs_as_none() -> None:
-    """Backward-compatible: existing mocks.json files without prerequisites
-    parse fine and just have prerequisites=None."""
-    from io import StringIO
-    import json as _json
-    raw = _json.dumps([{"id": "m1", "status": "pending"}])
-    # Use a tmp path-like bypass via an inline call
-    import tempfile
-
-    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
-        f.write(raw)
-        f.flush()
-        mocks = load_mocks(Path(f.name))
+def test_parse_mocks_treats_missing_prereqs_as_none() -> None:
+    """A mock without an inline `prereq:` segment parses to prerequisites=None."""
+    md = "## Mocks\n\n- [ ] [m1] _pending_\n"
+    mocks = parse_mocks(md)
     assert mocks[0].prerequisites is None
 
 
@@ -1608,15 +1576,12 @@ def test_render_coverage_next_subsection_shows_prereq_subbullet_for_pending_mock
     assert "❌ 2/10 SD chapters" in out
 
 
-def test_load_mocks_parses_sd_chapter_ids_into_prerequisites_tuple(
-    tmp_path: Path,
-) -> None:
-    path = tmp_path / "mocks.json"
-    path.write_text(
-        '[{"id": "m1", "status": "pending", '
-        '"prerequisites": {"sd_chapter_ids": ["axu1-4", "axu1-5", "axu1-6"]}}]'
+def test_parse_mocks_extracts_sd_chapter_ids_into_prerequisites_tuple() -> None:
+    md = (
+        "## Mocks\n\n"
+        "- [ ] [m1] _pending_ · prereq: axu1-4, axu1-5, axu1-6\n"
     )
-    mocks = load_mocks(path)
+    mocks = parse_mocks(md)
     assert mocks[0].prerequisites == MockPrereq(
         em_problems=0,
         sd_chapters=0,
@@ -1688,9 +1653,9 @@ def test_render_today_chapter_id_prereq_lists_chapter_titles_inline() -> None:
     assert "Ch 6 — Key-Value Store" in out
 
 
-def test_save_mocks_round_trips_sd_chapter_ids(tmp_path: Path) -> None:
-    """save_mocks → load_mocks must preserve `sd_chapter_ids`."""
-    path = tmp_path / "mocks.json"
+def test_write_curriculum_mocks_round_trips_sd_chapter_ids() -> None:
+    """write_curriculum_mocks → parse_mocks must preserve `sd_chapter_ids`."""
+    md = "## Mocks\n\n- [ ] [m1] _pending_\n"
     mocks_in = [
         Mock(
             id="m1",
@@ -1700,8 +1665,8 @@ def test_save_mocks_round_trips_sd_chapter_ids(tmp_path: Path) -> None:
             ),
         )
     ]
-    save_mocks(path, mocks_in)
-    mocks_out = load_mocks(path)
+    rewritten = write_curriculum_mocks(md, mocks_in)
+    mocks_out = parse_mocks(rewritten)
     assert mocks_out[0].prerequisites is not None
     assert mocks_out[0].prerequisites.sd_chapter_ids == ("axu1-4", "axu1-5")
     assert mocks_out[0].prerequisites.em_problems == 15
@@ -1884,10 +1849,10 @@ def test_apply_mock_updates_returns_zero_changes_when_state_already_matches() ->
     assert changes == 0
 
 
-def test_save_mocks_round_trips_through_load_mocks(tmp_path: Path) -> None:
-    """save_mocks → load_mocks should preserve every modeled field including
-    prereqs and booking_url."""
-    path = tmp_path / "mock_interviews.json"
+def test_write_curriculum_mocks_round_trips_through_parse_mocks() -> None:
+    """write_curriculum_mocks → parse_mocks should preserve every modeled
+    field including prereqs and booking_url."""
+    md = "## Mocks\n\n- [ ] [m1] _pending_\n- [ ] [m2] _pending_\n"
     original = [
         Mock(
             id="m1",
@@ -1907,53 +1872,52 @@ def test_save_mocks_round_trips_through_load_mocks(tmp_path: Path) -> None:
             notes="weak on memo",
         ),
     ]
-    save_mocks(path, original)
-    reloaded = load_mocks(path)
+    rewritten = write_curriculum_mocks(md, original)
+    reloaded = parse_mocks(rewritten)
     assert reloaded == original
 
 
-def test_recompute_folds_today_md_calendar_edit_into_mock_interviews_json(
+def test_recompute_folds_today_md_calendar_edit_into_curriculum_md(
     tmp_path: Path,
 ) -> None:
-    """End-to-end: user adds 📅 to today.md, runs recompute, mock_interviews.json
-    reflects the new scheduled state. This is the editing UX the user asked for."""
+    """End-to-end: user adds 📅 to today.md, runs recompute, curriculum.md
+    reflects the new scheduled state."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## A\n\n- [ ] Foo (E)\n"
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### A\n\n- [ ] Foo (E)\n\n"
+        '## Mocks\n\n'
+        '- [ ] [mock-1] Pramp · Trees · _pending_\n'
     )
     today_md = tmp_path / "today.md"
-    # Simulate a today.md the user has edited — added 📅 to the pending mock
     today_md.write_text(
         "# Today\n\n"
         "## Next mock\n\n"
         "- [ ] [mock-1] Pramp · Trees — _pending_ 📅 2026-05-20\n"
     )
     ledger = tmp_path / "completions.jsonl"
-    mocks_path = tmp_path / "mock_interviews.json"
-    mocks_path.write_text(
-        '[{"id": "mock-1", "status": "pending", "platform": "Pramp", "topic": "Trees"}]'
-    )
     recompute(
         daily_md,
         today_md,
         ledger,
         today=date(2026, 5, 11),
-        mocks_path=mocks_path,
     )
-    # mock_interviews.json now has the scheduled state
-    updated = load_mocks(mocks_path)
+    updated = parse_mocks(daily_md.read_text())
     assert updated[0].status == "scheduled"
     assert updated[0].scheduled_date == date(2026, 5, 20)
 
 
-def test_recompute_folds_today_md_completion_check_into_mock_interviews_json(
+def test_recompute_folds_today_md_completion_check_into_curriculum_md(
     tmp_path: Path,
 ) -> None:
     """Tasks plugin checks the box and auto-stamps ✅. Recompute folds that
-    completion stamp into mock_interviews.json."""
+    completion stamp back into curriculum.md."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## A\n\n- [ ] Foo (E)\n"
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### A\n\n- [ ] Foo (E)\n\n"
+        '## Mocks\n\n'
+        '- [ ] [mock-1] Pramp · Trees · 📅 2026-05-20\n'
     )
     today_md = tmp_path / "today.md"
     today_md.write_text(
@@ -1962,19 +1926,13 @@ def test_recompute_folds_today_md_completion_check_into_mock_interviews_json(
         "- [x] [mock-1] Pramp · Trees · 📅 2026-05-20 ✅ 2026-05-22\n"
     )
     ledger = tmp_path / "completions.jsonl"
-    mocks_path = tmp_path / "mock_interviews.json"
-    mocks_path.write_text(
-        '[{"id": "mock-1", "status": "scheduled", "platform": "Pramp", '
-        '"topic": "Trees", "scheduled_date": "2026-05-20"}]'
-    )
     recompute(
         daily_md,
         today_md,
         ledger,
         today=date(2026, 5, 23),
-        mocks_path=mocks_path,
     )
-    updated = load_mocks(mocks_path)
+    updated = parse_mocks(daily_md.read_text())
     assert updated[0].status == "completed"
     assert updated[0].completed_date == date(2026, 5, 22)
 
