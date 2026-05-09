@@ -51,7 +51,6 @@ from recall_engine import (
     render_readiness_block,
     render_today,
     start_date,
-    upcoming_mocks,
 )
 
 
@@ -1135,63 +1134,6 @@ def test_load_mocks_parses_pending_scheduled_completed_states(
     assert mocks[1].platform == "Pramp"
     assert mocks[2].completed_date == date(2026, 5, 8)
     assert mocks[2].notes == "weak on memo"
-
-
-def test_upcoming_mocks_filters_to_scheduled_only_within_window() -> None:
-    today = date(2026, 5, 11)
-    mocks = [
-        Mock(id="m1", status="pending"),
-        Mock(
-            id="m2",
-            status="scheduled",
-            platform="Pramp",
-            scheduled_date=date(2026, 5, 13),
-        ),
-        Mock(
-            id="m3",
-            status="scheduled",
-            platform="Interviewing.io",
-            scheduled_date=date(2026, 6, 1),  # 21 days out — past 14-day window
-        ),
-        Mock(
-            id="m4", status="completed", completed_date=date(2026, 5, 8)
-        ),
-    ]
-    upcoming = upcoming_mocks(mocks, today)
-    assert [m.id for m in upcoming] == ["m2"]
-
-
-def test_upcoming_mocks_surfaces_past_due_scheduled_mocks_so_user_notices() -> None:
-    """A scheduled mock whose date is already past — likely the user forgot
-    to mark it complete. Surface it rather than hiding it."""
-    today = date(2026, 5, 15)
-    mocks = [
-        Mock(
-            id="m1",
-            status="scheduled",
-            platform="Pramp",
-            scheduled_date=date(2026, 5, 10),  # 5 days ago
-        ),
-    ]
-    upcoming = upcoming_mocks(mocks, today)
-    assert [m.id for m in upcoming] == ["m1"]
-
-
-def test_upcoming_mocks_sorts_soonest_first() -> None:
-    today = date(2026, 5, 11)
-    mocks = [
-        Mock(
-            id="later",
-            status="scheduled",
-            scheduled_date=date(2026, 5, 18),
-        ),
-        Mock(
-            id="sooner",
-            status="scheduled",
-            scheduled_date=date(2026, 5, 13),
-        ),
-    ]
-    assert [m.id for m in upcoming_mocks(mocks, today)] == ["sooner", "later"]
 
 
 def test_render_coverage_includes_mock_section_with_progress_bar() -> None:

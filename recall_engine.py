@@ -110,12 +110,8 @@ MockStatus = Literal["pending", "scheduled", "completed"]
 
 @dataclass(frozen=True)
 class MockPrereq:
-    """Per-mock readiness threshold the user wants to clear before sitting it.
-
-    Two SD shapes are supported:
-      - `sd_chapters` (count): any N chapters complete satisfies the threshold.
-      - `sd_chapter_ids` (specific): the named chapters must all be complete.
-        When set, this overrides `sd_chapters` — the count derives from the list."""
+    """Per-mock readiness thresholds. `sd_chapter_ids` (when set) overrides
+    `sd_chapters` — the count then derives from the list length."""
 
     em_problems: int = 0
     sd_chapters: int = 0
@@ -123,26 +119,12 @@ class MockPrereq:
 
     @property
     def has_any(self) -> bool:
-        return (
-            self.em_problems > 0
-            or self.sd_chapters > 0
-            or len(self.sd_chapter_ids) > 0
-        )
-
-    @property
-    def sd_threshold(self) -> int:
-        """How many SD chapters are required, regardless of which shape is in use.
-        Specific-id list wins (length); else the count threshold."""
-        if self.sd_chapter_ids:
-            return len(self.sd_chapter_ids)
-        return self.sd_chapters
+        return bool(self.em_problems or self.sd_chapters or self.sd_chapter_ids)
 
 
 @dataclass(frozen=True)
 class PrereqRow:
-    """One row in the prereq summary line. `detail` is an optional inline
-    breakdown — e.g., `Ch 4 — Rate Limiter ✓, Ch 5 — Consistent Hashing` —
-    used when a mock pins specific items rather than a bulk count."""
+    """One row of a prereq summary line; `detail` is an optional inline breakdown."""
 
     label: str
     met: bool
@@ -174,13 +156,13 @@ class Mock:
 
     @property
     def effective_booking_url(self) -> str | None:
-        """Per-mock override wins; otherwise fall back to the platform default
-        for Pramp / Interviewing.io. Returns None for unknown platforms."""
-        if self.booking_url:
-            return self.booking_url
-        if self.platform and self.platform in _PLATFORM_BOOKING_URLS:
-            return _PLATFORM_BOOKING_URLS[self.platform]
-        return None
+        """Per-mock override wins; otherwise the platform default. None if neither."""
+        return self.booking_url or _PLATFORM_BOOKING_URLS.get(self.platform or "")
+
+    @property
+    def descriptor(self) -> str:
+        """Human-readable label: `platform · topic`, or the id as fallback."""
+        return " · ".join(b for b in (self.platform, self.topic) if b) or self.id
 
 
 SDChapterStatus = Literal["pending", "completed"]
@@ -585,32 +567,18 @@ _BOOKED_DATE = re.compile(r"📅\s*(\d{4}-\d{2}-\d{2})")
 def parse_mock_updates(
     today_md: str, known_ids: set[str]
 ) -> list[tuple[str, MockStatus, date]]:
-    """Find Next-mock checkbox lines in today.md tagged `[mock-id]` and extract
-    user edits. A `📅 YYYY-MM-DD` stamp signals a scheduled booking; a `✅ YYYY-MM-DD`
-    stamp (auto-added by the Tasks plugin when you check the box) signals completion.
-
-    Returns list of (mock_id, status, date) updates. Lines whose id isn't in
-    `known_ids` are ignored (so problem checkboxes can't accidentally collide)."""
+    """Extract user edits to `[mock-id]` checkbox lines in today.md. ✅ → completed,
+    📅 → scheduled. Lines whose id isn't in `known_ids` are skipped."""
     updates: list[tuple[str, MockStatus, date]] = []
     for line in today_md.splitlines():
         m = _MOCK_LINE.match(line)
-        if not m:
+        if not m or m.group(2) not in known_ids:
             continue
-        mock_id = m.group(2)
-        if mock_id not in known_ids:
-            continue
-        body = m.group(3)
-        completed_match = _DONE_DATE.search(body)
-        if completed_match:
-            updates.append(
-                (mock_id, "completed", date.fromisoformat(completed_match.group(1)))
-            )
-            continue
-        scheduled_match = _BOOKED_DATE.search(body)
-        if scheduled_match:
-            updates.append(
-                (mock_id, "scheduled", date.fromisoformat(scheduled_match.group(1)))
-            )
+        mock_id, body = m.group(2), m.group(3)
+        if hit := _DONE_DATE.search(body):
+            updates.append((mock_id, "completed", date.fromisoformat(hit.group(1))))
+        elif hit := _BOOKED_DATE.search(body):
+            updates.append((mock_id, "scheduled", date.fromisoformat(hit.group(1))))
     return updates
 
 
@@ -618,60 +586,54 @@ def apply_mock_updates(
     mocks: list[Mock],
     updates: list[tuple[str, MockStatus, date]],
 ) -> tuple[list[Mock], int]:
-    """Fold parsed today.md updates into the mock list. Completed status wins —
-    a mock that's already completed isn't downgraded by a stale 📅. Returns
-    (updated_list, change_count)."""
+    """Fold parsed today.md updates into the mock list. Completed status is
+    sticky — a stale 📅 cannot downgrade an already-completed mock."""
     by_id = {m.id: m for m in mocks}
     changes = 0
     for mock_id, new_status, dt in updates:
-        if mock_id not in by_id:
-            continue
-        existing = by_id[mock_id]
-        if existing.status == "completed":
+        existing = by_id.get(mock_id)
+        if existing is None or existing.status == "completed":
             continue
         if new_status == "completed" and existing.completed_date != dt:
-            by_id[mock_id] = replace(
-                existing, status="completed", completed_date=dt
-            )
+            by_id[mock_id] = replace(existing, status="completed", completed_date=dt)
             changes += 1
         elif new_status == "scheduled" and (
             existing.status != "scheduled" or existing.scheduled_date != dt
         ):
-            by_id[mock_id] = replace(
-                existing, status="scheduled", scheduled_date=dt
-            )
+            by_id[mock_id] = replace(existing, status="scheduled", scheduled_date=dt)
             changes += 1
     return list(by_id.values()), changes
 
 
+def _mock_to_record(m: Mock) -> dict[str, Any]:
+    rec: dict[str, Any] = {"id": m.id, "status": m.status}
+    for key, val in (
+        ("platform", m.platform),
+        ("topic", m.topic),
+        ("scheduled_date", m.scheduled_date.isoformat() if m.scheduled_date else None),
+        ("completed_date", m.completed_date.isoformat() if m.completed_date else None),
+        ("notes", m.notes),
+    ):
+        if val:
+            rec[key] = val
+    if m.prerequisites and m.prerequisites.has_any:
+        prereqs: dict[str, Any] = {
+            "em_problems": m.prerequisites.em_problems,
+            "sd_chapters": m.prerequisites.sd_chapters,
+        }
+        if m.prerequisites.sd_chapter_ids:
+            prereqs["sd_chapter_ids"] = list(m.prerequisites.sd_chapter_ids)
+        rec["prerequisites"] = prereqs
+    if m.booking_url:
+        rec["booking_url"] = m.booking_url
+    return rec
+
+
 def save_mocks(path: Path, mocks: list[Mock]) -> None:
-    """Write mocks back to JSON. Used after parse_mock_updates + apply_mock_updates
-    so today.md edits propagate to the source-of-truth file."""
-    records: list[dict[str, Any]] = []
-    for m in mocks:
-        rec: dict[str, Any] = {"id": m.id, "status": m.status}
-        if m.platform:
-            rec["platform"] = m.platform
-        if m.topic:
-            rec["topic"] = m.topic
-        if m.scheduled_date:
-            rec["scheduled_date"] = m.scheduled_date.isoformat()
-        if m.completed_date:
-            rec["completed_date"] = m.completed_date.isoformat()
-        if m.notes:
-            rec["notes"] = m.notes
-        if m.prerequisites is not None and m.prerequisites.has_any:
-            prereqs: dict[str, Any] = {
-                "em_problems": m.prerequisites.em_problems,
-                "sd_chapters": m.prerequisites.sd_chapters,
-            }
-            if m.prerequisites.sd_chapter_ids:
-                prereqs["sd_chapter_ids"] = list(m.prerequisites.sd_chapter_ids)
-            rec["prerequisites"] = prereqs
-        if m.booking_url:
-            rec["booking_url"] = m.booking_url
-        records.append(rec)
-    path.write_text(json.dumps(records, indent=2) + "\n")
+    """Write mocks back to JSON. Used by recompute to fold today.md edits."""
+    path.write_text(
+        json.dumps([_mock_to_record(m) for m in mocks], indent=2) + "\n"
+    )
 
 
 def mock_prereq_status(
@@ -680,82 +642,55 @@ def mock_prereq_status(
     sd_done: int,
     sd_chapters: list[SDChapter] | None = None,
 ) -> list[PrereqRow]:
-    """For a mock with prerequisites, return one `PrereqRow` per dimension.
-    Empty list if the mock has no prereqs defined.
-
-    When the mock pins specific SD chapter ids (`sd_chapter_ids`), the SD row's
-    `current` counts only those required chapters that are completed (not
-    `sd_done` overall) and `detail` lists the chapter titles inline. Falling
-    back to the count-only shape when `sd_chapters` is set instead."""
+    """One `PrereqRow` per dimension a mock pins. Empty if no prereqs.
+    When `sd_chapter_ids` is set, the SD row counts only those chapters and
+    lists them inline — otherwise it uses the count threshold."""
     pre = mock.prerequisites
-    if pre is None or not pre.has_any:
+    if not pre or not pre.has_any:
         return []
 
     rows: list[PrereqRow] = []
     if pre.em_problems > 0:
-        rows.append(
-            PrereqRow(
-                label="E/M problems",
-                met=em_done >= pre.em_problems,
-                current=em_done,
-                threshold=pre.em_problems,
-            )
-        )
+        rows.append(PrereqRow(
+            "E/M problems", em_done >= pre.em_problems, em_done, pre.em_problems
+        ))
 
     if pre.sd_chapter_ids:
-        chapter_lookup: dict[str, SDChapter] = {}
-        if sd_chapters is not None:
-            chapter_lookup = {ch.id: ch for ch in sd_chapters}
-        required_count = len(pre.sd_chapter_ids)
-        done_count = 0
-        detail_parts: list[str] = []
-        for cid in pre.sd_chapter_ids:
-            ch = chapter_lookup.get(cid)
-            label = ch.title if ch else cid
-            is_done = ch is not None and ch.status == "completed"
-            if is_done:
-                done_count += 1
-                detail_parts.append(f"{label} ✓")
-            else:
-                detail_parts.append(label)
-        rows.append(
-            PrereqRow(
-                label="SD chapters",
-                met=done_count >= required_count,
-                current=done_count,
-                threshold=required_count,
-                detail=", ".join(detail_parts),
-            )
+        lookup = {ch.id: ch for ch in (sd_chapters or [])}
+        chapters = [(cid, lookup.get(cid)) for cid in pre.sd_chapter_ids]
+        done = sum(1 for _, ch in chapters if ch and ch.status == "completed")
+        detail = ", ".join(
+            f"{ch.title} ✓" if ch and ch.status == "completed" else (ch.title if ch else cid)
+            for cid, ch in chapters
         )
+        rows.append(PrereqRow(
+            "SD chapters", done >= len(chapters), done, len(chapters), detail
+        ))
     elif pre.sd_chapters > 0:
-        rows.append(
-            PrereqRow(
-                label="SD chapters",
-                met=sd_done >= pre.sd_chapters,
-                current=sd_done,
-                threshold=pre.sd_chapters,
-            )
-        )
+        rows.append(PrereqRow(
+            "SD chapters", sd_done >= pre.sd_chapters, sd_done, pre.sd_chapters
+        ))
 
     return rows
 
 
 def _format_prereq_line(rows: list[PrereqRow]) -> str:
-    """Single-line summary of prereq rows for use as a sub-bullet.
+    """`  - Prereqs: ✓ 5/4 E/M problems, ❌ 1/3 SD chapters: Ch 4 ✓, Ch 5, Ch 6`"""
+    def fmt(r: PrereqRow) -> str:
+        head = f"{'✓' if r.met else '❌'} {r.current}/{r.threshold} {r.label}"
+        return f"{head}: {r.detail}" if r.detail else head
+    return f"  - Prereqs: {', '.join(fmt(r) for r in rows)}"
 
-    Format per row: `{marker} {current}/{threshold} {label}[: detail]`. The
-    optional `detail` lists the specific items required (e.g., the chapter
-    titles when a mock pins to specific SD chapters), each annotated with ✓
-    if already complete."""
-    parts: list[str] = []
-    for row in rows:
-        marker = "✓" if row.met else "❌"
-        head = f"{marker} {row.current}/{row.threshold} {row.label}"
-        if row.detail:
-            parts.append(f"{head}: {row.detail}")
-        else:
-            parts.append(head)
-    return f"  - Prereqs: {', '.join(parts)}"
+
+def _format_urgency(delta: int) -> str:
+    if delta < 0:
+        return f"{abs(delta)}d ago — mark complete or reschedule"
+    return {0: "today", 1: "tomorrow"}.get(delta, f"in {delta}d")
+
+
+def _format_short_date(d: date) -> str:
+    """`Mon May 11`-style date with no zero-padding on the day."""
+    return d.strftime("%a %b ").replace(" 0", " ") + str(d.day)
 
 
 def _render_next_mock_block(
@@ -765,38 +700,18 @@ def _render_next_mock_block(
     sd_done: int = 0,
     sd_chapters: list[SDChapter] | None = None,
 ) -> list[str]:
-    """One-mock display, formatted as an editable checkbox tagged `[mock-id]`.
-    User flow:
-      - Pending: add `📅 YYYY-MM-DD` to the line after booking. Recompute folds
-        the date back into mock_interviews.json (status → scheduled).
-      - Scheduled: tick the box after the mock; the Tasks plugin auto-stamps
-        `✅ DATE`. Recompute marks the mock completed in mock_interviews.json.
-
-    Same mental model as DSA touches: edit today.md, recompute folds the edit
-    into the source-of-truth JSON."""
-    bits = [mock.platform or "", mock.topic or ""]
-    descriptor = " · ".join(b for b in bits if b) or mock.id
-
+    """Editable checkbox for the next mock, tagged `[mock-id]`.
+    Pending: user appends `📅 DATE` after booking. Scheduled: user ticks box on
+    completion (Tasks plugin auto-stamps ✅). Recompute folds either edit back
+    into mock_interviews.json."""
     if mock.status == "scheduled" and mock.scheduled_date is not None:
         delta = (mock.scheduled_date - today).days
-        if delta < 0:
-            urgency = f"{abs(delta)}d ago — mark complete or reschedule"
-        elif delta == 0:
-            urgency = "today"
-        elif delta == 1:
-            urgency = "tomorrow"
-        else:
-            urgency = f"in {delta}d"
-        date_str = (
-            mock.scheduled_date.strftime("%a %b ").replace(" 0", " ")
-            + str(mock.scheduled_date.day)
-        )
         line = (
-            f"- [ ] [{mock.id}] {descriptor} · 📅 {mock.scheduled_date.isoformat()} "
-            f"({date_str}, {urgency})"
+            f"- [ ] [{mock.id}] {mock.descriptor} · 📅 {mock.scheduled_date.isoformat()} "
+            f"({_format_short_date(mock.scheduled_date)}, {_format_urgency(delta)})"
         )
     else:
-        line = f"- [ ] [{mock.id}] {descriptor} — _pending_"
+        line = f"- [ ] [{mock.id}] {mock.descriptor} — _pending_"
 
     lines = [line]
     prereqs = mock_prereq_status(mock, em_done, sd_done, sd_chapters)
@@ -804,8 +719,7 @@ def _render_next_mock_block(
         lines.append(_format_prereq_line(prereqs))
 
     if mock.status == "pending":
-        url = mock.effective_booking_url
-        if url:
+        if url := mock.effective_booking_url:
             lines.append(f"  - Book: [{mock.platform or 'link'}]({url})")
         lines.append(
             "  - _When booked, append `📅 YYYY-MM-DD` to the line above. "
@@ -992,79 +906,18 @@ def _progress_bar(done: int, total: int, width: int = 13) -> str:
 
 
 def next_mock(mocks: list[Mock]) -> Mock | None:
-    """The first non-completed mock in document order — the one the user
-    should focus on next, whether it's scheduled or still pending. Returns
-    None if every mock is completed."""
-    for m in mocks:
-        if m.status != "completed":
-            return m
-    return None
-
-
-def upcoming_mocks(
-    mocks: list[Mock], today: date, window_days: int = 14
-) -> list[Mock]:
-    """Mocks that are scheduled and due to happen within the next `window_days`,
-    sorted soonest first. Past-dated scheduled mocks (forgotten to mark complete)
-    also surface so the user notices."""
-    soon: list[Mock] = []
-    for m in mocks:
-        if m.status != "scheduled" or m.scheduled_date is None:
-            continue
-        delta = (m.scheduled_date - today).days
-        if delta <= window_days:
-            soon.append(m)
-    soon.sort(key=lambda m: m.scheduled_date or today)
-    return soon
+    """First non-completed mock, or None if all completed."""
+    return next((m for m in mocks if m.status != "completed"), None)
 
 
 def _format_mock_line(mock: Mock) -> str:
     """One bullet describing a single mock — its status, date, platform, topic."""
-    bits: list[str] = []
-    if mock.platform:
-        bits.append(mock.platform)
-    if mock.topic:
-        bits.append(mock.topic)
-    descriptor = " · ".join(bits) if bits else mock.id
+    descriptor = mock.descriptor
     if mock.status == "completed" and mock.completed_date:
         return f"- [x] {descriptor} · ✅ {mock.completed_date.isoformat()}"
     if mock.status == "scheduled" and mock.scheduled_date:
         return f"- [ ] {descriptor} · 📅 {mock.scheduled_date.isoformat()}"
     return f"- [ ] {descriptor} · _pending_"
-
-
-def _render_upcoming_mocks_block(
-    mocks: list[Mock],
-    today: date,
-    em_done: int = 0,
-    sd_done: int = 0,
-    sd_chapters: list[SDChapter] | None = None,
-) -> list[str]:
-    """The 'Upcoming mocks' block that surfaces in today.md when scheduled
-    mocks are within the look-ahead window. Each mock with prerequisites
-    gets a sub-bullet showing whether its thresholds are met."""
-    lines: list[str] = []
-    for m in mocks:
-        assert m.scheduled_date is not None  # filtered by upcoming_mocks
-        delta = (m.scheduled_date - today).days
-        if delta < 0:
-            urgency = f"{abs(delta)}d ago — mark complete or reschedule"
-        elif delta == 0:
-            urgency = "today"
-        elif delta == 1:
-            urgency = "tomorrow"
-        else:
-            urgency = f"in {delta}d"
-        bits = [m.platform or "", m.topic or ""]
-        descriptor = " · ".join(b for b in bits if b) or m.id
-        lines.append(
-            f"- {descriptor} · {m.scheduled_date.strftime('%a %b ').replace(' 0', ' ')}"
-            f"{m.scheduled_date.day} ({urgency})"
-        )
-        prereqs = mock_prereq_status(m, em_done, sd_done, sd_chapters)
-        if prereqs:
-            lines.append(_format_prereq_line(prereqs))
-    return lines
 
 
 # ─── Application-readiness gates ─────────────────────────────────────────────
