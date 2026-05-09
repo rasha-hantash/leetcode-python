@@ -425,27 +425,8 @@ _DAY_ANNOTATION = re.compile(r"\s*\(Day\s+\d+\)\s*")
 _METADATA_SUFFIX = re.compile(r"\s+—\s+.*$")
 _DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
 _SOURCE_TAG = re.compile(r"\s*\((nc-150\+|company question)\)\s*")
-_VARIANT_TAG = re.compile(r"\s*\(variant of:\s*[^)]+\)\s*")
+_VARIANT_TAG = re.compile(r"\s*\(variant of:\s*([^)]+)\)\s*")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")
-
-
-def _extract_difficulty(text: str) -> Difficulty | None:
-    match = _DIFFICULTY_TAG.search(text)
-    if match is None:
-        return None
-    return match.group(1)  # type: ignore[return-value]
-
-
-def _extract_source(text: str) -> Source:
-    match = _SOURCE_TAG.search(text)
-    if match is None:
-        return "nc-150"
-    return match.group(1)  # type: ignore[return-value]
-
-
-def _extract_variant_of(text: str) -> str | None:
-    match = re.search(r"\(variant of:\s*([^)]+)\)", text)
-    return match.group(1).strip() if match else None
 
 
 def _canonicalize(text: str) -> str:
@@ -479,20 +460,21 @@ def parse_curriculum(daily_md: str) -> list[Problem]:
         if not problem_match:
             continue
         raw = problem_match.group(1)
-        difficulty = _extract_difficulty(raw)
-        source = _extract_source(raw)
-        variant_of = _extract_variant_of(raw)
         canonical = _canonicalize(raw)
-        if _PROBLEM_TEXT.match(canonical):
-            problems.append(
-                Problem(
-                    text=canonical,
-                    source_day=current_day,
-                    difficulty=difficulty,
-                    source=source,
-                    variant_of=variant_of,
-                )
+        if not _PROBLEM_TEXT.match(canonical):
+            continue
+        diff_m = _DIFFICULTY_TAG.search(raw)
+        src_m = _SOURCE_TAG.search(raw)
+        var_m = _VARIANT_TAG.search(raw)
+        problems.append(
+            Problem(
+                text=canonical,
+                source_day=current_day,
+                difficulty=diff_m.group(1) if diff_m else None,  # type: ignore[arg-type]
+                source=src_m.group(1) if src_m else "nc-150",  # type: ignore[arg-type]
+                variant_of=var_m.group(1).strip() if var_m else None,
             )
+        )
 
     return problems
 
