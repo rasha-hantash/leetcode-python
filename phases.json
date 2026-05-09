@@ -1,0 +1,72 @@
+[
+  {
+    "number": 1,
+    "name": "Linear Patterns E+M",
+    "patterns": [
+      "Arrays & Hashing",
+      "Two Pointers",
+      "Sliding Window",
+      "Stack",
+      "Binary Search"
+    ],
+    "new_per_day": 5,
+    "difficulty_cap": "M"
+  },
+  {
+    "number": 2,
+    "name": "Linked List + Trees",
+    "patterns": ["Linked List", "Trees"],
+    "new_per_day": 4,
+    "difficulty_cap": "M"
+  },
+  {
+    "number": 3,
+    "name": "Heap + Backtracking",
+    "patterns": ["Heap", "Backtracking", "Tries"],
+    "new_per_day": 4,
+    "difficulty_cap": "M"
+  },
+  {
+    "number": 4,
+    "name": "Graphs + DP",
+    "patterns": ["Graphs", "Advanced Graphs", "1-D DP", "2-D DP"],
+    "new_per_day": 4,
+    "difficulty_cap": "M"
+  },
+  {
+    "number": 5,
+    "name": "Hard Problems",
+    "patterns": null,
+    "new_per_day": 2,
+    "difficulty_cap": "H",
+    "difficulty_floor": "H"
+  },
+  {
+    "number": 6,
+    "name": "Closing Patterns",
+    "patterns": ["Greedy", "Intervals", "Math & Geometry", "Bit Manipulation"],
+    "new_per_day": 4,
+    "difficulty_cap": "M"
+  },
+  {
+    "number": 7,
+    "name": "NC150+ Extras",
+    "patterns": [
+      "String Transformation",
+      "Difference Array",
+      "Boyer-Moore",
+      "Bit-Trie",
+      "Reservoir Sampling",
+      "Segment Tree",
+      "Bitmask DP",
+      "Sweep Line"
+    ],
+    "new_per_day": 3
+  },
+  {
+    "number": 8,
+    "name": "Reinforcement",
+    "patterns": null,
+    "new_per_day": 0
+  }
+]
