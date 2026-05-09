@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 import math
 import re
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, replace
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Iterable, Literal
@@ -199,8 +199,7 @@ class BehavioralTopic:
 
 @dataclass(frozen=True)
 class CategoryProgress:
-    """Completion progress within one prep category (E+M problems, SD chapters,
-    or mocks). Used to render percentage bars and feed readiness gates."""
+    """Completion of one prep category (E+M, SD, mocks). Drives bars and gates."""
 
     name: str
     done: int
@@ -210,15 +209,14 @@ class CategoryProgress:
     def fraction(self) -> float:
         return self.done / self.total if self.total > 0 else 0.0
 
+    @property
+    def complete(self) -> bool:
+        return self.total > 0 and self.done == self.total
+
 
 @dataclass(frozen=True)
 class Readiness:
-    """Aggregate prep state — three category progresses + which application
-    tiers the user has cleared. Tier thresholds are hardcoded in `compute_readiness`.
-
-    The `tiers` list is ordered easiest-first (fallback → target → stretch);
-    each entry's `met` flag reflects whether all criteria for that tier are
-    currently satisfied."""
+    """Three category bars + tiers (ordered fallback → target → stretch)."""
 
     em: CategoryProgress
     sd: CategoryProgress
@@ -228,8 +226,7 @@ class Readiness:
 
 @dataclass(frozen=True)
 class ReadinessTier:
-    """One application-readiness gate. `criteria` is a list of (label, met)
-    pairs that compose the tier — e.g., 'All E+M problems touched'."""
+    """One application-readiness gate as a list of (label, met) criteria."""
 
     name: str
     criteria: list[tuple[str, bool]]
@@ -241,7 +238,7 @@ class ReadinessTier:
 
 @dataclass(frozen=True)
 class RecomputeResult:
-    """Summary of what a single recompute() call did. Useful for CLI output."""
+    """Summary of one `recompute()` call, surfaced via the CLI."""
 
     new_touches_logged: int
     recall_size: int
@@ -906,61 +903,30 @@ def compute_readiness(
     sd_chapters: list[SDChapter],
     mocks: list[Mock],
 ) -> Readiness:
-    """Roll up the three ledgers into a Readiness summary with three tiered
-    application gates: Fallback-ready (E+M done), Target-ready (E+M + partial
-    SD + partial mocks), Stretch-ready (everything)."""
+    """Roll up the three ledgers into category bars + tiered application gates."""
     touched = {t.problem for t in ledger}
-    em_curriculum = [p for p in curriculum if p.difficulty in ("E", "M")]
-    em_done = sum(1 for p in em_curriculum if p.text in touched)
-    em = CategoryProgress(
-        name="E+M problems", done=em_done, total=len(em_curriculum)
-    )
-    em_complete = em.done == em.total and em.total > 0
-
-    sd_done = sum(1 for c in sd_chapters if c.status == "completed")
-    sd = CategoryProgress(
-        name="System Design", done=sd_done, total=len(sd_chapters)
-    )
-    sd_complete = sd.done == sd.total and sd.total > 0
-
-    mocks_done = sum(1 for m in mocks if m.status == "completed")
-    mock_progress = CategoryProgress(
-        name="Mocks", done=mocks_done, total=len(mocks)
-    )
-    mocks_complete = mock_progress.done == mock_progress.total and mock_progress.total > 0
-
-    all_curriculum_done = all(p.text in touched for p in curriculum) and curriculum
+    em_curr = [p for p in curriculum if p.difficulty in ("E", "M")]
+    em = CategoryProgress("E+M problems", sum(1 for p in em_curr if p.text in touched), len(em_curr))
+    sd = CategoryProgress("System Design", sum(1 for c in sd_chapters if c.status == "completed"), len(sd_chapters))
+    mp = CategoryProgress("Mocks", sum(1 for m in mocks if m.status == "completed"), len(mocks))
+    all_done = bool(curriculum) and all(p.text in touched for p in curriculum)
 
     tiers = [
-        ReadinessTier(
-            name="Fallback-ready",
-            criteria=[("All E+M problems touched", em_complete)],
-        ),
-        ReadinessTier(
-            name="Target-ready",
-            criteria=[
-                ("All E+M problems touched", em_complete),
-                (
-                    f"≥{_TARGET_READY_MIN_SD_CHAPTERS} SD chapters complete",
-                    sd.done >= _TARGET_READY_MIN_SD_CHAPTERS,
-                ),
-                (
-                    f"≥{_TARGET_READY_MIN_MOCKS} mocks completed",
-                    mock_progress.done >= _TARGET_READY_MIN_MOCKS,
-                ),
-            ],
-        ),
-        ReadinessTier(
-            name="Stretch-ready",
-            criteria=[
-                ("All curriculum problems touched", bool(all_curriculum_done)),
-                ("All SD chapters complete", sd_complete),
-                ("All mocks completed", mocks_complete),
-            ],
-        ),
+        ReadinessTier("Fallback-ready", [("All E+M problems touched", em.complete)]),
+        ReadinessTier("Target-ready", [
+            ("All E+M problems touched", em.complete),
+            (f"≥{_TARGET_READY_MIN_SD_CHAPTERS} SD chapters complete",
+             sd.done >= _TARGET_READY_MIN_SD_CHAPTERS),
+            (f"≥{_TARGET_READY_MIN_MOCKS} mocks completed",
+             mp.done >= _TARGET_READY_MIN_MOCKS),
+        ]),
+        ReadinessTier("Stretch-ready", [
+            ("All curriculum problems touched", all_done),
+            ("All SD chapters complete", sd.complete),
+            ("All mocks completed", mp.complete),
+        ]),
     ]
-
-    return Readiness(em=em, sd=sd, mocks=mock_progress, tiers=tiers)
+    return Readiness(em=em, sd=sd, mocks=mp, tiers=tiers)
 
 
 def _render_category_line(cat: CategoryProgress) -> str:
