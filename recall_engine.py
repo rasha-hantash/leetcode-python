@@ -10,6 +10,7 @@ There is no live daemon — today's set is frozen until the next recompute call.
 
 from __future__ import annotations
 
+import calendar
 import json
 import math
 import re
@@ -671,10 +672,14 @@ def mock_prereq_status(
     return rows
 
 
+def _check(ok: bool) -> str:
+    return "✓" if ok else "❌"
+
+
 def _format_prereq_line(rows: list[PrereqRow]) -> str:
     """`  - Prereqs: ✓ 5/4 E/M problems, ❌ 1/3 SD chapters: Ch 4 ✓, Ch 5, Ch 6`"""
     def fmt(r: PrereqRow) -> str:
-        head = f"{'✓' if r.met else '❌'} {r.current}/{r.threshold} {r.label}"
+        head = f"{_check(r.met)} {r.current}/{r.threshold} {r.label}"
         return f"{head}: {r.detail}" if r.detail else head
     return f"  - Prereqs: {', '.join(fmt(r) for r in rows)}"
 
@@ -685,9 +690,6 @@ def _format_urgency(delta: int) -> str:
     return {0: "today", 1: "tomorrow"}.get(delta, f"in {delta}d")
 
 
-def _format_short_date(d: date) -> str:
-    """`Mon May 11`-style date with no zero-padding on the day."""
-    return d.strftime("%a %b ").replace(" 0", " ") + str(d.day)
 
 
 def _render_next_mock_block(
@@ -705,7 +707,7 @@ def _render_next_mock_block(
         delta = (mock.scheduled_date - today).days
         line = (
             f"- [ ] [{mock.id}] {mock.descriptor} · 📅 {mock.scheduled_date.isoformat()} "
-            f"({_format_short_date(mock.scheduled_date)}, {_format_urgency(delta)})"
+            f"({_format_date(mock.scheduled_date, weekday=True)}, {_format_urgency(delta)})"
         )
     else:
         line = f"- [ ] [{mock.id}] {mock.descriptor} — _pending_"
@@ -750,8 +752,10 @@ def append_to_ledger(path: Path, new_touches: list[Touch]) -> int:
 # ─── Renderer ────────────────────────────────────────────────────────────────
 
 
-def _format_date(d: date) -> str:
-    return d.strftime("%b ").replace(" 0", " ") + str(d.day)
+def _format_date(d: date, *, weekday: bool = False) -> str:
+    """`May 11` or `Mon May 11` (weekday=True). Day is never zero-padded."""
+    fmt = "%a %b " if weekday else "%b "
+    return d.strftime(fmt).replace(" 0", " ") + str(d.day)
 
 
 def _diff_suffix(d: Difficulty | None) -> str:
@@ -801,7 +805,7 @@ def render_today(
     sd_chapters: list[SDChapter] | None = None,
 ) -> str:
     """Produce the markdown for today.md."""
-    base = f"# Today — {today.strftime('%a')} {_format_date(today)}, {today.year}"
+    base = f"# Today — {_format_date(today, weekday=True)}, {today.year}"
     if day_n is None:
         header = f"{base} · Pre-prep"
     elif phase is None:
@@ -837,7 +841,7 @@ def render_today(
     if sd_next is not None:
         lines += ["", "## Today's SD reading", "", f"- [ ] {sd_next.book} · {sd_next.title}"]
 
-    if today.weekday() == 5:  # Saturday
+    if today.weekday() == calendar.SATURDAY:
         lines += [
             "",
             "## This week's hardest — your pick",
@@ -880,12 +884,11 @@ def next_mock(mocks: list[Mock]) -> Mock | None:
 
 def _format_mock_line(mock: Mock) -> str:
     """One bullet describing a single mock — its status, date, platform, topic."""
-    descriptor = mock.descriptor
     if mock.status == "completed" and mock.completed_date:
-        return f"- [x] {descriptor} · ✅ {mock.completed_date.isoformat()}"
+        return f"- [x] {mock.descriptor}{_stamp(mock.completed_date)}"
     if mock.status == "scheduled" and mock.scheduled_date:
-        return f"- [ ] {descriptor} · 📅 {mock.scheduled_date.isoformat()}"
-    return f"- [ ] {descriptor} · _pending_"
+        return f"- [ ] {mock.descriptor} · 📅 {mock.scheduled_date.isoformat()}"
+    return f"- [ ] {mock.descriptor} · _pending_"
 
 
 # ─── Application-readiness gates ─────────────────────────────────────────────
@@ -940,9 +943,9 @@ def render_readiness_block(readiness: Readiness) -> list[str]:
     lines += [_render_category_line(c) for c in (readiness.em, readiness.sd, readiness.mocks)]
     lines.append("")
     for tier in readiness.tiers:
-        lines.append(f"**{tier.name}: {'✓' if tier.met else '❌'}**")
+        lines.append(f"**{tier.name}: {_check(tier.met)}**")
         for label, ok in tier.criteria:
-            lines.append(f"  - {'✓' if ok else '❌'} {label}")
+            lines.append(f"  - {_check(ok)} {label}")
         lines.append("")
     return lines
 
@@ -1049,7 +1052,10 @@ def _render_dsa_by_pattern(
         for p in items:
             if p.variant_of is None:
                 continue
-            (variants.setdefault(p.variant_of, []) if p.variant_of in canonicals else loose).append(p)
+            if p.variant_of in canonicals:
+                variants.setdefault(p.variant_of, []).append(p)
+            else:
+                loose.append(p)
 
         lines.append(f"### {pattern}")
         for p in items:
@@ -1115,10 +1121,8 @@ def recompute(
     curriculum = parse_curriculum(daily_md)
     phases = parse_phases(daily_md)
 
-    new_touches = (
-        parse_completions(today_md_path.read_text()) if today_md_path.exists() else []
-    )
-    logged = append_to_ledger(ledger_path, new_touches)
+    today_md = today_md_path.read_text() if today_md_path.exists() else ""
+    logged = append_to_ledger(ledger_path, parse_completions(today_md))
 
     ledger = load_ledger(ledger_path)
     recall = compute_recall(ledger, today=today, limit=recall_limit, curriculum=curriculum)
@@ -1134,8 +1138,8 @@ def recompute(
     untouched = sum(1 for p in curriculum if p.text not in touched)
 
     mocks = load_mocks(mocks_path) if mocks_path and mocks_path.exists() else []
-    if mocks and today_md_path.exists():
-        updates = parse_mock_updates(today_md_path.read_text(), {m.id for m in mocks})
+    if mocks:
+        updates = parse_mock_updates(today_md, {m.id for m in mocks})
         if updates:
             mocks, changed = apply_mock_updates(mocks, updates)
             if changed:
