@@ -478,6 +478,50 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
     return problems
 
 
+def parse_curriculum_dsa_state(curriculum_md: str) -> dict[str, bool]:
+    """Walk the `## DSA` section, return `{problem_text: checked?}`.
+    Used to sync curriculum.md ticks ↔ ledger."""
+    state: dict[str, bool] = {}
+    in_dsa = False
+    pattern: str | None = None
+
+    for line in curriculum_md.splitlines():
+        if _DSA_HEADING.match(line):
+            in_dsa = True
+            pattern = None
+            continue
+        h2 = _OTHER_H2.match(line)
+        if h2 and not _DSA_HEADING.match(line):
+            in_dsa = False
+            pattern = None
+            continue
+        if not in_dsa:
+            continue
+        if _PHASE_HEADING.match(line):
+            pattern = None
+            continue
+        if (m := _PATTERN_SUBHEADING.match(line)):
+            pattern = m.group(1).strip()
+            continue
+        if pattern is None:
+            continue
+        problem_match = _PROBLEM_LINE.match(line)
+        if not problem_match:
+            continue
+        is_checked = bool(_CHECKED_LINE.match(line))
+        raw = problem_match.group(1)
+        name = _DIFFICULTY_TAG.sub(" ", raw)
+        name = _SOURCE_TAG.sub(" ", name)
+        name = _VARIANT_TAG.sub(" ", name)
+        name = _T_MARKER.sub(" ", name)
+        name = _DONE_DATE.sub("", name)
+        name = re.sub(r"\s+", " ", name).strip()
+        if not name:
+            continue
+        state[f"[{pattern}] -> {name}"] = is_checked
+    return state
+
+
 def parse_phases(curriculum_md: str) -> list[Phase]:
     """Walk the `## DSA` section, return one Phase per `### Phase N — Name (X new/day)` heading."""
     phases: list[Phase] = []
@@ -804,6 +848,125 @@ def _atomic_write(path: Path, content: str) -> None:
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(content)
     os.replace(tmp, path)
+
+
+# ─── DSA sync (curriculum.md ↔ ledger) ───────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class DSASyncPlan:
+    """Pending changes computed from comparing curriculum.md DSA state with the ledger."""
+    additions: list[Touch]
+    purges: list[str]
+
+
+def diff_dsa_state(
+    state: dict[str, bool], ledger: list[Touch], today: date
+) -> DSASyncPlan:
+    """Compare curriculum.md DSA tick state with the ledger.
+
+    - Box ticked but no ledger entries → schedule a touch dated `today`.
+    - Box unticked but ledger has entries → schedule a purge of all entries
+      for that problem (destructive — the engine will warn before applying).
+
+    Migration safeguard: if EVERY box is unticked, skip purges entirely. This
+    catches the common case of a fresh curriculum.md restructure where the
+    user's ledger predates the new format — recompute's render pass will
+    re-sync the ticks from the ledger. To genuinely wipe DSA progress, untick
+    everything except one box (or use `prep recompute` after deleting the
+    ledger directly)."""
+    touched = {t.problem for t in ledger}
+    additions: list[Touch] = []
+    purges: list[str] = []
+    pristine = state and all(not c for c in state.values())
+    for problem, checked in state.items():
+        if checked and problem not in touched:
+            additions.append(Touch(problem=problem, on=today))
+        elif not checked and problem in touched and not pristine:
+            purges.append(problem)
+    return DSASyncPlan(additions=additions, purges=purges)
+
+
+def purge_ledger_entries(ledger_path: Path, purge: set[str]) -> int:
+    """Remove every Touch whose `problem` is in `purge`. Returns count removed."""
+    if not ledger_path.exists() or not purge:
+        return 0
+    keep: list[str] = []
+    removed = 0
+    for line in ledger_path.read_text().splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        if r["problem"] in purge:
+            removed += 1
+            continue
+        keep.append(line)
+    if removed:
+        _atomic_write(ledger_path, ("\n".join(keep) + "\n") if keep else "")
+    return removed
+
+
+def write_curriculum_dsa(curriculum_md: str, ledger: list[Touch]) -> str:
+    """Surgically update DSA `[ ] / [x]` boxes in curriculum.md to reflect the ledger.
+    Touched problem → `[x] ... ✅ <latest_date>`. Untouched → `[ ] ...` with any
+    stale ✅ stamp stripped. Phase/pattern headings and non-DSA sections untouched."""
+    summary = aggregate_touches(ledger)  # {problem -> (count, latest)}
+    out: list[str] = []
+    in_dsa = False
+    pattern: str | None = None
+
+    for line in curriculum_md.splitlines():
+        if _DSA_HEADING.match(line):
+            in_dsa = True
+            pattern = None
+            out.append(line)
+            continue
+        h2 = _OTHER_H2.match(line)
+        if h2 and not _DSA_HEADING.match(line):
+            in_dsa = False
+            pattern = None
+            out.append(line)
+            continue
+        if not in_dsa:
+            out.append(line)
+            continue
+        if _PHASE_HEADING.match(line):
+            pattern = None
+            out.append(line)
+            continue
+        if (m := _PATTERN_SUBHEADING.match(line)):
+            pattern = m.group(1).strip()
+            out.append(line)
+            continue
+        if pattern is None:
+            out.append(line)
+            continue
+        problem_match = _PROBLEM_LINE.match(line)
+        if not problem_match:
+            out.append(line)
+            continue
+        raw = problem_match.group(1)
+        # Strip any existing ✅ stamp before deciding the new state.
+        body = _DONE_DATE.sub("", raw).rstrip()
+        # Reconstruct canonical key to look up ledger.
+        name = _DIFFICULTY_TAG.sub(" ", body)
+        name = _SOURCE_TAG.sub(" ", name)
+        name = _VARIANT_TAG.sub(" ", name)
+        name = _T_MARKER.sub(" ", name)
+        name = re.sub(r"\s+", " ", name).strip()
+        if not name:
+            out.append(line)
+            continue
+        key = f"[{pattern}] -> {name}"
+        # Preserve original leading whitespace.
+        indent_m = re.match(r"^(\s*)-\s+\[", line)
+        indent = indent_m.group(1) if indent_m else ""
+        if (entry := summary.get(key)):
+            _, latest = entry
+            out.append(f"{indent}- [x] {body} ✅ {latest.isoformat()}")
+        else:
+            out.append(f"{indent}- [ ] {body}")
+    return "\n".join(out)
 
 
 _MOCK_LINE = re.compile(r"^\s*-\s+\[([ xX])\]\s+\[([^\]]+)\]\s+(.*)$")
@@ -1354,12 +1517,15 @@ def recompute(
     today: date,
     recall_limit: int = DEFAULT_RECALL_LIMIT,
     coverage_md_path: Path | None = None,
+    dry_run: bool = False,
 ) -> RecomputeResult:
     """One full cycle: log new completions, fold mock edits, regenerate today.md + coverage.md.
 
     Reads everything (DSA, SD, Mocks, Behavioral) from curriculum.md. When
     today.md ticks update mock state, the change is written back to
-    curriculum.md atomically."""
+    curriculum.md atomically. DSA boxes ticked directly in curriculum.md log
+    a touch dated today; unticked boxes purge ledger entries (warned).
+    `dry_run=True` previews destructive purges instead of applying them."""
     curriculum_md = curriculum_md_path.read_text()
     curriculum = parse_curriculum(curriculum_md)
     phases = parse_phases(curriculum_md)
@@ -1368,7 +1534,37 @@ def recompute(
     behavioral = parse_behavioral(curriculum_md)
 
     today_md = today_md_path.read_text() if today_md_path.exists() else ""
+
+    # Diff curriculum.md DSA ticks against the prior ledger BEFORE applying
+    # today.md touches — otherwise a today.md tick would race ahead of the
+    # curriculum.md box and look like a user uncheck.
+    prev_ledger = load_ledger(ledger_path)
+    dsa_state = parse_curriculum_dsa_state(curriculum_md)
+    plan = diff_dsa_state(dsa_state, prev_ledger, today)
+    if plan.purges:
+        if dry_run:
+            would = sum(1 for t in prev_ledger if t.problem in set(plan.purges))
+            click.echo(
+                f"[dry-run] Would purge {would} ledger entries for "
+                f"{len(plan.purges)} unticked problem(s):",
+                err=True,
+            )
+            for p in plan.purges:
+                click.echo(f"  - {p}", err=True)
+        else:
+            removed = purge_ledger_entries(ledger_path, set(plan.purges))
+            click.echo(
+                f"⚠️  Purged {removed} ledger entries for {len(plan.purges)} "
+                f"unticked DSA problem(s). To preview before applying, "
+                f"use `prep recompute --dry-run`.",
+                err=True,
+            )
+            for p in plan.purges:
+                click.echo(f"  - {p}", err=True)
+
     logged = append_to_ledger(ledger_path, parse_completions(today_md))
+    if plan.additions and not dry_run:
+        logged += append_to_ledger(ledger_path, plan.additions)
 
     ledger = load_ledger(ledger_path)
     recall = compute_recall(ledger, today=today, limit=recall_limit, curriculum=curriculum)
@@ -1389,12 +1585,16 @@ def recompute(
     if mocks:
         updates = parse_mock_updates(today_md, {m.id for m in mocks})
         if updates:
-            mocks, changed = apply_mock_updates(mocks, updates)
-            if changed:
-                _atomic_write(
-                    curriculum_md_path,
-                    write_curriculum_mocks(curriculum_md, mocks),
-                )
+            mocks, _ = apply_mock_updates(mocks, updates)
+
+    # One atomic write covers mock state + DSA tick state. Preserve the
+    # original trailing newline (or lack thereof) to avoid spurious diffs.
+    new_md = write_curriculum_mocks(curriculum_md, mocks) if mocks else curriculum_md
+    new_md = write_curriculum_dsa(new_md, ledger)
+    if curriculum_md.endswith("\n") and not new_md.endswith("\n"):
+        new_md += "\n"
+    if not dry_run and new_md != curriculum_md:
+        _atomic_write(curriculum_md_path, new_md)
 
     readiness = compute_readiness(curriculum, ledger, sd_chapters, mocks)
     em_done, sd_done = readiness.em.done, readiness.sd.done
@@ -1475,11 +1675,17 @@ def cli() -> None:
     show_default=True,
     help="Generated by-pattern coverage view. Overwritten on every recompute.",
 )
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Preview destructive ledger purges (from DSA unchecks in curriculum.md) without applying.",
+)
 def recompute_cmd(
     curriculum: Path,
     today_md: Path,
     ledger: Path,
     coverage_md: Path,
+    dry_run: bool,
 ) -> None:
     """Fold yesterday's checks into the ledger, then regenerate today.md and coverage.md."""
     result = recompute(
@@ -1488,6 +1694,7 @@ def recompute_cmd(
         ledger,
         today=date.today(),
         coverage_md_path=coverage_md,
+        dry_run=dry_run,
     )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "
