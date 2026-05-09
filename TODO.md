@@ -10,7 +10,7 @@ Tracker for deferred prep-system work. Strike items through (`~~text~~`) when do
 
 ## Mid-prep (when relevant)
 
-- [x] ~~**Expand D59–D90 day-by-day.**~~ Done 2026-05-08 — dropped instead of expanded. Phase 7/8 in `curriculum.md` now use a Calendar milestones list anchored to dates rather than Day-N markers. Pace varies per user; calendar dates remain useful as full-time-pace reference.
+- [x] ~~**Expand D59–D90 day-by-day.**~~ Done 2026-05-09 — dropped twice over. First superseded by ledger-derived dates, then by the phase-driven refactor: `phases.json` declares pattern allowlists + `new_per_day` budgets, and the engine advances ledger-driven (no calendar dates anywhere).
 - [x] ~~**Build interview-coverage tool.**~~ Done 2026-05-08 — superseded by `prep-data/coverage.md` (Readiness → Behavioral → Mocks → SD → DSA-by-pattern). Same source set as the engine, grouped by pattern, variants nested, boxes auto-checked from ledger.
 
 ## Reference

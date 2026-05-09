@@ -1,6 +1,6 @@
 # Interview Prep — Overview
 
-_System-level reference (dashboard, routine, spaced-repetition rules, mock cadence, risks). For day-by-day execution see [`prep-plan-daily.md`](./prep-plan-daily.md)._
+_System-level reference: daily routine, spaced-repetition rules, mock cadence, risks. The **engine no longer enforces calendar dates** — phase advancement is ledger-driven (`phases.json` defines pattern allowlists + `new_per_day` budgets). The Day-N labels below remain a useful full-time-pace reference, not a schedule the engine is checking against. For the flat curriculum see [`curriculum.md`](./curriculum.md)._
 
 ## Dashboard
 
