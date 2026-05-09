@@ -14,7 +14,6 @@ import pytest
 from recall_engine import (
     BehavioralTopic,
     CategoryProgress,
-    CurriculumPhase,
     Mock,
     MockPrereq,
     Phase,
@@ -46,8 +45,6 @@ from recall_engine import (
     save_mocks,
     parse_completions,
     parse_curriculum,
-    parse_phases,
-    phase_for,
     projected_end_date,
     recompute,
     render_coverage,
@@ -185,11 +182,11 @@ def test_recall_item_carries_metadata_for_rendering() -> None:
 
 
 CURRICULUM = [
-    Problem("[A] P1", source_day=1),
-    Problem("[A] P2", source_day=1),
-    Problem("[A] P3", source_day=2),
-    Problem("[A] P4", source_day=2),
-    Problem("[A] P5", source_day=3),
+    Problem("[A] P1"),
+    Problem("[A] P2"),
+    Problem("[A] P3"),
+    Problem("[A] P4"),
+    Problem("[A] P5"),
 ]
 
 
@@ -224,41 +221,31 @@ def test_new_returns_fewer_than_limit_when_curriculum_is_exhausted() -> None:
 # ─── Curriculum parser ─────────────────────────────────────────────────────────
 
 
-SAMPLE_DAILY_MD = """\
-# Header
+SAMPLE_CURRICULUM_MD = """\
+# NeetCode Curriculum
 
-## Today (live)
+Source of truth — flat by-pattern list.
 
-- [ ] this checkbox is in the dashboard, ignore
+## Legend
 
-## Day 0 — Setup (Tue May 5)
+- `(E)` `(M)` `(H)` — LeetCode difficulty.
 
-- [ ] Anki desktop installed
-- [ ] uv installed
+---
 
-## Phase 1 — Arrays/Hashing (Days 1–6, 4/day)
+## Arrays & Hashing
 
-### Day 1 — Wed May 6 (4)
+- [ ] Contains Duplicate (E)
+- [ ] Valid Anagram (E)
+- [ ] Two Sum (E)
 
-- **9:00–13:00 DSA New (4):**
-  - [ ] [Arrays & Hashing] -> Contains Duplicate
-  - [ ] [Arrays & Hashing] -> Valid Anagram
-- **14:00–15:30 System Design:**
-  - [ ] Grokking SD Fundamentals — intro
-- **15:30–19:30 Consolidation:**
-  - **Recall queue:** open the [Today](#today-live) dashboard.
-  - [ ] today's hardest: ___
+## Two Pointers
 
-### Day 2 — Thu May 7 (4)
-
-- **9:00–13:00 DSA New (4):**
-  - [ ] [Arrays & Hashing] -> Two Sum
-  - [ ] [Two Pointers] -> Trapping Rain Water `T2`
+- [ ] Trapping Rain Water `T2` (H)
 """
 
 
-def test_curriculum_parser_extracts_every_dsa_new_problem() -> None:
-    problems = parse_curriculum(SAMPLE_DAILY_MD)
+def test_curriculum_parser_extracts_every_problem_under_pattern_headings() -> None:
+    problems = parse_curriculum(SAMPLE_CURRICULUM_MD)
     assert [p.text for p in problems] == [
         "[Arrays & Hashing] -> Contains Duplicate",
         "[Arrays & Hashing] -> Valid Anagram",
@@ -267,36 +254,19 @@ def test_curriculum_parser_extracts_every_dsa_new_problem() -> None:
     ]
 
 
-def test_curriculum_parser_tags_each_problem_with_its_source_day() -> None:
-    problems = parse_curriculum(SAMPLE_DAILY_MD)
-    assert [(p.text, p.source_day) for p in problems] == [
-        ("[Arrays & Hashing] -> Contains Duplicate", 1),
-        ("[Arrays & Hashing] -> Valid Anagram", 1),
-        ("[Arrays & Hashing] -> Two Sum", 2),
-        ("[Two Pointers] -> Trapping Rain Water", 2),
-    ]
-
-
 def test_curriculum_parser_strips_the_T2_marker_from_canonical_text() -> None:
     """The vestigial `T2` marker on a few problems must not contaminate the
     canonical key — otherwise the same problem would appear twice in the ledger."""
-    problems = parse_curriculum(SAMPLE_DAILY_MD)
+    problems = parse_curriculum(SAMPLE_CURRICULUM_MD)
     trapping = next(p for p in problems if "Trapping" in p.text)
     assert trapping.text == "[Two Pointers] -> Trapping Rain Water"
 
 
-def test_curriculum_parser_ignores_non_problem_checkboxes() -> None:
-    problems = parse_curriculum(SAMPLE_DAILY_MD)
+def test_curriculum_parser_ignores_legend_section() -> None:
+    """The Legend section has bullet lines that shouldn't parse as problems."""
+    problems = parse_curriculum(SAMPLE_CURRICULUM_MD)
     texts = {p.text for p in problems}
-    assert "Anki desktop installed" not in texts
-    assert "Grokking SD Fundamentals — intro" not in texts
-    assert "today's hardest: ___" not in texts
-
-
-def test_curriculum_parser_ignores_problems_outside_a_day_section() -> None:
-    """Day 0 setup checkboxes look like tasks but aren't curriculum problems."""
-    problems = parse_curriculum(SAMPLE_DAILY_MD)
-    assert all(p.source_day >= 1 for p in problems)
+    assert not any("LeetCode difficulty" in t for t in texts)
 
 
 # ─── Completion parser ────────────────────────────────────────────────────────
@@ -386,30 +356,19 @@ def test_ledger_returns_empty_list_when_no_file_exists(tmp_path: Path) -> None:
 
 
 THREE_DAY_CURRICULUM_MD = """\
-## Phase 1
+## A
 
-### Day 1 — Mon May 6
-
-- **9:00–13:00 DSA New:**
-  - [ ] [A] -> P1
-  - [ ] [A] -> P2
-
-### Day 2 — Tue May 7
-
-- **9:00–13:00 DSA New:**
-  - [ ] [A] -> P3
-  - [ ] [A] -> P4
-
-### Day 3 — Wed May 8
-
-- **9:00–13:00 DSA New:**
-  - [ ] [A] -> P5
+- [ ] P1 (E)
+- [ ] P2 (E)
+- [ ] P3 (E)
+- [ ] P4 (E)
+- [ ] P5 (E)
 """
 
 
 def test_recompute_creates_today_md_on_first_run(tmp_path: Path) -> None:
     """Day 1 morning: nothing exists yet. Recompute generates today's set."""
-    daily = tmp_path / "prep-plan-daily.md"
+    daily = tmp_path / "curriculum.md"
     daily.write_text(THREE_DAY_CURRICULUM_MD)
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
@@ -428,7 +387,7 @@ def test_recompute_creates_today_md_on_first_run(tmp_path: Path) -> None:
 def test_recompute_logs_yesterday_completions_into_the_ledger(tmp_path: Path) -> None:
     """Tomorrow morning: previous today.md has a checked, dated item. Recompute
     folds that touch into the ledger before regenerating today.md."""
-    daily = tmp_path / "prep-plan-daily.md"
+    daily = tmp_path / "curriculum.md"
     daily.write_text(THREE_DAY_CURRICULUM_MD)
     ledger = tmp_path / "completions.jsonl"
     today_md = tmp_path / "today.md"
@@ -445,7 +404,7 @@ def test_recompute_surfaces_yesterdays_completion_into_recall_the_next_day(
 ) -> None:
     """A problem solved on May 6 with 1 touch is due May 7 — it should appear in
     the May 7 Recall section after recompute folds the touch into the ledger."""
-    daily = tmp_path / "prep-plan-daily.md"
+    daily = tmp_path / "curriculum.md"
     daily.write_text(THREE_DAY_CURRICULUM_MD)
     ledger = tmp_path / "completions.jsonl"
     today_md = tmp_path / "today.md"
@@ -466,7 +425,7 @@ def test_recompute_does_not_relog_when_run_twice_with_no_new_completions(
     """Snapshot semantics: rerunning recompute mid-day must not corrupt the
     ledger. Each completion gets logged exactly once regardless of how many
     times the user triggers a refresh."""
-    daily = tmp_path / "prep-plan-daily.md"
+    daily = tmp_path / "curriculum.md"
     daily.write_text(THREE_DAY_CURRICULUM_MD)
     ledger = tmp_path / "completions.jsonl"
     today_md = tmp_path / "today.md"
@@ -487,7 +446,7 @@ def test_recompute_advances_new_section_past_completed_curriculum_problems(
 ) -> None:
     """After P1 is logged as solved, today's New section should not surface P1
     again — it advances to the next unsolved curriculum problem."""
-    daily = tmp_path / "prep-plan-daily.md"
+    daily = tmp_path / "curriculum.md"
     daily.write_text(THREE_DAY_CURRICULUM_MD)
     ledger = tmp_path / "completions.jsonl"
     today_md = tmp_path / "today.md"
@@ -520,23 +479,23 @@ def test_renderer_includes_a_dated_header_for_orientation() -> None:
 
 
 _TAGGED_DAILY_MD = """\
-### Day 1 — Mon May 11
+## Arrays & Hashing
 
-- **9:00–13:00 DSA New:**
-  - [ ] [Arrays & Hashing] -> Contains Duplicate (E)
-  - [ ] [Arrays & Hashing] -> Group Anagrams (M)
+- [ ] Contains Duplicate (E)
+- [ ] Group Anagrams (M)
+- [ ] Customers With 2-Day 2-Page Visits (M) (company question)
 
-### Day 40 — Hard problems
+## Two Pointers
 
-- **9:00–13:00 DSA New:**
-  - [ ] [Two Pointers] -> Trapping Rain Water (H)
+- [ ] Trapping Rain Water (H)
 
-### Day 54 — Beyond-NC150 patterns
+## Boyer-Moore
 
-- **9:00–13:00 DSA New:**
-  - [ ] [Boyer-Moore] -> Majority Element II (M) (nc-150+)
-  - [ ] [Segment Tree] -> Count of Smaller After Self (H) (nc-150+)
-  - [ ] [Arrays & Hashing] -> Customers With 2-Day 2-Page Visits (M) (company question)
+- [ ] Majority Element II (M) (nc-150+)
+
+## Segment Tree
+
+- [ ] Count of Smaller After Self (H) (nc-150+)
 """
 
 
@@ -602,12 +561,7 @@ def test_completion_parser_strips_variant_of_tag_from_canonical() -> None:
 
 
 def test_curriculum_parser_canonical_text_omits_variant_of_tag() -> None:
-    md = """\
-### Day 31 — Wed Jun 10
-
-- **9:00–13:00 DSA New:**
-  - [ ] [1-D DP] -> House Robber II (M) (variant of: House Robber)
-"""
+    md = "## 1-D DP\n\n- [ ] House Robber II (M) (variant of: House Robber)\n"
     problems = parse_curriculum(md)
     assert len(problems) == 1
     assert problems[0].text == "[1-D DP] -> House Robber II"
@@ -620,10 +574,10 @@ def test_compute_new_prefers_nc_150_over_nc_150_plus_in_same_day() -> None:
     """The engine surfaces NC150 problems before non-NC150 patterns regardless
     of document position within a day."""
     curriculum = [
-        Problem("[X] beyond-1", source_day=54, difficulty="M", source="nc-150+"),
-        Problem("[X] core-nc-1", source_day=54, difficulty="M", source="nc-150"),
-        Problem("[X] beyond-2", source_day=54, difficulty="H", source="nc-150+"),
-        Problem("[X] core-nc-2", source_day=54, difficulty="M", source="nc-150"),
+        Problem("[X] beyond-1", difficulty="M", source="nc-150+"),
+        Problem("[X] core-nc-1", difficulty="M", source="nc-150"),
+        Problem("[X] beyond-2", difficulty="H", source="nc-150+"),
+        Problem("[X] core-nc-2", difficulty="M", source="nc-150"),
     ]
     new = compute_new(curriculum, ledger=[], limit=2)
     assert [p.text for p in new] == ["[X] core-nc-1", "[X] core-nc-2"]
@@ -631,9 +585,9 @@ def test_compute_new_prefers_nc_150_over_nc_150_plus_in_same_day() -> None:
 
 def test_compute_new_falls_through_to_nc_150_plus_then_company_when_nc_150_is_drained() -> None:
     curriculum = [
-        Problem("[X] nc-only", source_day=54, difficulty="M", source="nc-150"),
-        Problem("[X] beyond-thing", source_day=54, difficulty="M", source="nc-150+"),
-        Problem("[X] company-thing", source_day=54, difficulty="H", source="company question"),
+        Problem("[X] nc-only", difficulty="M", source="nc-150"),
+        Problem("[X] beyond-thing", difficulty="M", source="nc-150+"),
+        Problem("[X] company-thing", difficulty="H", source="company question"),
     ]
     ledger = [Touch("[X] nc-only", date(2026, 7, 3))]
     new = compute_new(curriculum, ledger, limit=2)
@@ -642,9 +596,9 @@ def test_compute_new_falls_through_to_nc_150_plus_then_company_when_nc_150_is_dr
 
 def test_compute_new_within_a_source_tier_preserves_document_order() -> None:
     curriculum = [
-        Problem("[X] P3", source_day=2, difficulty="M", source="nc-150"),
-        Problem("[X] P1", source_day=1, difficulty="M", source="nc-150"),
-        Problem("[X] P2", source_day=1, difficulty="M", source="nc-150"),
+        Problem("[X] P3", difficulty="M", source="nc-150"),
+        Problem("[X] P1", difficulty="M", source="nc-150"),
+        Problem("[X] P2", difficulty="M", source="nc-150"),
     ]
     new = compute_new(curriculum, ledger=[], limit=3)
     assert [p.text for p in new] == ["[X] P3", "[X] P1", "[X] P2"]
@@ -655,7 +609,7 @@ def test_compute_new_within_a_source_tier_preserves_document_order() -> None:
 
 def test_recall_item_carries_difficulty_when_curriculum_is_provided() -> None:
     curriculum = [
-        Problem("[A] Two Sum", source_day=1, difficulty="E", source="nc-150"),
+        Problem("[A] Two Sum", difficulty="E", source="nc-150"),
     ]
     ledger = [Touch("[A] Two Sum", date(2026, 5, 1))]
     recall = compute_recall(ledger, today=date(2026, 5, 7), limit=10, curriculum=curriculum)
@@ -687,7 +641,7 @@ def test_renderer_displays_difficulty_in_new_lines() -> None:
     out = render_today(
         today=date(2026, 5, 11),
         recall=[],
-        new=[Problem("[A] Two Sum", source_day=1, difficulty="E", source="nc-150")],
+        new=[Problem("[A] Two Sum", difficulty="E", source="nc-150")],
     )
     new_section = out.split("## New")[1]
     assert "(E)" in new_section
@@ -736,68 +690,6 @@ def test_completion_parser_ignores_empty_writable_checkboxes_on_saturday(tmp_pat
 # ─── Sprint day + phase math ──────────────────────────────────────────────────
 
 
-_PHASE_MD = """\
-## Phase 1 — Linear Patterns E+M (Days 1–7)
-
-intro
-
-### Day 1 — Mon May 11
-
-- [ ] [A] Foo (E)
-
-## Phase 2 — Search + Trees (Days 8–17)
-
-### Day 8 — Mon May 18
-
-- [ ] [B] Bar (M)
-
-## Phase 5 — Hard Problems (Days 40–53) — mock-heavy
-
-### Day 40 — Thu Jun 18
-
-- [ ] [C] Baz (H)
-"""
-
-
-def test_parse_phases_extracts_each_phase_heading() -> None:
-    phases = parse_phases(_PHASE_MD)
-    assert len(phases) == 3
-    assert phases[0] == CurriculumPhase(
-        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
-    )
-    assert phases[1] == CurriculumPhase(
-        number=2, name="Search + Trees", days_start=8, days_end=17
-    )
-    # Phase 5 has trailing "— mock-heavy" after the days range; parser ignores it.
-    assert phases[2] == CurriculumPhase(
-        number=5, name="Hard Problems", days_start=40, days_end=53
-    )
-
-
-def test_phase_for_returns_phase_containing_the_day() -> None:
-    phases = parse_phases(_PHASE_MD)
-    assert phase_for(1, phases).number == 1
-    assert phase_for(7, phases).number == 1  # inclusive end
-    assert phase_for(8, phases).number == 2  # next phase begins
-    assert phase_for(40, phases).number == 5
-    assert phase_for(53, phases).number == 5
-
-
-def test_phase_for_returns_none_when_day_falls_outside_known_phases() -> None:
-    phases = parse_phases(_PHASE_MD)
-    assert phase_for(0, phases) is None  # before Day 1
-    assert phase_for(20, phases) is None  # gap between Phase 2 and Phase 5
-    assert phase_for(100, phases) is None  # past last phase
-
-
-def test_curriculum_phase_slug_matches_github_anchor_conventions() -> None:
-    phase = CurriculumPhase(
-        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
-    )
-    # GitHub: lowercase, drop punctuation (— em-dash, +, parens), spaces → hyphens
-    assert phase.slug == "phase-1--linear-patterns-em-days-17"
-
-
 def test_start_date_returns_none_for_empty_ledger() -> None:
     assert start_date([]) is None
 
@@ -830,8 +722,8 @@ def test_renderer_header_says_pre_prep_when_no_day_n() -> None:
 
 
 def test_renderer_header_includes_day_n_when_provided() -> None:
-    phase = CurriculumPhase(
-        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
+    phase = Phase(
+        number=1, name="Linear Patterns E+M", patterns=("A",), new_per_day=5
     )
     out = render_today(
         today=date(2026, 5, 11), recall=[], new=[], day_n=1, phase=phase
@@ -840,22 +732,24 @@ def test_renderer_header_includes_day_n_when_provided() -> None:
     assert "Day 1" in first_line
 
 
-def test_renderer_header_includes_linked_phase_heading_with_anchor() -> None:
-    phase = CurriculumPhase(
-        number=1, name="Linear Patterns E+M", days_start=1, days_end=7
+def test_renderer_header_includes_phase_name_and_budget() -> None:
+    """Phase header lists name + new/day budget so the reader sees the cap."""
+    phase = Phase(
+        number=1,
+        name="Linear Patterns E+M",
+        patterns=("Arrays & Hashing",),
+        new_per_day=5,
     )
     out = render_today(
         today=date(2026, 5, 11), recall=[], new=[], day_n=1, phase=phase
     )
     first_line = out.splitlines()[0]
-    # Markdown link to the daily file with the phase slug as anchor
-    assert "[Phase 1 — Linear Patterns E+M (Days 1–7)]" in first_line
-    assert "#phase-1--linear-patterns-em-days-17" in first_line
+    assert "Phase 1 — Linear Patterns E+M" in first_line
+    assert "5 new/day" in first_line
 
 
 def test_renderer_header_falls_back_to_day_only_when_phase_is_none() -> None:
-    """If day_n is past the last phase (e.g., Day 95 in a 90-day curriculum),
-    render the day number without a phase link rather than crashing."""
+    """If no phases are loaded, render the day number without phase metadata."""
     out = render_today(
         today=date(2026, 8, 15), recall=[], new=[], day_n=95, phase=None
     )
@@ -901,12 +795,12 @@ def test_avg_new_per_day_counts_distinct_problems_not_touch_events() -> None:
 
 
 def test_projected_end_date_returns_none_for_empty_ledger() -> None:
-    curriculum = [Problem("[A] Foo", source_day=1, difficulty="E")]
+    curriculum = [Problem("[A] Foo", difficulty="E")]
     assert projected_end_date([], curriculum, today=date(2026, 5, 11)) is None
 
 
 def test_projected_end_date_returns_today_when_curriculum_is_fully_touched() -> None:
-    curriculum = [Problem("[A] Foo", source_day=1, difficulty="E")]
+    curriculum = [Problem("[A] Foo", difficulty="E")]
     ledger = [Touch("[A] Foo", date(2026, 5, 11))]
     assert projected_end_date(ledger, curriculum, today=date(2026, 5, 11)) == date(
         2026, 5, 11
@@ -916,7 +810,7 @@ def test_projected_end_date_returns_today_when_curriculum_is_fully_touched() -> 
 def test_projected_end_date_extrapolates_remaining_problems_at_current_pace() -> None:
     """Day 1, solved 3 of 9 → rate 3.0/day, 6 untouched → +2 days = May 13."""
     curriculum = [
-        Problem(f"[A] P{i}", source_day=1, difficulty="E") for i in range(9)
+        Problem(f"[A] P{i}", difficulty="E") for i in range(9)
     ]
     ledger = [
         Touch("[A] P0", date(2026, 5, 11)),
@@ -932,7 +826,7 @@ def test_projected_end_date_self_corrects_as_pace_data_accrues() -> None:
     """Pace projections in early days swing wildly — that's OK as long as the
     function honestly reflects what the ledger says today."""
     curriculum = [
-        Problem(f"[A] P{i}", source_day=1, difficulty="E") for i in range(20)
+        Problem(f"[A] P{i}", difficulty="E") for i in range(20)
     ]
     fast_day_one = [Touch(f"[A] P{i}", date(2026, 5, 11)) for i in range(5)]
     end_after_fast_day = projected_end_date(
@@ -993,10 +887,9 @@ def test_renderer_omits_projection_line_when_curriculum_already_fully_touched() 
 
 def test_curriculum_parser_captures_variant_of_relationship() -> None:
     md = (
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [1-D DP] -> House Robber (M)\n"
-        "- [ ] [1-D DP] -> House Robber II (M) (variant of: House Robber)\n"
+        "## 1-D DP\n\n"
+        "- [ ] House Robber (M)\n"
+        "- [ ] House Robber II (M) (variant of: House Robber)\n"
     )
     problems = parse_curriculum(md)
     assert problems[0].variant_of is None
@@ -1004,16 +897,16 @@ def test_curriculum_parser_captures_variant_of_relationship() -> None:
 
 
 def test_problem_pattern_and_name_split_on_arrow() -> None:
-    p = Problem("[Arrays & Hashing] -> Two Sum", source_day=1, difficulty="E")
+    p = Problem("[Arrays & Hashing] -> Two Sum", difficulty="E")
     assert p.pattern == "Arrays & Hashing"
     assert p.name == "Two Sum"
 
 
 def test_render_coverage_groups_problems_by_pattern() -> None:
     curriculum = [
-        Problem("[Arrays & Hashing] -> Two Sum", source_day=1, difficulty="E"),
-        Problem("[Two Pointers] -> Valid Palindrome", source_day=2, difficulty="E"),
-        Problem("[Arrays & Hashing] -> Group Anagrams", source_day=1, difficulty="M"),
+        Problem("[Arrays & Hashing] -> Two Sum", difficulty="E"),
+        Problem("[Two Pointers] -> Valid Palindrome", difficulty="E"),
+        Problem("[Arrays & Hashing] -> Group Anagrams", difficulty="M"),
     ]
     out = render_coverage(curriculum, ledger=[])
     assert "### Arrays & Hashing" in out
@@ -1026,8 +919,8 @@ def test_render_coverage_groups_problems_by_pattern() -> None:
 
 def test_render_coverage_checks_box_when_problem_is_in_ledger() -> None:
     curriculum = [
-        Problem("[Arrays & Hashing] -> Two Sum", source_day=1, difficulty="E"),
-        Problem("[Arrays & Hashing] -> Group Anagrams", source_day=1, difficulty="M"),
+        Problem("[Arrays & Hashing] -> Two Sum", difficulty="E"),
+        Problem("[Arrays & Hashing] -> Group Anagrams", difficulty="M"),
     ]
     ledger = [Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11))]
     out = render_coverage(curriculum, ledger)
@@ -1037,10 +930,9 @@ def test_render_coverage_checks_box_when_problem_is_in_ledger() -> None:
 
 def test_render_coverage_nests_variants_under_their_canonical() -> None:
     curriculum = [
-        Problem("[1-D DP] -> House Robber", source_day=1, difficulty="M"),
+        Problem("[1-D DP] -> House Robber", difficulty="M"),
         Problem(
             "[1-D DP] -> House Robber II",
-            source_day=1,
             difficulty="M",
             variant_of="House Robber",
         ),
@@ -1056,13 +948,11 @@ def test_render_coverage_orders_patterns_by_source_tier() -> None:
     curriculum = [
         Problem(
             "[Beyond] -> X",
-            source_day=54,
             difficulty="M",
             source="nc-150+",
         ),
         Problem(
             "[Core] -> Y",
-            source_day=54,
             difficulty="M",
             source="nc-150",
         ),
@@ -1080,7 +970,6 @@ def test_render_coverage_handles_variant_whose_canonical_is_not_in_curriculum() 
     curriculum = [
         Problem(
             "[Stack] -> Basic Calculator II",
-            source_day=10,
             difficulty="M",
             variant_of="Basic Calculator",
         ),
@@ -1091,11 +980,9 @@ def test_render_coverage_handles_variant_whose_canonical_is_not_in_curriculum() 
 
 
 def test_recompute_writes_coverage_md_when_path_provided(tmp_path: Path) -> None:
-    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [Arrays & Hashing] -> Two Sum (E)\n"
+        "## Arrays & Hashing\n\n- [ ] Two Sum (E)\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
@@ -1140,7 +1027,7 @@ def test_load_mocks_parses_pending_scheduled_completed_states(
 
 
 def test_render_coverage_includes_mock_section_with_progress_bar() -> None:
-    curriculum = [Problem("[A] Foo", source_day=1, difficulty="E")]
+    curriculum = [Problem("[A] Foo", difficulty="E")]
     mocks = [
         Mock(id="m1", status="completed", completed_date=date(2026, 5, 8)),
         Mock(id="m2", status="scheduled", scheduled_date=date(2026, 5, 20)),
@@ -1156,7 +1043,7 @@ def test_render_coverage_omits_mocks_section_when_mocks_arg_is_none() -> None:
     """Backwards-compatible: callers that don't pass mocks get the bare
     by-pattern view, no Mocks header."""
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)], ledger=[], mocks=None
+        [Problem("[A] Foo")], ledger=[], mocks=None
     )
     assert "Mocks" not in out
 
@@ -1166,11 +1053,9 @@ def test_recompute_renders_next_mock_in_today_and_full_mocks_in_coverage(
 ) -> None:
     """today.md gets a single 'Next mock' block between Readiness and Recall.
     coverage.md has the full ## Mocks section (summary + Next + Completed)."""
-    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [A] -> Foo (E)\n"
+        "## A\n\n- [ ] Foo (E)\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
@@ -1283,7 +1168,7 @@ def test_render_coverage_includes_system_design_section_with_progress_bar() -> N
         SDChapter(id="ch-2", title="Ch 2", book="Alex Xu Vol 1", status="pending"),
     ]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)], ledger=[], sd_chapters=chapters
+        [Problem("[A] Foo")], ledger=[], sd_chapters=chapters
     )
     assert "## System Design (1/2 complete)" in out
     assert "█" in out and "░" in out
@@ -1294,11 +1179,9 @@ def test_render_coverage_includes_system_design_section_with_progress_bar() -> N
 def test_recompute_reads_sd_chapters_and_renders_in_both_views(
     tmp_path: Path,
 ) -> None:
-    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [A] -> Foo (E)\n"
+        "## A\n\n- [ ] Foo (E)\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
@@ -1324,11 +1207,11 @@ def test_recompute_reads_sd_chapters_and_renders_in_both_views(
 
 
 def _em(text: str) -> Problem:
-    return Problem(text, source_day=1, difficulty="M")
+    return Problem(text, difficulty="M")
 
 
 def _h(text: str) -> Problem:
-    return Problem(text, source_day=1, difficulty="H")
+    return Problem(text, difficulty="H")
 
 
 def test_readiness_fallback_tier_clears_when_all_em_problems_touched() -> None:
@@ -1463,7 +1346,7 @@ def test_render_coverage_mocks_section_shows_next_and_completed_subsections() ->
         Mock(id="m3", platform="Pramp", topic="Backtracking", status="pending"),
     ]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1, difficulty="E")],
+        [Problem("[A] Foo", difficulty="E")],
         ledger=[],
         today=today,
         mocks=mocks,
@@ -1490,7 +1373,7 @@ def test_render_coverage_orders_sections_readiness_behavioral_mocks_sd_dsa() -> 
         tiers=[ReadinessTier(name="Fallback-ready", criteria=[("x", False)])],
     )
     out = render_coverage(
-        [Problem("[Trees] -> Foo", source_day=1)],
+        [Problem("[Trees] -> Foo")],
         ledger=[],
         today=date(2026, 5, 11),
         mocks=[Mock(id="m1", status="pending")],
@@ -1543,7 +1426,7 @@ def test_render_coverage_includes_behavioral_section_with_progress_bar() -> None
         BehavioralTopic(id="b2", prompt="Conflict story", status="pending"),
     ]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)], ledger=[], behavioral=topics
+        [Problem("[A] Foo")], ledger=[], behavioral=topics
     )
     assert "## Behavioral (1/2 complete)" in out
     assert "█" in out and "░" in out
@@ -1553,17 +1436,15 @@ def test_render_coverage_includes_behavioral_section_with_progress_bar() -> None
 
 def test_render_coverage_omits_behavioral_section_when_arg_is_none() -> None:
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)], ledger=[], behavioral=None
+        [Problem("[A] Foo")], ledger=[], behavioral=None
     )
     assert "Behavioral" not in out
 
 
 def test_recompute_reads_behavioral_file_and_renders_in_coverage(tmp_path: Path) -> None:
-    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [A] -> Foo (E)\n"
+        "## A\n\n- [ ] Foo (E)\n"
     )
     today_md = tmp_path / "today.md"
     ledger = tmp_path / "completions.jsonl"
@@ -1683,7 +1564,7 @@ def test_render_coverage_next_subsection_shows_prereq_subbullet_for_pending_mock
         )
     ]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)],
+        [Problem("[A] Foo")],
         ledger=[],
         today=date(2026, 5, 11),
         mocks=mocks,
@@ -1804,7 +1685,7 @@ def test_render_coverage_next_subsection_skips_completed_to_find_first_open_mock
         Mock(id="m4", status="pending", platform="Pramp", topic="DP"),
     ]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)],
+        [Problem("[A] Foo")],
         ledger=[],
         today=date(2026, 5, 11),
         mocks=mocks,
@@ -1823,7 +1704,7 @@ def test_pending_mock_with_pramp_platform_renders_default_booking_link() -> None
     platform's dashboard URL as a clickable link on the pending Next mock."""
     mocks = [Mock(id="m1", status="pending", platform="Pramp", topic="Trees")]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)],
+        [Problem("[A] Foo")],
         ledger=[],
         today=date(2026, 5, 11),
         mocks=mocks,
@@ -1842,7 +1723,7 @@ def test_pending_mock_with_explicit_booking_url_overrides_platform_default() -> 
         )
     ]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)],
+        [Problem("[A] Foo")],
         ledger=[],
         today=date(2026, 5, 11),
         mocks=mocks,
@@ -1862,7 +1743,7 @@ def test_scheduled_mock_does_not_show_booking_link() -> None:
         )
     ]
     out = render_coverage(
-        [Problem("[A] Foo", source_day=1)],
+        [Problem("[A] Foo")],
         ledger=[],
         today=date(2026, 5, 11),
         mocks=mocks,
@@ -2005,11 +1886,9 @@ def test_recompute_folds_today_md_calendar_edit_into_mock_interviews_json(
 ) -> None:
     """End-to-end: user adds 📅 to today.md, runs recompute, mock_interviews.json
     reflects the new scheduled state. This is the editing UX the user asked for."""
-    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [A] -> Foo (E)\n"
+        "## A\n\n- [ ] Foo (E)\n"
     )
     today_md = tmp_path / "today.md"
     # Simulate a today.md the user has edited — added 📅 to the pending mock
@@ -2041,11 +1920,9 @@ def test_recompute_folds_today_md_completion_check_into_mock_interviews_json(
 ) -> None:
     """Tasks plugin checks the box and auto-stamps ✅. Recompute folds that
     completion stamp into mock_interviews.json."""
-    daily_md = tmp_path / "prep-plan-daily.md"
+    daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
-        "## Phase 1 — X (Days 1–7)\n"
-        "### Day 1\n"
-        "- [ ] [A] -> Foo (E)\n"
+        "## A\n\n- [ ] Foo (E)\n"
     )
     today_md = tmp_path / "today.md"
     today_md.write_text(
@@ -2104,7 +1981,7 @@ PHASE_REINFORCE = Phase(
 
 
 def _p(text: str, diff: str = "M", source: str = "nc-150") -> Problem:
-    return Problem(text=text, source_day=1, difficulty=diff, source=source)  # type: ignore[arg-type]
+    return Problem(text=text, difficulty=diff, source=source)  # type: ignore[arg-type]
 
 
 def test_current_phase_picks_first_phase_with_untouched_problems() -> None:

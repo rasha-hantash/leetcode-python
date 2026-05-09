@@ -1,8 +1,11 @@
 """Recall engine: snapshot-mode SM-2 lite scheduler for the NeetCode 150 curriculum.
 
-Reads `prep-plan-daily.md` (curriculum) and the previous `today.md` (yesterday's
-checked-off items), folds new completions into an append-only JSONL ledger, then
-regenerates `today.md` with today's Recall and New sections.
+Reads `curriculum.md` (flat by-pattern problem list) + `phases.json` (phase
+budgets — pattern allowlist + daily new-problem cap + difficulty bounds) and
+the previous `today.md` (yesterday's checked-off items), folds new completions
+into an append-only JSONL ledger, then regenerates `today.md` with today's
+Recall and New sections. Phase advancement is ledger-driven: the current phase
+is the lowest-numbered one with eligible untouched problems.
 
 Designed to run once per morning (LaunchAgent) or on-demand (`prep recompute`).
 There is no live daemon — today's set is frozen until the next recompute call.
@@ -42,10 +45,9 @@ _DIFFICULTY_RANK: dict[str, int] = {"E": 0, "M": 1, "H": 2}
 
 @dataclass(frozen=True)
 class Problem:
-    """A curriculum entry: canonical problem text, source day, and optional tags."""
+    """A curriculum entry: canonical problem text + optional metadata tags."""
 
     text: str
-    source_day: int
     difficulty: Difficulty | None = None
     source: Source = "nc-150"
     variant_of: str | None = None
@@ -95,33 +97,6 @@ class Phase:
     new_per_day: int
     difficulty_cap: Difficulty | None = None
     difficulty_floor: Difficulty | None = None
-
-
-@dataclass(frozen=True)
-class CurriculumPhase:
-    """A `## Phase N — Name (Days A–B)` section header parsed from the curriculum."""
-
-    number: int
-    name: str
-    days_start: int
-    days_end: int
-
-    @property
-    def heading(self) -> str:
-        return f"Phase {self.number} — {self.name} (Days {self.days_start}–{self.days_end})"
-
-    @property
-    def slug(self) -> str:
-        """GitHub-flavored markdown anchor for the phase header.
-
-        GitHub strips punctuation but preserves the *number* of spaces — a
-        run of `space em-dash space` becomes `--` (the em-dash is dropped
-        but the two surrounding spaces survive as two hyphens)."""
-        s = self.heading.lower()
-        s = re.sub(r"[^\w\s-]", "", s, flags=re.UNICODE)
-        # Each whitespace char → one hyphen (no collapsing)
-        s = re.sub(r"\s", "-", s).strip("-")
-        return s
 
 
 MockStatus = Literal["pending", "scheduled", "completed"]
@@ -281,7 +256,7 @@ def overdue_days(touches: int, last_touched: date, today: date) -> int:
     return (today - due_date(touches, last_touched)).days
 
 
-# ─── Sprint day + phase math ─────────────────────────────────────────────────
+# ─── Sprint day math ─────────────────────────────────────────────────────────
 
 
 def start_date(ledger: list[Touch]) -> date | None:
@@ -292,15 +267,6 @@ def start_date(ledger: list[Touch]) -> date | None:
 def day_n_for(today: date, start: date) -> int:
     """Day number relative to start. start_date itself is Day 1."""
     return (today - start).days + 1
-
-
-def phase_for(
-    day_n: int, phases: list[CurriculumPhase]
-) -> CurriculumPhase | None:
-    """The phase containing `day_n`, or None if it falls outside all phases."""
-    return next(
-        (p for p in phases if p.days_start <= day_n <= p.days_end), None
-    )
 
 
 # ─── Pace projection ─────────────────────────────────────────────────────────
@@ -453,10 +419,7 @@ def load_phases(path: Path) -> list[Phase]:
 # ─── Parsers ─────────────────────────────────────────────────────────────────
 
 
-_DAY_HEADING = re.compile(r"^###\s+Day\s+(\d+)\b")
-_PHASE_HEADING = re.compile(
-    r"^##\s+Phase\s+(\d+)\s+[—-]\s+(.+?)\s+\(Days?\s+(\d+)[–-](\d+)\)"
-)
+_PATTERN_HEADING = re.compile(r"^##\s+(.+?)\s*$")
 _PROBLEM_LINE = re.compile(r"^\s*-\s+\[[ xX]\]\s+(.*)$")
 _CHECKED_LINE = re.compile(r"^\s*-\s+\[[xX]\]\s+(.*)$")
 _DONE_DATE = re.compile(r"\s*✅\s*(\d{4}-\d{2}-\d{2}).*$")
@@ -483,33 +446,43 @@ def _canonicalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def parse_curriculum(daily_md: str) -> list[Problem]:
-    """Walk the daily schedule file, emit one Problem per checkbox line that
-    matches the `[Category] -> Name` form under a `### Day N` heading."""
-    problems: list[Problem] = []
-    current_day: int | None = None
+_NON_PATTERN_HEADINGS = {"Legend", "Today"}
 
-    for line in daily_md.splitlines():
-        day_match = _DAY_HEADING.match(line)
-        if day_match:
-            current_day = int(day_match.group(1))
+
+def parse_curriculum(curriculum_md: str) -> list[Problem]:
+    """Walk `curriculum.md`, emit one Problem per checkbox line under a
+    `## <Pattern>` heading. Canonical text is reconstructed as `[Pattern] -> Name`
+    (the on-disk line is just `- [ ] Name (E)`; the pattern lives in the heading).
+    Headings in `_NON_PATTERN_HEADINGS` are ignored."""
+    problems: list[Problem] = []
+    current_pattern: str | None = None
+
+    for line in curriculum_md.splitlines():
+        heading = _PATTERN_HEADING.match(line)
+        if heading:
+            name = heading.group(1).strip()
+            current_pattern = None if name in _NON_PATTERN_HEADINGS else name
             continue
-        if current_day is None:
+        if current_pattern is None:
             continue
         problem_match = _PROBLEM_LINE.match(line)
         if not problem_match:
             continue
         raw = problem_match.group(1)
-        canonical = _canonicalize(raw)
-        if not _PROBLEM_TEXT.match(canonical):
-            continue
         diff_m = _DIFFICULTY_TAG.search(raw)
         src_m = _SOURCE_TAG.search(raw)
         var_m = _VARIANT_TAG.search(raw)
+        # Strip tags from the displayed name to get the canonical name.
+        name = _DIFFICULTY_TAG.sub(" ", raw)
+        name = _SOURCE_TAG.sub(" ", name)
+        name = _VARIANT_TAG.sub(" ", name)
+        name = _T_MARKER.sub(" ", name)
+        name = re.sub(r"\s+", " ", name).strip()
+        if not name:
+            continue
         problems.append(
             Problem(
-                text=canonical,
-                source_day=current_day,
+                text=f"[{current_pattern}] -> {name}",
                 difficulty=diff_m.group(1) if diff_m else None,  # type: ignore[arg-type]
                 source=src_m.group(1) if src_m else "nc-150",  # type: ignore[arg-type]
                 variant_of=var_m.group(1).strip() if var_m else None,
@@ -517,23 +490,6 @@ def parse_curriculum(daily_md: str) -> list[Problem]:
         )
 
     return problems
-
-
-def parse_phases(daily_md: str) -> list[CurriculumPhase]:
-    """Walk the daily schedule file, emit one CurriculumPhase per `## Phase N — Name (Days A–B)` heading."""
-    phases: list[CurriculumPhase] = []
-    for line in daily_md.splitlines():
-        match = _PHASE_HEADING.match(line)
-        if match:
-            phases.append(
-                CurriculumPhase(
-                    number=int(match.group(1)),
-                    name=match.group(2).strip(),
-                    days_start=int(match.group(3)),
-                    days_end=int(match.group(4)),
-                )
-            )
-    return phases
 
 
 def parse_completions(today_md: str) -> list[Touch]:
@@ -857,7 +813,7 @@ def _render_recall_line(item: RecallItem) -> str:
 
 
 def _render_new_line(problem: Problem) -> str:
-    return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)} (Day {problem.source_day})"
+    return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)}"
 
 
 def _format_projection_line(
@@ -876,8 +832,7 @@ def render_today(
     new: list[Problem],
     *,
     day_n: int | None = None,
-    phase: CurriculumPhase | None = None,
-    daily_md_link: str = "./prep-plan-daily.md",
+    phase: Phase | None = None,
     projection: date | None = None,
     projection_rate: float | None = None,
     projection_untouched: int | None = None,
@@ -895,7 +850,10 @@ def render_today(
     elif phase is None:
         header = f"{base} · Day {day_n}"
     else:
-        header = f"{base} · [{phase.heading}]({daily_md_link}#{phase.slug}) · Day {day_n}"
+        header = (
+            f"{base} · Phase {phase.number} — {phase.name} · "
+            f"Day {day_n} · {phase.new_per_day} new/day"
+        )
 
     lines = [header, ""]
     if projection and projection_rate and projection_untouched:
@@ -1189,32 +1147,34 @@ def render_coverage(
 
 
 def recompute(
-    daily_md_path: Path,
+    curriculum_md_path: Path,
     today_md_path: Path,
     ledger_path: Path,
     today: date,
     recall_limit: int = DEFAULT_RECALL_LIMIT,
-    new_limit: int = DEFAULT_NEW_LIMIT,
     coverage_md_path: Path | None = None,
     mocks_path: Path | None = None,
     sd_chapters_path: Path | None = None,
     behavioral_path: Path | None = None,
+    phases_json_path: Path | None = None,
 ) -> RecomputeResult:
     """One full cycle: log new completions, fold mock edits, regenerate today.md + coverage.md."""
-    daily_md = daily_md_path.read_text()
-    curriculum = parse_curriculum(daily_md)
-    phases = parse_phases(daily_md)
+    curriculum = parse_curriculum(curriculum_md_path.read_text())
+    phases = load_phases(phases_json_path) if phases_json_path else []
 
     today_md = today_md_path.read_text() if today_md_path.exists() else ""
     logged = append_to_ledger(ledger_path, parse_completions(today_md))
 
     ledger = load_ledger(ledger_path)
     recall = compute_recall(ledger, today=today, limit=recall_limit, curriculum=curriculum)
-    new = compute_new(curriculum, ledger, limit=new_limit)
+    phase = current_phase(curriculum, ledger, phases) if phases else None
+    new = (
+        compute_new(curriculum, ledger, phase=phase) if phase
+        else compute_new(curriculum, ledger)
+    )
 
     start = start_date(ledger)
     day_n = day_n_for(today, start) if start else None
-    phase = phase_for(day_n, phases) if day_n is not None else None
 
     rate = avg_new_per_day(ledger, today)
     end = projected_end_date(ledger, curriculum, today)
@@ -1289,11 +1249,18 @@ def cli() -> None:
 
 @cli.command(name="recompute")
 @click.option(
-    "--daily",
+    "--curriculum",
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    default=Path("prep-plan-daily.md"),
+    default=Path("curriculum.md"),
     show_default=True,
-    help="Curriculum / schedule reference markdown.",
+    help="Flat by-pattern curriculum markdown (source of truth).",
+)
+@click.option(
+    "--phases",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=Path("phases.json"),
+    show_default=True,
+    help="Phase budgets (pattern allowlist + new_per_day + difficulty bounds).",
 )
 @click.option(
     "--today-md",
@@ -1338,7 +1305,8 @@ def cli() -> None:
     help="User-editable list of behavioral interview prompts (pending/completed).",
 )
 def recompute_cmd(
-    daily: Path,
+    curriculum: Path,
+    phases: Path,
     today_md: Path,
     ledger: Path,
     coverage_md: Path,
@@ -1348,7 +1316,7 @@ def recompute_cmd(
 ) -> None:
     """Fold yesterday's checks into the ledger, then regenerate today.md and coverage.md."""
     result = recompute(
-        daily,
+        curriculum,
         today_md,
         ledger,
         today=date.today(),
@@ -1356,6 +1324,7 @@ def recompute_cmd(
         mocks_path=mocks,
         sd_chapters_path=sd_chapters,
         behavioral_path=behavioral,
+        phases_json_path=phases,
     )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "
