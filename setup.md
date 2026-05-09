@@ -137,7 +137,7 @@ Before D1, calibrate your retention baseline:
 3. Record: how many you got cleanly, how many partially, how many you blanked on.
 4. **If you nailed all 3:** stay at 4/day in P1.
 5. **If you got 2/3:** stay at 4/day but expect P1 to be slow.
-6. **If you got 1 or fewer:** drop Phase 1's `new_per_day` from 5 to 3 in `phases.json` and re-balance later phases.
+6. **If you got 1 or fewer:** drop Phase 1's budget — edit `curriculum.md`'s `### Phase 1 — Linear Patterns E+M (5 new/day)` heading to `(3 new/day)` and re-balance later phases.
 
 This is the only step that informs anything about your actual schedule — don't skip it.
 
