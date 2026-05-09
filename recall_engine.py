@@ -34,6 +34,7 @@ Difficulty = Literal["E", "M", "H"]
 Source = Literal["nc-150", "nc-150+", "company question"]
 
 _SOURCE_RANK: dict[str, int] = {"nc-150": 0, "nc-150+": 1, "company question": 2}
+_DIFFICULTY_RANK: dict[str, int] = {"E": 0, "M": 1, "H": 2}
 
 
 # ─── Data types ──────────────────────────────────────────────────────────────
@@ -77,6 +78,23 @@ class RecallItem:
     last_touched: date
     days_overdue: int
     difficulty: Difficulty | None = None
+
+
+@dataclass(frozen=True)
+class Phase:
+    """A curriculum phase: pattern allowlist + daily new-problem budget + difficulty bounds.
+
+    `patterns=None` means any pattern is eligible. `difficulty_cap` limits the
+    upper bound (e.g. `M` blocks Hards). `difficulty_floor` limits the lower
+    bound (e.g. `H` for the Hard-only phase). `new_per_day=0` puts the phase in
+    recall-only mode."""
+
+    number: int
+    name: str
+    patterns: tuple[str, ...] | None
+    new_per_day: int
+    difficulty_cap: Difficulty | None = None
+    difficulty_floor: Difficulty | None = None
 
 
 @dataclass(frozen=True)
@@ -356,14 +374,80 @@ def compute_recall(
     return items[:limit]
 
 
+def _problem_eligible_for_phase(p: Problem, phase: Phase) -> bool:
+    """True if the problem's pattern + difficulty fall inside the phase's filters."""
+    if phase.patterns is not None and p.pattern not in phase.patterns:
+        return False
+    diff = p.difficulty or "M"
+    if phase.difficulty_cap and _DIFFICULTY_RANK[diff] > _DIFFICULTY_RANK[phase.difficulty_cap]:
+        return False
+    if phase.difficulty_floor and _DIFFICULTY_RANK[diff] < _DIFFICULTY_RANK[phase.difficulty_floor]:
+        return False
+    return True
+
+
 def compute_new(
-    curriculum: list[Problem], ledger: list[Touch], limit: int = DEFAULT_NEW_LIMIT
+    curriculum: list[Problem],
+    ledger: list[Touch],
+    limit: int = DEFAULT_NEW_LIMIT,
+    phase: Phase | None = None,
 ) -> list[Problem]:
     """The next N never-touched problems, ordered by source provenance
-    (nc-150 > nc-150+ > company question) then document order."""
+    (nc-150 > nc-150+ > company question), then difficulty (E → M → H),
+    then document order. When `phase` is given, the pool is filtered to its
+    pattern allowlist + difficulty cap/floor and the limit defaults to
+    `phase.new_per_day` (so a phase with `new_per_day=0` returns nothing)."""
     touched = {t.problem for t in ledger}
-    untouched = [p for p in curriculum if p.text not in touched]
-    return sorted(untouched, key=lambda p: _SOURCE_RANK.get(p.source, 0))[:limit]
+    pool = [p for p in curriculum if p.text not in touched]
+    if phase is not None:
+        pool = [p for p in pool if _problem_eligible_for_phase(p, phase)]
+        limit = phase.new_per_day
+    return sorted(
+        pool,
+        key=lambda p: (
+            _SOURCE_RANK.get(p.source, 0),
+            _DIFFICULTY_RANK.get(p.difficulty or "M", 1),
+        ),
+    )[:limit]
+
+
+def current_phase(
+    curriculum: list[Problem], ledger: list[Touch], phases: list[Phase]
+) -> Phase | None:
+    """The lowest-numbered phase that still has untouched eligible problems.
+    Falls through to the last phase (typically Reinforcement, `new_per_day=0`)
+    when every prior phase is drained. Returns None if `phases` is empty."""
+    if not phases:
+        return None
+    touched = {t.problem for t in ledger}
+    ordered = sorted(phases, key=lambda ph: ph.number)
+    return next(
+        (
+            ph for ph in ordered
+            if any(
+                p.text not in touched and _problem_eligible_for_phase(p, ph)
+                for p in curriculum
+            )
+        ),
+        ordered[-1],
+    )
+
+
+def load_phases(path: Path) -> list[Phase]:
+    """Read `phases.json` (list of phase records). Empty list if file missing."""
+    if not path.exists():
+        return []
+    return [
+        Phase(
+            number=int(r["number"]),
+            name=r["name"],
+            patterns=tuple(r["patterns"]) if r.get("patterns") else None,
+            new_per_day=int(r["new_per_day"]),
+            difficulty_cap=r.get("difficulty_cap"),
+            difficulty_floor=r.get("difficulty_floor"),
+        )
+        for r in json.loads(path.read_text())
+    ]
 
 
 # ─── Parsers ─────────────────────────────────────────────────────────────────

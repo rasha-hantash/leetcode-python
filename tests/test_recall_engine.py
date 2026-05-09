@@ -17,6 +17,7 @@ from recall_engine import (
     CurriculumPhase,
     Mock,
     MockPrereq,
+    Phase,
     Problem,
     Readiness,
     ReadinessTier,
@@ -28,6 +29,7 @@ from recall_engine import (
     compute_new,
     compute_readiness,
     compute_recall,
+    current_phase,
     day_n_for,
     due_date,
     interval_for,
@@ -35,6 +37,7 @@ from recall_engine import (
     load_behavioral,
     load_ledger,
     load_mocks,
+    load_phases,
     load_sd_chapters,
     mock_prereq_status,
     next_sd_chapter,
@@ -2066,3 +2069,130 @@ def test_recompute_folds_today_md_completion_check_into_mock_interviews_json(
     updated = load_mocks(mocks_path)
     assert updated[0].status == "completed"
     assert updated[0].completed_date == date(2026, 5, 22)
+
+
+# ─── Phase model + phase-aware compute_new ───────────────────────────────────
+
+PHASE_LINEAR = Phase(
+    number=1,
+    name="Linear Patterns E+M",
+    patterns=("Arrays & Hashing", "Two Pointers"),
+    new_per_day=5,
+    difficulty_cap="M",
+)
+PHASE_TREES = Phase(
+    number=2,
+    name="Trees",
+    patterns=("Trees",),
+    new_per_day=4,
+    difficulty_cap="M",
+)
+PHASE_HARD = Phase(
+    number=3,
+    name="Hard Problems",
+    patterns=None,
+    new_per_day=2,
+    difficulty_cap="H",
+    difficulty_floor="H",
+)
+PHASE_REINFORCE = Phase(
+    number=8,
+    name="Reinforcement",
+    patterns=None,
+    new_per_day=0,
+)
+
+
+def _p(text: str, diff: str = "M", source: str = "nc-150") -> Problem:
+    return Problem(text=text, source_day=1, difficulty=diff, source=source)  # type: ignore[arg-type]
+
+
+def test_current_phase_picks_first_phase_with_untouched_problems() -> None:
+    curriculum = [
+        _p("[Arrays & Hashing] -> Two Sum", "E"),
+        _p("[Trees] -> Invert Binary Tree", "E"),
+    ]
+    ledger: list[Touch] = []
+    assert current_phase(curriculum, ledger, [PHASE_LINEAR, PHASE_TREES]).number == 1
+
+
+def test_current_phase_advances_when_phase_patterns_drained() -> None:
+    """All Phase 1 problems touched → current phase rolls to Phase 2 even though
+    Phase 2 also has untouched work. Advancement is by the lowest unfinished phase."""
+    curriculum = [
+        _p("[Arrays & Hashing] -> Two Sum", "E"),
+        _p("[Two Pointers] -> Valid Palindrome", "E"),
+        _p("[Trees] -> Invert Binary Tree", "E"),
+    ]
+    ledger = [
+        Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 9)),
+        Touch("[Two Pointers] -> Valid Palindrome", date(2026, 5, 9)),
+    ]
+    assert current_phase(curriculum, ledger, [PHASE_LINEAR, PHASE_TREES]).number == 2
+
+
+def test_compute_new_respects_phase_pattern_allowlist() -> None:
+    curriculum = [
+        _p("[Arrays & Hashing] -> Two Sum", "E"),
+        _p("[Trees] -> Invert Binary Tree", "E"),
+        _p("[Two Pointers] -> 3Sum", "M"),
+    ]
+    new = compute_new(curriculum, ledger=[], phase=PHASE_LINEAR)
+    assert all(p.pattern in PHASE_LINEAR.patterns for p in new)
+    assert "[Trees] -> Invert Binary Tree" not in {p.text for p in new}
+
+
+def test_compute_new_respects_phase_difficulty_cap() -> None:
+    curriculum = [
+        _p("[Arrays & Hashing] -> Two Sum", "E"),
+        _p("[Arrays & Hashing] -> 3Sum", "M"),
+        _p("[Arrays & Hashing] -> Trapping Rain Water", "H"),
+    ]
+    new = compute_new(curriculum, ledger=[], phase=PHASE_LINEAR)
+    assert "[Arrays & Hashing] -> Trapping Rain Water" not in {p.text for p in new}
+    assert {p.difficulty for p in new} <= {"E", "M"}
+
+
+def test_compute_new_respects_phase_difficulty_floor_for_hard_phase() -> None:
+    """Phase 5 (Hards-only) skips E/M problems even though they're untouched."""
+    curriculum = [
+        _p("[Arrays & Hashing] -> Two Sum", "E"),
+        _p("[Arrays & Hashing] -> 3Sum", "M"),
+        _p("[Arrays & Hashing] -> Trapping Rain Water", "H"),
+    ]
+    new = compute_new(curriculum, ledger=[], phase=PHASE_HARD)
+    assert [p.text for p in new] == ["[Arrays & Hashing] -> Trapping Rain Water"]
+
+
+def test_compute_new_returns_empty_when_phase_new_per_day_is_zero() -> None:
+    """Reinforcement phase: ledger is full, no acquisition wanted."""
+    curriculum = [_p("[Arrays & Hashing] -> Two Sum", "E")]
+    assert compute_new(curriculum, ledger=[], phase=PHASE_REINFORCE) == []
+
+
+def test_compute_new_with_null_patterns_allows_any_pattern() -> None:
+    """Phase 5 has `patterns=None` — any pattern is eligible (subject to floor)."""
+    curriculum = [
+        _p("[Arrays & Hashing] -> Trapping Rain Water", "H"),
+        _p("[Trees] -> Binary Tree Maximum Path Sum", "H"),
+        _p("[Graphs] -> Word Ladder", "H"),
+    ]
+    new = compute_new(curriculum, ledger=[], phase=PHASE_HARD)
+    assert {p.pattern for p in new} == {"Arrays & Hashing", "Trees"}  # capped at 2
+
+
+def test_load_phases_reads_json_into_phase_dataclasses(tmp_path: Path) -> None:
+    """Sanity check the JSON loader matches the seeded `phases.json` shape."""
+    p = tmp_path / "phases.json"
+    p.write_text(
+        '[{"number": 1, "name": "X", "patterns": ["A"], "new_per_day": 3, '
+        '"difficulty_cap": "M"}, '
+        '{"number": 2, "name": "Y", "patterns": null, "new_per_day": 0}]'
+    )
+    phases = load_phases(p)
+    assert phases[0] == Phase(
+        number=1, name="X", patterns=("A",), new_per_day=3, difficulty_cap="M"
+    )
+    assert phases[1] == Phase(
+        number=2, name="Y", patterns=None, new_per_day=0
+    )
