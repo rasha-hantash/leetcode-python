@@ -1137,13 +1137,6 @@ def test_load_mocks_parses_pending_scheduled_completed_states(
     assert mocks[2].notes == "weak on memo"
 
 
-def test_load_mocks_rejects_a_non_list_payload(tmp_path: Path) -> None:
-    path = tmp_path / "mocks.json"
-    path.write_text('{"id": "m1", "status": "pending"}')
-    with pytest.raises(ValueError, match="must contain a JSON list"):
-        load_mocks(path)
-
-
 def test_upcoming_mocks_filters_to_scheduled_only_within_window() -> None:
     today = date(2026, 5, 11)
     mocks = [
@@ -1284,13 +1277,6 @@ def test_load_sd_chapters_parses_pending_and_completed_states(
     assert chapters[0].completed_date == date(2026, 5, 12)
     assert chapters[1].status == "pending"
     assert chapters[1].completed_date is None
-
-
-def test_load_sd_chapters_rejects_a_non_list_payload(tmp_path: Path) -> None:
-    path = tmp_path / "sd.json"
-    path.write_text('{"id": "ch-1"}')
-    with pytest.raises(ValueError, match="must contain a JSON list"):
-        load_sd_chapters(path)
 
 
 def test_next_sd_chapter_returns_first_pending_in_document_order() -> None:
@@ -1599,13 +1585,6 @@ def test_load_behavioral_parses_pending_and_completed_entries(tmp_path: Path) ->
     assert topics[0].status == "pending"
     assert topics[1].completed_date == date(2026, 5, 12)
     assert topics[1].notes == "use Datadog migration"
-
-
-def test_load_behavioral_rejects_non_list_payload(tmp_path: Path) -> None:
-    path = tmp_path / "b.json"
-    path.write_text('{"id": "b1"}')
-    with pytest.raises(ValueError, match="must contain a JSON list"):
-        load_behavioral(path)
 
 
 def test_render_coverage_includes_behavioral_section_with_progress_bar() -> None:

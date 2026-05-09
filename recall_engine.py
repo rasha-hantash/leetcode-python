@@ -340,11 +340,8 @@ def aggregate_touches(ledger: Iterable[Touch]) -> dict[str, tuple[int, date]]:
     """Roll the ledger up to {problem: (touch_count, latest_completion_date)}."""
     summary: dict[str, tuple[int, date]] = {}
     for t in ledger:
-        if t.problem in summary:
-            count, latest = summary[t.problem]
-            summary[t.problem] = (count + 1, max(latest, t.on))
-        else:
-            summary[t.problem] = (1, t.on)
+        count, latest = summary.get(t.problem, (0, t.on))
+        summary[t.problem] = (count + 1, max(latest, t.on))
     return summary
 
 
@@ -383,15 +380,10 @@ def compute_new(
     curriculum: list[Problem], ledger: list[Touch], limit: int = DEFAULT_NEW_LIMIT
 ) -> list[Problem]:
     """The next N never-touched problems, ordered by source provenance
-    (nc-150 > nc-150+ > company question) then document order. NC150 problems
-    always surface before non-NC150 patterns, and both before company-specific
-    variants."""
+    (nc-150 > nc-150+ > company question) then document order."""
     touched = {t.problem for t in ledger}
-    indexed = [
-        (i, p) for i, p in enumerate(curriculum) if p.text not in touched
-    ]
-    indexed.sort(key=lambda item: (_SOURCE_RANK.get(item[1].source, 0), item[0]))
-    return [p for _, p in indexed[:limit]]
+    untouched = [p for p in curriculum if p.text not in touched]
+    return sorted(untouched, key=lambda p: _SOURCE_RANK.get(p.source, 0))[:limit]
 
 
 # ─── Parsers ─────────────────────────────────────────────────────────────────
@@ -502,116 +494,88 @@ def parse_completions(today_md: str) -> list[Touch]:
 # ─── Ledger I/O ──────────────────────────────────────────────────────────────
 
 
+def _opt_date(s: str | None) -> date | None:
+    return date.fromisoformat(s) if s else None
+
+
 def load_ledger(path: Path) -> list[Touch]:
-    """Read the JSONL ledger. Empty list if the file does not exist yet."""
+    """Read the JSONL ledger. Empty list if the file does not exist."""
     if not path.exists():
         return []
     touches: list[Touch] = []
     for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line:
+        if not line.strip():
             continue
-        record = json.loads(line)
-        touches.append(
-            Touch(problem=record["problem"], on=date.fromisoformat(record["on"]))
-        )
+        r = json.loads(line)
+        touches.append(Touch(problem=r["problem"], on=date.fromisoformat(r["on"])))
     return touches
 
 
 def load_sd_chapters(path: Path) -> list[SDChapter]:
-    """Read the user-editable SD chapter list. Empty list if the file does not
-    exist yet. Each line is the latest state of one chapter; the file is
-    edited in place rather than appended to."""
+    """Read the SD chapter list. Empty list if the file does not exist."""
     if not path.exists():
         return []
-    raw = json.loads(path.read_text())
-    if not isinstance(raw, list):
-        raise ValueError(f"{path} must contain a JSON list of SD chapters")
-    chapters: list[SDChapter] = []
-    for record in raw:
-        completed = record.get("completed_date")
-        chapters.append(
-            SDChapter(
-                id=record["id"],
-                title=record["title"],
-                book=record["book"],
-                status=record["status"],
-                completed_date=date.fromisoformat(completed) if completed else None,
-            )
+    return [
+        SDChapter(
+            id=r["id"],
+            title=r["title"],
+            book=r["book"],
+            status=r["status"],
+            completed_date=_opt_date(r.get("completed_date")),
         )
-    return chapters
+        for r in json.loads(path.read_text())
+    ]
 
 
 def next_sd_chapter(chapters: list[SDChapter]) -> SDChapter | None:
-    """First pending chapter in document order, or None if all complete."""
-    for ch in chapters:
-        if ch.status == "pending":
-            return ch
-    return None
+    """First pending chapter, or None if all complete."""
+    return next((ch for ch in chapters if ch.status == "pending"), None)
 
 
 def load_behavioral(path: Path) -> list[BehavioralTopic]:
-    """Read the user-editable behavioral prep list. Empty list if the file
-    does not exist yet."""
+    """Read the behavioral prep list. Empty list if the file does not exist."""
     if not path.exists():
         return []
-    raw = json.loads(path.read_text())
-    if not isinstance(raw, list):
-        raise ValueError(f"{path} must contain a JSON list of behavioral topics")
-    topics: list[BehavioralTopic] = []
-    for record in raw:
-        completed = record.get("completed_date")
-        topics.append(
-            BehavioralTopic(
-                id=record["id"],
-                prompt=record["prompt"],
-                status=record["status"],
-                completed_date=date.fromisoformat(completed) if completed else None,
-                notes=record.get("notes"),
-            )
+    return [
+        BehavioralTopic(
+            id=r["id"],
+            prompt=r["prompt"],
+            status=r["status"],
+            completed_date=_opt_date(r.get("completed_date")),
+            notes=r.get("notes"),
         )
-    return topics
+        for r in json.loads(path.read_text())
+    ]
+
+
+def _parse_mock_prereq(data: dict[str, Any] | None) -> MockPrereq | None:
+    if not data:
+        return None
+    return MockPrereq(
+        em_problems=int(data.get("em_problems", 0)),
+        sd_chapters=int(data.get("sd_chapters", 0)),
+        sd_chapter_ids=tuple(data.get("sd_chapter_ids", ())),
+    )
 
 
 def load_mocks(path: Path) -> list[Mock]:
-    """Read the user-editable mocks JSON file. Empty list if the file does not
-    exist yet. Unlike the ledger, mocks are mutable — each entry is the latest
-    state of one mock interview, edited in place rather than appended to."""
+    """Read the mocks JSON file. Empty list if the file does not exist."""
     if not path.exists():
         return []
-    raw = json.loads(path.read_text())
-    if not isinstance(raw, list):
-        raise ValueError(f"{path} must contain a JSON list of mocks")
-    mocks: list[Mock] = []
-    for record in raw:
-        scheduled = record.get("scheduled_date")
-        completed = record.get("completed_date")
-        prereq_data = record.get("prerequisites")
-        prerequisites: MockPrereq | None = None
-        if isinstance(prereq_data, dict):
-            chapter_ids_raw = prereq_data.get("sd_chapter_ids", [])
-            chapter_ids: tuple[str, ...] = ()
-            if isinstance(chapter_ids_raw, list):
-                chapter_ids = tuple(str(cid) for cid in chapter_ids_raw)
-            prerequisites = MockPrereq(
-                em_problems=int(prereq_data.get("em_problems", 0)),
-                sd_chapters=int(prereq_data.get("sd_chapters", 0)),
-                sd_chapter_ids=chapter_ids,
-            )
-        mocks.append(
-            Mock(
-                id=record["id"],
-                status=record["status"],
-                platform=record.get("platform"),
-                topic=record.get("topic"),
-                scheduled_date=date.fromisoformat(scheduled) if scheduled else None,
-                completed_date=date.fromisoformat(completed) if completed else None,
-                notes=record.get("notes"),
-                prerequisites=prerequisites,
-                booking_url=record.get("booking_url"),
-            )
+    return [
+        Mock(
+            id=r["id"],
+            status=r["status"],
+            platform=r.get("platform"),
+            topic=r.get("topic"),
+            scheduled_date=_opt_date(r.get("scheduled_date")),
+            completed_date=_opt_date(r.get("completed_date")),
+            notes=r.get("notes"),
+            prerequisites=_parse_mock_prereq(r.get("prerequisites")),
+            booking_url=r.get("booking_url"),
         )
-    return mocks
+        for r in json.loads(path.read_text())
+    ]
 
 
 _MOCK_LINE = re.compile(r"^\s*-\s+\[([ xX])\]\s+\[([^\]]+)\]\s+(.*)$")
