@@ -1,13 +1,13 @@
 # Interview Prep — README
 
-A 90-day NeetCode 150 + system design + behavioral prep system built on top of a snapshot-mode SM-2 lite recall queue. One master file (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral. Each morning a Python script generates today's queue into `prep-data/today.md`. You drain it. Tomorrow morning the script regenerates based on what you checked — and `curriculum.md` stays in sync with the ledger.
+A 90-day NeetCode 150 + system design + behavioral prep system built on top of a snapshot-mode SM-2 lite recall queue. One master file (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral. Each morning a Python script generates today's queue into `today.md`. You drain it. Tomorrow morning the script regenerates based on what you checked — and `curriculum.md` stays in sync with the ledger.
 
 ## Daily flow
 
-1. **Morning (one-time, automatic at 8:30 AM):** the LaunchAgent runs `uv run prep recompute`. This logs yesterday's completions into the ledger, syncs `curriculum.md` ticks, then writes a fresh `prep-data/today.md` with today's **Recall** + **New** sections. _If the cron didn't fire, run the command manually — same result._
-2. **Morning Recall block (9:00–13:00):** open `prep-data/today.md`. Drain **Recall** top-down — click the checkbox of each problem as you re-solve it. Tasks plugin auto-stamps `✅ DATE`. Recall is the highest-leverage work — protecting it with the morning slot keeps it from getting dropped when the day runs long.
-3. **Afternoon System Design (14:00–15:30):** today's chapter is surfaced as `## Today's SD reading` in `prep-data/today.md`. Tick the box in either today.md OR directly in curriculum.md's `## System Design` section.
-4. **DSA New block (15:30–19:30):** today's New problems are listed in `prep-data/today.md` under `## New`. Solve them and tick the boxes there (or in `curriculum.md`). Phase + budget come from the heading in curriculum.md (`### Phase 1 — Linear Patterns E+M (5 new/day)`); `curriculum.md` is the master reference if you want to look ahead.
+1. **Morning (one-time, automatic at 8:30 AM):** the LaunchAgent runs `uv run prep recompute`. This logs yesterday's completions into the ledger, syncs `curriculum.md` ticks, then writes a fresh `today.md` with today's **Recall** + **New** sections. _If the cron didn't fire, run the command manually — same result._
+2. **Morning Recall block (9:00–13:00):** open `today.md`. Drain **Recall** top-down — click the checkbox of each problem as you re-solve it. Tasks plugin auto-stamps `✅ DATE`. Recall is the highest-leverage work — protecting it with the morning slot keeps it from getting dropped when the day runs long.
+3. **Afternoon System Design (14:00–15:30):** today's chapter is surfaced as `## Today's SD reading` in `today.md`. Tick the box in either today.md OR directly in curriculum.md's `## System Design` section.
+4. **DSA New block (15:30–19:30):** today's New problems are listed in `today.md` under `## New`. Solve them and tick the boxes there (or in `curriculum.md`). Phase + budget come from the heading in curriculum.md (`### Phase 1 — Linear Patterns E+M (5 new/day)`); `curriculum.md` is the master reference if you want to look ahead.
 5. **End the day:** the engine doesn't need anything from you besides the ticked boxes. Pick tomorrow's first re-solve from your private "today's hardest" notes.
 
 That's it. The list you wake up to is the list for the day — it does not reshuffle as you check items off. Whatever you don't finish gets folded into tomorrow's queue with more days overdue.
@@ -78,7 +78,7 @@ A problem you've solved once is due 1 day later. Solved twice → 3 days. Solved
 
 1. `uv sync` from the repo root — installs the recall engine and pytest.
 2. Install Obsidian's **Tasks** plugin → enable "Set done date on task completion." (Rendered checkboxes are clickable by default — no separate toggle.)
-3. `uv run prep recompute` — generates the first `prep-data/today.md`.
+3. `uv run prep recompute` — generates the first `today.md`.
 4. (Optional but recommended) Copy `launchd/com.rasha.recall-engine.plist` to `~/Library/LaunchAgents/` and `launchctl load` it. Now `recompute` runs daily at 8:30 AM.
 
 ## Tests
@@ -98,11 +98,10 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 | `tests/test_recall_engine.py`           | Narrative tests — also serve as the spec.                                                                       |
 | `pyproject.toml`                        | Python project metadata + uv lock. `click` (CLI) + `pytest` (dev).                                              |
 | `launchd/com.rasha.recall-engine.plist` | LaunchAgent template that runs `recompute` daily at 8:30 AM.                                                    |
-| `prep-data/today.md`                    | _(generated, bidirectionally synced)_ Today's frozen Recall + New queue. Tick boxes here OR in curriculum.md.   |
+| `today.md`                              | _(generated, bidirectionally synced)_ Today's frozen Recall + New queue. Tick boxes here OR in curriculum.md.   |
 | `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth for DSA touches.                                   |
 | `setup.md`                              | Day-0 setup guide — Obsidian, Anki, Python, books, mocks, GCal, slash commands.                                 |
 | `prep-plan-overview.md`                 | System reference: routine shape per phase, mock cadence, spaced-repetition rules, risks.                        |
-| `neetcode-150.md`                       | Original NC150 list (reference).                                                                                |
 | `python-gotchas.md`                     | Append-only log of Python language stumbles you hit during the prep.                                            |
 | `patterns/*.md`                         | One file per pattern (e.g., `arrays-and-hashing.md`). Mistakes nested under each problem.                       |
 | `anki/`                                 | Four decks: code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total.                   |
@@ -113,8 +112,8 @@ The test names ARE the spec — read them top to bottom for a complete descripti
 
 - **Recall block** — the 4 hr morning slot (9:00–13:00) for draining the Recall queue + yesterday's-hardest re-solve. Highest-leverage work; protected by the morning slot so it doesn't get dropped when the day runs long.
 - **DSA New** — the 4 hr afternoon slot (15:30–19:30) for fresh problems from today's curriculum. On mock days shifts to 17:30–19:30.
-- **Recall (10)** — the most-overdue 10 items in `prep-data/today.md`, frozen at recompute time.
-- **New (3)** — the next 3 never-touched curriculum problems in `prep-data/today.md`, frozen at recompute time.
+- **Recall (10)** — the most-overdue 10 items in `today.md`, frozen at recompute time.
+- **New (3)** — the next 3 never-touched curriculum problems in `today.md`, frozen at recompute time.
 - **Touch** — one successful (re-)solve event. One line in `completions.jsonl`.
 - **Ledger** — `prep-data/completions.jsonl`. Append-only history of every touch.
 - **Recompute** — running `uv run prep recompute`. Logs new touches, regenerates `today.md`.

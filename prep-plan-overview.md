@@ -57,7 +57,7 @@ Total: **182** problems · 18 NC150 patterns + 7 NC-150+ patterns + 1 String Tra
 
 Schedule shape shifts across phases: **E+M acquisition (D1–D39)** → **Hard acquisition (D40–D53)** → **reinforcement + job application window (D54–D58)** → **mock-heavy reinforcement (D59–D78)** → **interview mode (D79–D90)**. Saturdays in D59+ restructure to fit a Behavioral Intensive block. Sundays are off across all phases.
 
-The "Recall queue" below is the **`prep-data/today.md`** snapshot generated each morning by `recall_engine`. Open it during the morning Recall block; drain top-down. Whatever doesn't get done is folded into tomorrow's queue with higher overdue-ness. No manual scheduling.
+The "Recall queue" below is the **`today.md`** snapshot generated each morning by `recall_engine`. Open it during the morning Recall block; drain top-down. Whatever doesn't get done is folded into tomorrow's queue with higher overdue-ness. No manual scheduling.
 
 ### D1–D58 — Mon–Sat (Acquisition + Hard acquisition + reinforcement)
 
@@ -67,13 +67,13 @@ The "Recall queue" below is the **`prep-data/today.md`** snapshot generated each
 | ----------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 7:00–8:00   | Workout                    | Fixed (BDNF prime)                                                                                                                                  |
 | 8:00–9:00   | Shower + breakfast         | Read tomorrow's first problem 10 min (incubation)                                                                                                   |
-| 9:00–13:00  | **Recall (4 hr · peak)**   | Open `prep-data/today.md` → drain Recall top-down at standard time (E 20m / M 40m / H 90m) → yesterday's hardest re-solve → editorial → Anki        |
+| 9:00–13:00  | **Recall (4 hr · peak)**   | Open `today.md` → drain Recall top-down at standard time (E 20m / M 40m / H 90m) → yesterday's hardest re-solve → editorial → Anki                  |
 | 13:00–14:00 | Lunch + walk               | Off-screen                                                                                                                                          |
 | 14:00–15:30 | **System Design (1.5 hr)** | Today's chapter writeup in Obsidian (mock days swap to 14:00-16:00 mock + 16:00-17:30 SD)                                                           |
 | 15:30–19:30 | **DSA New (4 hr)**         | Today's fresh problems from `prep-plan-daily.md` (D1-D39: 3-4 E+M/day · D40-D53: 1.5-2 Hards/day · D54-D58: 2 NC-150+/day). Mock days: 17:30-19:30. |
 | 19:30+      | Free                       | Pre-bed: read tomorrow's first problem 10 min                                                                                                       |
 
-**Saturday note (D6, D13, D20, D27, D34, D41, D48, D55).** Same time blocks. The 4 hr morning Recall block opens with **This week's hardest — your pick**: open `prep-data/today.md` (Saturday's render adds the section automatically) and re-solve 2-3 problems you flagged hardest from your Mon-Fri "today's hardest" notes. Then drain Recall. New (3) intake on Saturdays drops to 3 problems instead of 4 to fit the reinforcement block.
+**Saturday note (D6, D13, D20, D27, D34, D41, D48, D55).** Same time blocks. The 4 hr morning Recall block opens with **This week's hardest — your pick**: open `today.md` (Saturday's render adds the section automatically) and re-solve 2-3 problems you flagged hardest from your Mon-Fri "today's hardest" notes. Then drain Recall. New (3) intake on Saturdays drops to 3 problems instead of 4 to fit the reinforcement block.
 
 **Daily ceiling note.** 4 hr Recall + 1.5 hr SD + 4 hr DSA New = 9.5 focused-work hours, 0.5 hr over the 9-hr dashboard ceiling. Acceptable on weekdays; if drift starts compounding, shrink the SD slot to 1 hr or end Recall 30 min early on light-queue days (rare — queue grows to 30-50 items by D40+).
 
@@ -108,14 +108,14 @@ _From D71 onward: add a 1-problem random retention check (15–20 min, weighted 
 
 Restructured for **Behavioral Intensive** (3 hr afternoon block).
 
-| Time        | Block                           | Activity                                                                                                      |
-| ----------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| 9:00–12:00  | DSA                             | 1 weakness re-solve on 30-min clock                                                                           |
-| 12:00–13:00 | System Design                   | Alex Xu Vol 2 chapter                                                                                         |
-| 13:00–14:00 | Lunch + walk                    | Off-screen                                                                                                    |
-| 14:00–15:00 | **Recall (anchored, 1 hr)**     | Recall queue drain + this-week's-hardest section in `prep-data/today.md` (Phase 8: + random retention check). |
-| 15:00–18:00 | **Behavioral Intensive (3 hr)** | Story drafting / refinement, recording + listen-back, 5-story drill (60-sec → 90-sec → 3-min versions).       |
-| 18:00       | Done                            |                                                                                                               |
+| Time        | Block                           | Activity                                                                                                |
+| ----------- | ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 9:00–12:00  | DSA                             | 1 weakness re-solve on 30-min clock                                                                     |
+| 12:00–13:00 | System Design                   | Alex Xu Vol 2 chapter                                                                                   |
+| 13:00–14:00 | Lunch + walk                    | Off-screen                                                                                              |
+| 14:00–15:00 | **Recall (anchored, 1 hr)**     | Recall queue drain + this-week's-hardest section in `today.md` (Phase 8: + random retention check).     |
+| 15:00–18:00 | **Behavioral Intensive (3 hr)** | Story drafting / refinement, recording + listen-back, 5-story drill (60-sec → 90-sec → 3-min versions). |
+| 18:00       | Done                            |                                                                                                         |
 
 ### Sundays — OFF (all phases)
 
@@ -137,15 +137,15 @@ Four layers, four different jobs:
 
 **Daily hardest re-solve (~30 min, start of morning Recall block):** yesterday's hardest, from a blank file. Mistake-driven (not pattern-coverage). Slot is in every day's Recall block.
 
-**This week's hardest (Saturday morning, Recall block):** open `prep-data/today.md` — Saturday's render adds a `## This week's hardest — your pick` section automatically. Pick 2-3 problems you flagged hardest from your Mon-Fri "today's hardest" notes, write their canonical names into the empty bullets, re-solve from blank file, tick to log a touch.
+**This week's hardest (Saturday morning, Recall block):** open `today.md` — Saturday's render adds a `## This week's hardest — your pick` section automatically. Pick 2-3 problems you flagged hardest from your Mon-Fri "today's hardest" notes, write their canonical names into the empty bullets, re-solve from blank file, tick to log a touch.
 
-**Recall queue (morning Recall block, every working day):** snapshot-mode SM-2 lite queue rendered into `prep-data/today.md` by `recall_engine`. Frozen at morning recompute time; clicking checkboxes does not reshuffle.
+**Recall queue (morning Recall block, every working day):** snapshot-mode SM-2 lite queue rendered into `today.md` by `recall_engine`. Frozen at morning recompute time; clicking checkboxes does not reshuffle.
 
 ### How the Recall queue works
 
 - An append-only JSONL ledger at `prep-data/completions.jsonl` records every (problem, date) touch.
 - The engine aggregates the ledger by problem → `(touch_count, latest_date)`, applies SM-2 lite to compute a due date, and ranks items most-overdue first (capped at 10).
-- During the morning Recall block: open `prep-data/today.md`, drain Recall top-down at standard times (Easy 20 min · Medium 40 min · Hard 90 min) until the block ends. Whatever doesn't get done is folded into tomorrow's queue with higher overdue-ness — no manual rescheduling.
+- During the morning Recall block: open `today.md`, drain Recall top-down at standard times (Easy 20 min · Medium 40 min · Hard 90 min) until the block ends. Whatever doesn't get done is folded into tomorrow's queue with higher overdue-ness — no manual rescheduling.
 - Snapshot mode means the visible list is fixed for the day. Manual `prep recompute` regenerates it any time (e.g., if you forgot to tick yesterday's items).
 
 ### Intervals (SM-2 lite)
