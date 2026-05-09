@@ -1,7 +1,7 @@
 # Curriculum
 
 _The master list — DSA + System Design + Mocks + Behavioral. Tick boxes here OR in_
-_`prep-data/today.md` — `prep recompute` keeps both in sync._
+_`today.md` — `prep recompute` keeps both in sync._
 
 ## Legend
 
@@ -335,7 +335,7 @@ _`prep-data/today.md` — `prep recompute` keeps both in sync._
 
 ## System Design
 
-_Read in order. Tick a box here or in `prep-data/today.md`._
+_Read in order. Tick a box here or in `today.md`._
 
 - [ ] [axu1-1] Alex Xu Vol 1 · Ch 1 — Scale from Zero to Millions
 - [ ] [axu1-2] Alex Xu Vol 1 · Ch 2 — Back-of-envelope estimation

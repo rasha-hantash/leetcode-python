@@ -1629,7 +1629,7 @@ def cli() -> None:
 @click.option(
     "--today-md",
     type=click.Path(dir_okay=False, path_type=Path),
-    default=Path("prep-data/today.md"),
+    default=Path("today.md"),
     show_default=True,
     help="Generated daily list. Overwritten on every recompute.",
 )
