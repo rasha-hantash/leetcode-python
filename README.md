@@ -23,12 +23,26 @@ Run `uv run prep recompute` any time. It scans `today.md` for new `✅` stamps, 
 **Each recompute call:**
 
 1. Reads `today.md`, finds checked-and-dated lines, appends them to the ledger (deduped by `(problem, date)` so reruns are safe).
-2. Reads `curriculum.md`'s DSA tick state. New ticks → log a touch dated today. Unticks → purge ledger entries (warned; preview with `--dry-run`).
+2. Reads `curriculum.md`'s DSA sub-bullet state. Each ticked sub-bullet `- [x] ✅ YYYY-MM-DD` is one logged touch. New sub-bullets (or hand-typed backdated ones) → log a touch on that date. Removed sub-bullets → purge that specific `(problem, date)` from the ledger. Other touches preserved. Removing every sub-bullet for a problem is the destructive "full purge" path (warned on stderr; preview with `--dry-run`).
 3. Aggregates the ledger by problem → `(touch_count, latest_date)`.
 4. Computes due-ness with SM-2 lite (table below). Items at or past their due date go into Recall, sorted most-overdue first, capped at 10.
 5. Picks `phase.new_per_day` never-touched problems from the current phase in `curriculum.md`, ordered by source-rank → difficulty → document order.
-6. Atomically writes `curriculum.md` so DSA boxes match the ledger and mock state reflects today.md edits.
+6. Atomically writes `curriculum.md` — re-renders every DSA problem with the new counter (`· N/5`), `(next due DATE)` / `(overdue Nd)` annotation, and one ticked sub-bullet per logged touch + empty padding to 5 slots.
 7. Rewrites `today.md`.
+
+**DSA visual format in `curriculum.md`:** each problem is rendered as a parent line with up to 5 sub-bullet "mastery slots":
+
+```markdown
+- Two Sum (E) · 4/5 (next due 2026-06-25)
+  - [x] ✅ 2026-05-11
+  - [x] ✅ 2026-05-14
+  - [x] ✅ 2026-05-21
+  - [x] ✅ 2026-06-04
+  - [ ]
+- 3Sum (M) · 0/5
+```
+
+Each `[x]` = one logged touch. Empty `[ ]` = padding to 5 slots so the visible box count matches the `X/5` counter. Untouched problems render with no sub-bullets. After 5 touches, the counter saturates at `5/5`; additional touches still render (no truncation), so full history is preserved. Tick an empty padding slot in Obsidian → the Tasks plugin auto-stamps today's date → the next recompute logs the touch. To log a forgotten solve, hand-type `- [x] ✅ 2026-04-15` under the parent — the engine accepts backdated dates. Malformed dates are skipped with a stderr warning, never silently dropped.
 
 **Intervals (SM-2 lite):**
 
