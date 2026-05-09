@@ -270,9 +270,7 @@ class RecomputeResult:
 
 
 def interval_for(touches: int) -> int:
-    """Days from last touch to next due. Past the table, the interval saturates."""
-    if touches < 1:
-        raise ValueError(f"touches must be >= 1, got {touches}")
+    """Days from last touch to next due. Saturates at the last entry."""
     return INTERVALS_DAYS[min(touches, len(INTERVALS_DAYS)) - 1]
 
 
@@ -281,7 +279,7 @@ def due_date(touches: int, last_touched: date) -> date:
 
 
 def overdue_days(touches: int, last_touched: date, today: date) -> int:
-    """Positive = past due. Zero = exactly due today. Negative = not yet due."""
+    """Positive = past due. Zero = exactly due. Negative = not yet due."""
     return (today - due_date(touches, last_touched)).days
 
 
@@ -289,44 +287,33 @@ def overdue_days(touches: int, last_touched: date, today: date) -> int:
 
 
 def start_date(ledger: list[Touch]) -> date | None:
-    """The earliest touch in the ledger, or None if the ledger is empty.
-
-    This anchors Day 1 to the first DSA completion — friend-portable and
-    independent of any pre-configured calendar."""
+    """Earliest touch in the ledger; None if empty. Anchors Day 1."""
     return min((t.on for t in ledger), default=None)
 
 
 def day_n_for(today: date, start: date) -> int:
-    """Day number relative to the user's first touch. start_date itself is Day 1."""
+    """Day number relative to start. start_date itself is Day 1."""
     return (today - start).days + 1
 
 
 def phase_for(
     day_n: int, phases: list[CurriculumPhase]
 ) -> CurriculumPhase | None:
-    """Find the curriculum phase containing the given day number, or None
-    if the day falls outside every phase's range (e.g., past Day 90)."""
-    for phase in phases:
-        if phase.days_start <= day_n <= phase.days_end:
-            return phase
-    return None
+    """The phase containing `day_n`, or None if it falls outside all phases."""
+    return next(
+        (p for p in phases if p.days_start <= day_n <= p.days_end), None
+    )
 
 
 # ─── Pace projection ─────────────────────────────────────────────────────────
 
 
 def avg_new_per_day(ledger: list[Touch], today: date) -> float | None:
-    """Cumulative rate of distinct problems acquired per day, anchored to
-    the ledger's start_date. Returns None if the ledger is empty.
-
-    Uses cumulative average from Day 1 — recomputed on every recompute call,
-    so the projection self-corrects as more data accrues."""
+    """Distinct problems per day since start_date. None if ledger is empty."""
     start = start_date(ledger)
     if start is None:
         return None
-    distinct = {t.problem for t in ledger}
-    days_elapsed = day_n_for(today, start)
-    return len(distinct) / days_elapsed
+    return len({t.problem for t in ledger}) / day_n_for(today, start)
 
 
 def projected_end_date(
@@ -334,19 +321,16 @@ def projected_end_date(
     curriculum: list[Problem],
     today: date,
 ) -> date | None:
-    """Projected calendar date when every curriculum problem will have ≥1 touch,
-    based on the user's cumulative pace. Returns None when no projection is
-    possible (empty ledger, or pace is zero); returns `today` if the curriculum
-    is already fully touched."""
+    """Calendar date when every curriculum problem has ≥1 touch at current pace.
+    None if the ledger is empty; `today` if curriculum is already complete."""
     rate = avg_new_per_day(ledger, today)
-    if rate is None or rate <= 0:
+    if not rate:
         return None
     touched = {t.problem for t in ledger}
     untouched = sum(1 for p in curriculum if p.text not in touched)
     if untouched == 0:
         return today
-    days_remaining = math.ceil(untouched / rate)
-    return today + timedelta(days=days_remaining)
+    return today + timedelta(days=math.ceil(untouched / rate))
 
 
 # ─── Touch aggregation ───────────────────────────────────────────────────────
