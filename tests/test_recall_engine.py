@@ -6,6 +6,7 @@ a user-visible behavior of the snapshot-mode SM-2 lite recall queue.
 
 from __future__ import annotations
 
+import json
 from datetime import date
 from pathlib import Path
 
@@ -43,7 +44,9 @@ from recall_engine import (
     parse_sd_chapters,
     parse_completions,
     parse_curriculum,
+    parse_curriculum_dsa_state,
     parse_phases,
+    write_curriculum_dsa,
     write_curriculum_mocks,
     projected_end_date,
     recompute,
@@ -2057,3 +2060,134 @@ def test_time_blocks_shift_sd_when_today_is_a_mock_day() -> None:
     assert "14:00–16:00 Mock" in blocks
     assert "16:00–17:30 System Design" in blocks
     assert "17:30–19:30 DSA New" in blocks
+
+
+# ─── DSA bidirectional sync (curriculum.md ↔ ledger) ─────────────────────────
+
+
+def _dsa_md(*, two_sum_checked: bool = False) -> str:
+    box = "x" if two_sum_checked else " "
+    return (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        f"#### Arrays & Hashing\n\n- [{box}] Two Sum (E)\n"
+    )
+
+
+def test_parse_curriculum_dsa_state_returns_checked_state_per_problem() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- [x] Two Sum (E)\n- [ ] 3Sum (M)\n"
+    )
+    state = parse_curriculum_dsa_state(md)
+    assert state == {
+        "[Arrays & Hashing] -> Two Sum": True,
+        "[Arrays & Hashing] -> 3Sum": False,
+    }
+
+
+def test_recompute_logs_curriculum_md_dsa_tick_as_a_ledger_touch(
+    tmp_path: Path,
+) -> None:
+    """User ticks `[x] Two Sum` directly in curriculum.md → recompute appends a touch."""
+    daily_md = tmp_path / "curriculum.md"
+    daily_md.write_text(_dsa_md(two_sum_checked=True))
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
+    touches = [json.loads(l) for l in ledger.read_text().splitlines() if l]
+    assert any(t["problem"] == "[Arrays & Hashing] -> Two Sum" for t in touches)
+
+
+def test_recompute_purges_ledger_when_curriculum_md_dsa_box_is_unchecked(
+    tmp_path: Path,
+) -> None:
+    """User unchecks a previously-touched box in curriculum.md → ledger entries
+    for that problem are removed (destructive, with a warning)."""
+    daily_md = tmp_path / "curriculum.md"
+    # Two problems: one ticked (so this isn't pristine all-unchecked → migration
+    # safeguard doesn't apply), one unticked but in the ledger.
+    daily_md.write_text(
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
+        "- [x] Two Sum (E)\n- [ ] Group Anagrams (M)\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    ledger.write_text(
+        '{"problem": "[Arrays & Hashing] -> Group Anagrams", "on": "2026-05-09"}\n'
+    )
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
+    remaining = ledger.read_text()
+    assert "Group Anagrams" not in remaining
+
+
+def test_recompute_dry_run_does_not_purge_ledger(tmp_path: Path) -> None:
+    """`dry_run=True` must not mutate the ledger when a curriculum.md uncheck
+    would otherwise be destructive."""
+    daily_md = tmp_path / "curriculum.md"
+    daily_md.write_text(
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
+        "- [x] Two Sum (E)\n- [ ] Group Anagrams (M)\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    original = '{"problem": "[Arrays & Hashing] -> Group Anagrams", "on": "2026-05-09"}\n'
+    ledger.write_text(original)
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11), dry_run=True)
+    assert ledger.read_text() == original
+
+
+def test_recompute_skips_purge_on_pristine_all_unchecked_curriculum_migration(
+    tmp_path: Path,
+) -> None:
+    """Migration safeguard: when curriculum.md is freshly restructured (every
+    DSA box unticked) but the ledger has entries, treat as a migration. Don't
+    purge — recompute's render pass re-syncs the ticks from the ledger."""
+    daily_md = tmp_path / "curriculum.md"
+    daily_md.write_text(
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
+        "- [ ] Two Sum (E)\n"
+    )
+    today_md = tmp_path / "today.md"
+    ledger = tmp_path / "completions.jsonl"
+    ledger.write_text(
+        '{"problem": "[Arrays & Hashing] -> Two Sum", "on": "2026-05-09"}\n'
+    )
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
+    # Ledger preserved
+    assert "Two Sum" in ledger.read_text()
+    # curriculum.md re-synced to show the touch
+    assert "- [x] Two Sum (E) ✅ 2026-05-09" in daily_md.read_text()
+
+
+def test_write_curriculum_dsa_marks_touched_problems_with_latest_date() -> None:
+    md = _dsa_md(two_sum_checked=False)
+    ledger = [
+        Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 9)),
+        Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11)),
+    ]
+    out = write_curriculum_dsa(md, ledger)
+    assert "- [x] Two Sum (E) ✅ 2026-05-11" in out
+
+
+def test_write_curriculum_dsa_clears_stamp_on_untouched_problem() -> None:
+    """Re-rendering DSA from a ledger that no longer has a problem strips
+    its stale ✅ stamp (consistent with uncheck-as-purge)."""
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n- [x] Two Sum (E) ✅ 2026-05-08\n"
+    )
+    out = write_curriculum_dsa(md, ledger=[])
+    assert "- [ ] Two Sum (E)" in out
+    assert "✅" not in out
+
+
+def test_recompute_writes_back_curriculum_md_to_match_ledger(tmp_path: Path) -> None:
+    """After today.md ticks log a touch, curriculum.md's DSA box gets `[x] ✅ DATE`."""
+    daily_md = tmp_path / "curriculum.md"
+    daily_md.write_text(_dsa_md(two_sum_checked=False))
+    today_md = tmp_path / "today.md"
+    today_md.write_text("- [x] [Arrays & Hashing] -> Two Sum ✅ 2026-05-11\n")
+    ledger = tmp_path / "completions.jsonl"
+    recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
+    text = daily_md.read_text()
+    assert "- [x] Two Sum (E) ✅ 2026-05-11" in text
