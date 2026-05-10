@@ -77,7 +77,7 @@ All 194 problems touched. **Zero new acquisition.** The hard study is done — n
 | 14:00–16:00 | System Design (Alex Xu or DDIA chapter) |
 | 16:00–19:00 | Mock interview / real screen            |
 
-_Add a 1-problem retention spot-check (15–20 min, drawn from "solved >14d ago") to the morning when Recall feels light. Anki: ~15 min/day on mobile during downtime — fact-level recall (templates, patterns, gotchas, complexity)._
+_Anki: ~15 min/day on mobile during downtime — fact-level recall (templates, patterns, gotchas, complexity)._
 
 **Saturday schedule — Behavioral Intensive:**
 
@@ -117,16 +117,15 @@ Each `[x]` is a logged touch; `[ ]` is empty padding to 5 slots. Untouched probl
 
 ## Mocks
 
-- Pre-commitment beats willpower — book early-sprint mocks on Day 0
-- ~24 total · weekly through Phase 6 · every-other-day in Phase 7 · daily through Phase 8 (mocks + real screens combined)
+- **Schedule only after prereqs are met.** Each mock carries a `prereq:` clause; the engine evaluates it against ledger state and surfaces met/unmet in `today.md`. Algo mocks gate on E+M count (e.g. `15 E+M`); SD mocks gate on topic-relevant chapter IDs (e.g. `axu1-1, axu1-2, axu1-3, axu1-5, axu1-6, axu1-7, axu1-8` for the URL Shortener mock — foundations + the topic chapter). Both forms are supported by the parser.
+- ~30 mocks total over the sprint. Cadence ramps: weekly through Phase 6 · every-other-day in Phase 7 · ~daily through Phase 8 (mocks + real screens share the afternoon block).
 - State lives in `curriculum.md`'s `## Mocks` section: `pending → scheduled (📅 DATE) → completed (✅ DATE)`
-- Each mock carries a `prereq:` clause (count thresholds like `15 E+M, 2 SD` or specific chapter IDs); the engine evaluates it against ledger state and surfaces met/unmet in `today.md`. **Suggested mocks are unlocked by ledger state, not the calendar.**
 
-**Platforms — algo mocks sequenced by signal quality and cost; SD mocks gated on chapter coverage:**
+**Platforms — algo mocks sequenced by signal quality and cost; SD mocks are Hello Interview only:**
 
 - **Pramp** (free, peer-to-peer · algo) — your "interviewer" is another candidate, so feedback quality varies. Use **first half** to get cheap reps, normalize live coding under another person's eyes, and surface low-hanging weaknesses before paying for stronger feedback.
-- **Interviewing.io** (paid, vetted ex-FAANG interviewers · algo) — higher-fidelity feedback at a price. Use **second half** when you need realistic difficulty and actionable critique closer to real screens, after Pramp has cleared the obvious gaps. Skip for SD — peer/algo platforms can't reliably grade a system design.
-- **Hello Interview** (paid, ex-FAANG SD specialists · SD-only) — curated SD curriculum (Design Twitter / Uber / Top-K, etc.) plus mocks with interviewers who do nothing but SD. **Gate: ≥10 Alex Xu chapters before your first booking** — earlier and you'll discover you can't talk through a design yet, wasting the slot.
+- **Interviewing.io** (paid, vetted ex-FAANG interviewers · algo) — higher-fidelity feedback at a price. Use **second half** when you need realistic difficulty and actionable critique closer to real screens, after Pramp has cleared the obvious gaps. Skip for SD — algo-focused platforms can't reliably grade a system design.
+- **Hello Interview** (paid, ex-FAANG SD specialists · SD-only) — curated SD curriculum (Design Twitter / URL Shortener / etc.) plus mocks with interviewers who do nothing but SD. Each booking gates on topic-relevant chapters: SD foundations (`axu1-1..3`) + the chapter for the specific design problem. See the per-mock `prereq:` in `curriculum.md`.
 
 ## Setup (one-time, ~4 hr)
 

@@ -389,11 +389,11 @@ _Read in order. Tick a box here or in `today.md`._
 
 _Edit `📅 DATE` to schedule. Tick to complete (Tasks plugin auto-stamps ✅)._
 
-- [ ] [mock-1] Pramp · Arrays & Hashing · _pending_ · [book](https://www.pramp.com/dashboard/upcoming-sessions) · prereq: 15 E+M, 2 SD
-- [ ] [mock-2] Interviewing.io · Trees · 📅 2026-05-20 · [book](https://interviewing.io/dashboard) · prereq: 25 E+M, axu1-4, axu1-5, axu1-6
+- [ ] [mock-1] Pramp · Arrays & Hashing · _pending_ · [book](https://www.pramp.com/dashboard/upcoming-sessions) · prereq: 15 E+M
+- [ ] [mock-2] Interviewing.io · Trees · 📅 2026-05-20 · [book](https://interviewing.io/dashboard) · prereq: 25 E+M
 - [x] [mock-3] Pramp · DP · ✅ 2026-05-08 · note: Weak on memoization — practice top-down vs bottom-up
-- [ ] [mock-4] Hello Interview · Design URL Shortener · _pending_ · [book](https://www.hellointerview.com/mock-interviews) · prereq: 10 SD
-- [ ] [mock-5] Hello Interview · Design Twitter · _pending_ · [book](https://www.hellointerview.com/mock-interviews) · prereq: 50 E+M, 16 SD
+- [ ] [mock-4] Hello Interview · Design URL Shortener · _pending_ · [book](https://www.hellointerview.com/mock-interviews) · prereq: axu1-1, axu1-2, axu1-3, axu1-5, axu1-6, axu1-7, axu1-8
+- [ ] [mock-5] Hello Interview · Design Twitter · _pending_ · [book](https://www.hellointerview.com/mock-interviews) · prereq: axu1-1, axu1-2, axu1-3, axu1-5, axu1-6, axu1-10, axu1-11
 
 ## Behavioral
 
