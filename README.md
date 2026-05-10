@@ -2,7 +2,8 @@
 
 A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **One master file** (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral; a snapshot-mode SM-2 lite engine regenerates `today.md` each morning, and you drain it.
 
-- **Window:** Mon May 11 – Sat Aug 8, 2026 · ~77 working days · 9 hr/day ceiling
+- **Day 1 – Day 45** — all 164 Easy/Medium NC/LC problems solved (Phases 1–6 → Fallback-ready)
+- **Day 1 – Day 60** — all 194 DSA problems solved (Phase 7 Hards added → ready for hard-tier screens)
 - **Coverage:** 194 DSA problems = 150 canonical NC150 + 44 extras (21 NC-150+, 15 LC-only, 8 company-asked) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~24 mocks · ~10 behavioral stories
 
 ## Sequencing
