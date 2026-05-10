@@ -1,6 +1,6 @@
 # Interview Prep
 
-A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **One master file** (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral; a snapshot-mode SM-2 lite engine regenerates `today.md` each morning, and you drain it.
+A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **One master file** (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral; a snapshot-mode SM-2 lite engine (SuperMemo-2 spaced-repetition, simplified to fixed intervals — see _Spaced repetition_ below) regenerates `today.md` each morning, and you drain it.
 
 - **Day 1 – Day 45** — all 164 Easy/Medium NC/LC problems solved (Phases 1–6 → Fallback-ready)
 - **Day 1 – Day 60** — all 194 DSA problems solved (Phase 7 Hards added → ready for hard-tier screens)
@@ -10,7 +10,7 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
 
 - Easies before Mediums within each pattern
 - E+M before Hards across patterns; **no Hards until phase 7**
-- Phases: 1–6 (E+M acquisition) → 7 (Hards) → 8+ (reinforcement / interview mode)
+- Phases: 1–6 (E+M acquisition) → 7 (Hards) → 8 (Fallback-ready Reinforcement) → 9 (Target-ready Mock-heavy) → 10 (Interview Mode). Phases 1–7 advance by problem-count budgets; Phases 8–10 have **no new acquisition** and advance by readiness tier (ledger-gated, not calendar-gated).
 - Engine picks the lowest-numbered phase with eligible untouched problems
 - Phase budgets live in `curriculum.md`'s `### Phase N — Name (X new/day)` headings; edit if your retention diagnostic says so. **Chronically behind (1+ week of slip)?** Drop the budget by 1/day for the rest of the phase.
 
@@ -23,6 +23,8 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
 **Recall always wins over New.** Recall is knowledge you've already paid for, decaying on an exponential curve — skip a day and the cost compounds (you re-learn from scratch). New is just deferred scope; nothing degrades. When the day runs short, drain **all** of Recall first; let New slip into tomorrow. If even Recall is too long for the morning block, get partway down it — the most-overdue items are at the top, so partial draining still rescues the highest-priority knowledge.
 
 **Why split Recall and New?** Spaced retrieval (Recall) fights Ebbinghaus's forgetting curve — each gap between reviews is a "desirable difficulty" (Bjork) that strengthens the memory trace more than tight clustering would. Blocked acquisition (New, one pattern at a time) keeps working memory focused on first exposure; interleaving belongs to retention, not initial learning. **Acquire blocked, retain spaced.**
+
+**Where Anki fits.** The SM-2 queue in `today.md` handles **problem-level** spaced retrieval. Anki handles **fact-level** retrieval — code templates, pattern cues, Python gotchas, complexity tables (the four decks under `anki/`). Same Ebbinghaus/Bjork foundation, different granularity. Anki stays out of Phases 1–7 on purpose: first-exposure acquisition already saturates working memory, and stacking fact drills on top would crowd out the pattern you're trying to internalize. From **Phase 8 onward** acquisition is done, so Anki joins the daily mix to keep fact-level recall alive while the SM-2 queue keeps problem-level recall alive.
 
 _Mock-week pivot: if a scheduled mock needs an uncovered pattern, prioritize that pattern over Recall for one day._
 
@@ -46,17 +48,18 @@ _Mock days: afternoon shifts to `14:00–16:00 mock + 16:00–17:30 SD + 17:30�
 
 Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budget). Hards take longer to acquire — give each one the full 90 min that the Recall budget reserves for H, even on first solve.
 
-### Reinforcement Window (Fallback-ready) — application gate · M–F
+### Phase 8 — Reinforcement Window (Fallback-ready) · M–F
 
-- Zero new acquisition; every problem already touched (curriculum phases 1–7 done)
+- Zero new acquisition; every problem already touched (curriculum phases 1–7 done). This is the **application gate**: start submitting to fallback-tier companies.
 - Morning is all Recall
-- Afternoon: extra mocks + behavioral story practice + fallback-tier company applications
+- Afternoon: extra mocks + behavioral story practice + fallback-tier company applications (the safety-net rung — companies you'd accept an offer from if higher tiers don't pan out)
+- **Anki joins here** (~15 min/day) — fact-level cards complement the SM-2 problem queue (see _Where Anki fits_ above)
 
-### Mock-heavy Reinforcement (Target-ready) · M–F
+### Phase 9 — Mock-heavy Reinforcement (Target-ready) · M–F
 
 - Mornings: real-clock re-solve + Pythonic refactor + Recall
 - Afternoons: real screens / paid mocks; SD anchored on DDIA Ch 8–9 deep-dives
-- Daily STAR story drill; Anki sustains spaced-recall outside the morning block
+- Daily STAR (Situation / Task / Action / Result) story drill; Anki sustains spaced-recall outside the morning block
 
 | Time        | Block                                                    |
 | ----------- | -------------------------------------------------------- |
@@ -68,7 +71,7 @@ Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budg
 
 _Mid-Mock-heavy onward: add a 1-problem random retention check (15–20 min, ~20% E / 65% M / 15% H, drawn from "solved >14d ago") to the morning block._
 
-### Saturdays during Mock-heavy + Interview — Behavioral Intensive
+### Saturdays during Phases 9–10 — Behavioral Intensive
 
 | Time        | Block                                                                                 |
 | ----------- | ------------------------------------------------------------------------------------- |
@@ -77,7 +80,7 @@ _Mid-Mock-heavy onward: add a 1-problem random retention check (15–20 min, ~20
 | 14:00–15:00 | Recall (anchored, 1 hr) + this-week's-hardest section                                 |
 | 15:00–18:00 | Behavioral Intensive — story drafting + recording + 5-story drill (60s → 90s → 3-min) |
 
-### Interview Mode (when real screens start) · M–F
+### Phase 10 — Interview Mode (when real screens start) · M–F
 
 - Mornings simulate real screens (timed, blank file, 1 problem)
 - Afternoons are real interviews or paid mocks
@@ -120,7 +123,7 @@ Each `[x]` is a logged touch; `[ ]` is empty padding to 5 slots. Untouched probl
 
 - Pre-commitment beats willpower — book early-sprint mocks on Day 0
 - Pramp (free, peer) for first half; Interviewing.io (paid, mid/late) for second
-- ~24 total · weekly cadence in phases 1–5 · every-other-day in phases 7–8
+- ~24 total · weekly cadence in Phases 1–6 (acquisition) · every-other-day from Phase 7 (Hards) through Phase 9 (Mock-heavy) · daily in Phase 10 (real interviews)
 - State lives in `curriculum.md`'s `## Mocks` section: `pending → scheduled (📅 DATE) → completed (✅ DATE)`
 - Each mock can carry a `prereq:` clause (count thresholds like `15 E+M, 2 SD` or specific chapter IDs); the engine surfaces met/unmet status in `today.md`
 
@@ -147,7 +150,7 @@ launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
 
 Logs land in `~/Library/Logs/recall-engine.log`. The Mac must be awake at 8:30 to fire; if it sleeps through, run `uv run prep recompute` manually whenever you wake up.
 
-**Anki (~10–25 min/day, mobile during downtime):** four decks under `anki/` — code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total. NOT for full problem re-solves — those live in Obsidian.
+**Anki (~10–25 min/day, mobile during downtime, Phase 8 onward):** four decks under `anki/` — code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total. Handles **fact-level** spaced repetition (distinct from `today.md`'s SM-2 queue, which handles problem-level). NOT for full problem re-solves — those live in Obsidian. Rationale for the late entry: see _Where Anki fits_ in Daily flow.
 
 **Books:** DDIA (Ch 5–9), Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7), Fluent Python (Sunday reading). Index DDIA + Alex Xu in `technical-rag` MCP for fast lookup.
 
