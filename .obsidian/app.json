@@ -1,8 +1,0 @@
-{
-  "userIgnoreFilters": [
-    "neetcode_prep.egg-info/",
-    ".venv/",
-    "__pycache__/",
-    ".git/"
-  ]
-}
