@@ -10,11 +10,13 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
 
 - Easies before Mediums within each pattern
 - E+M before Hards across patterns; **no Hards until phase 7**
-- Phases: 1–6 (E+M acquisition) → 7 (Hards; applications begin when Fallback-ready triggers) → 8 (Post-Acquisition with three internal bands: Decompression → Mock-heavy → Interview). Phases 1–7 advance by problem-count budgets; Phase 8 has no new acquisition and bands escalate by readiness state + external calendar, not problem count. The engine parks on Phase 7 once all problems are touched — Phase 8 band advancement is your call, not the engine's.
-- Engine picks the lowest-numbered phase with eligible untouched problems
-- Phase budgets live in `curriculum.md`'s `### Phase N — Name (X new/day)` headings; edit if your retention diagnostic says so. **Chronically behind (1+ week of slip)?** Drop the budget by 1/day for the rest of the phase.
+- **Phases:**
+  - **1–6** — E+M acquisition (Easies + Mediums, blocked by pattern)
+  - **7** — Hards. **Start applying to new roles / jobs here.**
+  - **8** — Post-Acquisition (zero new problems; bands: Decompression → Mock-heavy → Interview)
+- Phases 1–7 advance by problem-count budgets; the engine picks the lowest-numbered phase with eligible untouched problems. The engine parks on Phase 7 once all problems are touched — Phase 8 band advancement is your call, not the engine's.
 
-**Everything is ledger-driven, not calendar-driven.** Phase advancement, the Recall queue, and **application-readiness gates** (Fallback / Target / Stretch — surfaced in `today.md`'s readiness banner) all fire from ledger state. Mock dates booked on the calendar are user bookkeeping; the engine counts _completed_ mocks toward Target-ready, not their dates.
+**Everything is ledger-driven, not calendar-driven.** Phase advancement, the Recall queue, and **mock interview unlocks** (each mock's `prereq:` clause is checked against ledger state and surfaced as met/unmet in `today.md`) all fire from ledger state.
 
 **Application timing — keyed to readiness tiers, not phases:**
 
@@ -52,7 +54,7 @@ _Mock days: afternoon shifts to `14:00–16:00 mock + 16:00–17:30 SD + 17:30�
 
 ### Phase 7 — Hards · M–F
 
-**Start applying here.** Phase 7 begins after all 164 E+M are acquired — Fallback-ready triggers at Day 45. Submit to fallback-tier companies on Day 1 of Phase 7. Hards are mostly an onsite-round signal, not a screen one; the ~15-day Phase 7 run + scheduling buffer gives you time to finish acquiring while early-round screens land on the calendar. Pre-commitment beats willpower — booked screens force the prep to converge.
+**Start applying to new roles / jobs here.** Phase 7 begins after all 164 E+M are acquired — Fallback-ready triggers at Day 45. Submit to fallback-tier companies on Day 1 of Phase 7. Hards are mostly an onsite-round signal, not a screen one; the ~15-day Phase 7 run + scheduling buffer gives you time to finish acquiring while early-round screens land on the calendar. Pre-commitment beats willpower — booked screens force the prep to converge.
 
 Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budget). Hards take longer to acquire — give each one the full 90 min that the Recall budget reserves for H, even on first solve.
 
@@ -69,7 +71,7 @@ All 194 problems touched. **Zero new acquisition.** Same daily skeleton as Acqui
 
 **Bands escalate in order, gated by readiness state + external calendar:**
 
-- **Decompression** — first ~3–7 days (skip entirely if you're already Target-ready when Phase 7 ends). Morning Recall is passive maintenance; mocks are free Pramp peer; apps target fallback-tier. **Anki joins here** (~15 min/day) — fact-level cards complement the SM-2 problem queue (see _Where Anki fits_ above).
+- **Decompression** — first 3–7 days (skip entirely if you're already Target-ready when Phase 7 ends). Morning Recall is passive maintenance; mocks are free Pramp peer; apps target fallback-tier. **Anki joins here** (15 min/day) — fact-level cards complement the SM-2 problem queue (see _Where Anki fits_ above).
 - **Mock-heavy** — Target-ready confirmed (≥20 SD + ≥8 mocks done). Morning Recall extends with a 30-min clock re-solve + Pythonic refactor (rewrite using `Counter`, `defaultdict`, comprehensions, `enumerate`, `zip`, `bisect` — compress code, signal stdlib fluency in screens, double the retrieval value of each re-solve). Afternoon mocks become paid Interviewing.io; SD anchors on DDIA Ch 8–9 deep-dives; daily STAR (Situation / Task / Action / Result) drill replaces casual story practice. Add a 1-problem random retention check (15–20 min, ~20% E / 65% M / 15% H, drawn from "solved >14d ago") to the morning block. Anki sustains.
 - **Interview** — real screens are landing on the calendar. Morning shifts from full Recall drain to a single 1-problem timed mock (blank file) + mock-notes; Recall shrinks to anchored 30 min. Afternoon = whatever the calendar dictates (real screens / paid mocks). Performance over coverage.
 
@@ -115,10 +117,14 @@ Each `[x]` is a logged touch; `[ ]` is empty padding to 5 slots. Untouched probl
 ## Mocks
 
 - Pre-commitment beats willpower — book early-sprint mocks on Day 0
-- Pramp (free, peer) for first half; Interviewing.io (paid, mid/late) for second
 - ~24 total · weekly through Phase 6 · every-other-day in Phase 7 + Phase 8 mock-heavy band · daily in Phase 8 interview band
 - State lives in `curriculum.md`'s `## Mocks` section: `pending → scheduled (📅 DATE) → completed (✅ DATE)`
-- Each mock can carry a `prereq:` clause (count thresholds like `15 E+M, 2 SD` or specific chapter IDs); the engine surfaces met/unmet status in `today.md`
+- Each mock carries a `prereq:` clause (count thresholds like `15 E+M, 2 SD` or specific chapter IDs); the engine evaluates it against ledger state and surfaces met/unmet in `today.md`. **Suggested mocks are unlocked by ledger state, not the calendar.**
+
+**Platforms — sequenced by signal quality and cost:**
+
+- **Pramp** (free, peer-to-peer) — your "interviewer" is another candidate, so feedback quality varies. Use **first half** to get cheap reps, normalize live coding under another person's eyes, and surface low-hanging weaknesses before paying for stronger feedback.
+- **Interviewing.io** (paid, vetted ex-FAANG interviewers) — higher-fidelity feedback at a price. Use **second half** when you need realistic difficulty and actionable critique closer to real screens, after Pramp has cleared the obvious gaps.
 
 ## Setup (one-time, ~4 hr)
 
