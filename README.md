@@ -13,11 +13,11 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
 - **Phases:**
   - **1–6** — E+M acquisition (Easies + Mediums, blocked by pattern)
   - **7** — Hards. **Start applying to new roles / jobs here.**
-  - **8** — Post-Acquisition (zero new problems; bands: Decompression → Mock-heavy → Interview)
+  - **8** — Post-Acquisition (zero new problems; daily Recall + SD + mocks/real screens · behavioral on Saturdays)
 
 **Everything is ledger-driven, not calendar-driven.** Phase advancement, the Recall queue, and **mock interview unlocks** (each mock's `prereq:` clause is checked against ledger state and surfaced as met/unmet in `today.md`) all fire from ledger state.
 
-**When to apply:** Phase 7 onward — start with safety-net companies on Day 45. Open up to target companies once you hit the Phase 8 Mock-heavy band, and dream / aspirational picks once you're in the Interview band. (See Phase 8 sections below for trigger conditions.)
+**When to apply:** Phase 7 onward — start with safety-net companies on Day 45. Sweep up the tiers as Phase 8 progresses: target companies once paid mocks are landing, dream / aspirational picks once real screens are on the calendar.
 
 ## Daily flow
 
@@ -67,35 +67,24 @@ Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budg
 
 ### Phase 8 — Post-Acquisition · Mon–Sat
 
-All 194 problems touched. **Zero new acquisition.** Three bands escalate in order; each column in the table below is one band.
+All 194 problems touched. **Zero new acquisition.** The hard study is done — now you're converting knowledge into performance: Recall to keep DSA sharp, a daily SD chapter, and mocks (or real screens) to drill live execution. Behavioral moves to Saturdays only.
 
-- **Decompression** — _first 3–7 days of Phase 8_
-- **Mock-heavy** — _trigger: ≥20 SD chapters + ≥8 mocks done_
-- **Interview** — _trigger: real screens landing on the calendar_
+**Mon–Fri schedule:**
 
-**Mon–Fri schedule (read columns left-to-right as you escalate through the bands):**
+| Time        | Block                                   |
+| ----------- | --------------------------------------- |
+| 9:00–13:00  | Recall                                  |
+| 14:00–16:00 | System Design (Alex Xu or DDIA chapter) |
+| 16:00–19:00 | Mock interview / real screen            |
 
-| Block (time)                                | Decompression                     | Mock-heavy                                                               | Interview                                                             |
-| ------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| **Recall** (9:00–13:00)                     | Passive maintenance, no extras    | + 30-min timed re-solve + Pythonic refactor¹ + retention spot-check²     | Shrinks: 1 timed mock (blank file, no notes) + 30 min anchored Recall |
-| **SD** (14:00–15:30)                        | Today's chapter from `today.md`   | DDIA Ch 8–9 deep-dives                                                   | Per calendar                                                          |
-| **Mocks / Behavioral / Apps** (15:30–18:00) | Free Pramp peer · safety-net apps | Paid Interviewing.io / Hello Interview · daily STAR drill³ · target apps | Real screens / paid mocks · dream apps                                |
-| **Anki** (18:00–19:00)                      | **Joins here** · 15 min/day       | Sustains                                                                 | Sustains                                                              |
+_Add a 1-problem retention spot-check (15–20 min, drawn from "solved >14d ago") to the morning when Recall feels light. Anki: ~15 min/day on mobile during downtime — fact-level recall (templates, patterns, gotchas, complexity)._
 
-¹ _Pythonic refactor: rewrite using `Counter`, `defaultdict`, comprehensions, `enumerate`, `zip`, `bisect`. Doubles each re-solve's value (memory + stdlib fluency)._
-² _Retention spot-check: 1 random problem (15–20 min, drawn from "solved >14d ago")._
-³ _STAR drill: Situation / Task / Action / Result — replaces casual story practice._
-
-Interview-band ethos: **performance over coverage** — you've already drilled the volume.
-
-**Saturday schedule (Mock-heavy / Interview bands — Behavioral Intensive):**
-
-_Decompression-band Saturdays inherit the Phase 1–7 Saturday format above._
+**Saturday schedule — Behavioral Intensive:**
 
 | Time        | Block                                                                                  |
 | ----------- | -------------------------------------------------------------------------------------- |
 | 9:00–12:00  | Recall (anchored) + this-week's-hardest sub-block (weakness re-solves on 30-min clock) |
-| 12:00–13:00 | SD — Alex Xu Vol 2 chapter                                                             |
+| 12:00–13:00 | SD — Alex Xu or DDIA chapter                                                           |
 | 14:00–17:00 | Behavioral Intensive — story drafting + recording + 5-story drill (60s → 90s → 3-min)  |
 
 ## Spaced repetition (SM-2 lite)
@@ -129,7 +118,7 @@ Each `[x]` is a logged touch; `[ ]` is empty padding to 5 slots. Untouched probl
 ## Mocks
 
 - Pre-commitment beats willpower — book early-sprint mocks on Day 0
-- ~24 total · weekly through Phase 6 · every-other-day in Phase 7 + Phase 8 mock-heavy band · daily in Phase 8 interview band
+- ~24 total · weekly through Phase 6 · every-other-day in Phase 7 · daily through Phase 8 (mocks + real screens combined)
 - State lives in `curriculum.md`'s `## Mocks` section: `pending → scheduled (📅 DATE) → completed (✅ DATE)`
 - Each mock carries a `prereq:` clause (count thresholds like `15 E+M, 2 SD` or specific chapter IDs); the engine evaluates it against ledger state and surfaces met/unmet in `today.md`. **Suggested mocks are unlocked by ledger state, not the calendar.**
 
@@ -208,7 +197,7 @@ Test names ARE the spec — read them top to bottom for a complete description o
 - **Touch** — one successful (re-)solve event. One line in `completions.jsonl`.
 - **Recall** — the most-overdue 10 items in `today.md`, frozen at recompute time.
 - **New** — the next `phase.new_per_day` never-touched problems from the current phase.
-- **Phase** — one entry in `curriculum.md`'s `### Phase N — Name (X new/day)` headings (Phases 1–7). Advancement is ledger-driven via the engine's `current_phase`. Phase 8 is README-only (post-acquisition; no engine-tracked budget); the engine parks on Phase 7 once all problems are touched, and Phase 8's bands escalate manually.
+- **Phase** — one entry in `curriculum.md`'s `### Phase N — Name (X new/day)` headings (Phases 1–7). Advancement is ledger-driven via the engine's `current_phase`. Phase 8 is README-only (post-acquisition; no engine-tracked budget); the engine parks on Phase 7 once all problems are touched.
 - **NC-150+** — problems outside NeetCode's canonical 150 list but **inside** NeetCode's full 450-problem dataset (links to neetcode.io). **21 in the curriculum** — gap-fillers from the NC450 coverage analysis (minimax DP, prefix sum + hashmap, cyclic sort, etc — see `coverage-analysis.md`) plus selected heavy patterns (Segment Tree, Bitmask DP, Sweep Line). Distributed by difficulty across phases 1–7 — Es and Ms in their pattern's natural phase, Hs in Phase 7.
 - **LC-only** — problems outside NeetCode's full 450 entirely (links to leetcode.com). **15 in the curriculum** — popular interview practice in two flavors: (1) the **String Transformation** cluster (Valid Word Abbreviation, String Compression, Basic Calculator II, atoi, Count Binary Substrings) which NeetCode underrepresents, and (2) heavy-pattern coverage NeetCode doesn't curate at all (Segment Tree, Sweep Line, BIT, Bitmask DP, Reservoir Sampling, Bit-Trie, Difference Array, Boyer-Moore Majority).
 - **`(variant of: X)` tag** — relationship marker only: "this problem is a follow-up of canonical problem X." Does NOT mean the problem is outside NC150 — most "II" variants (e.g. Combination Sum II, Coin Change II) are themselves on the canonical 150. Combine with `(nc-150+)` or `(lc-only)` for variants that ARE outside it (e.g. Majority Element II is `(lc-only)`).
