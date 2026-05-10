@@ -394,7 +394,7 @@ def current_phase(
 # ─── Parsers ─────────────────────────────────────────────────────────────────
 
 
-_DSA_HEADING = re.compile(r"^##\s+DSA\s*$")
+_DSA_HEADING = re.compile(r"^##\s+(?:DSA|NeetCode\s+150\b.*)\s*$")
 _PHASE_HEADING = re.compile(r"^###\s+Phase\s+(\d+)\s+—\s+(.+?)\s+\((\d+)\s+new/day\)\s*$")
 _PATTERN_SUBHEADING = re.compile(r"^####\s+(.+?)\s*$")
 _OTHER_H2 = re.compile(r"^##\s+(.+?)\s*$")

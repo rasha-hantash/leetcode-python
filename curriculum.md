@@ -13,7 +13,7 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 ---
 
-## DSA
+## NeetCode 150 (+44 extras)
 
 ### Phase 1 — Linear Patterns E+M (5 new/day)
 
