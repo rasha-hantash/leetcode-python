@@ -137,6 +137,7 @@ class PrereqRow:
 _PLATFORM_BOOKING_URLS: dict[str, str] = {
     "Pramp": "https://www.pramp.com/dashboard/upcoming-sessions",
     "Interviewing.io": "https://interviewing.io/dashboard",
+    "Hello Interview": "https://www.hellointerview.com/mock-interviews",
 }
 
 

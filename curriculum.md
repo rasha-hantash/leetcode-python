@@ -392,6 +392,8 @@ _Edit `📅 DATE` to schedule. Tick to complete (Tasks plugin auto-stamps ✅)._
 - [ ] [mock-1] Pramp · Arrays & Hashing · _pending_ · [book](https://www.pramp.com/dashboard/upcoming-sessions) · prereq: 15 E+M, 2 SD
 - [ ] [mock-2] Interviewing.io · Trees · 📅 2026-05-20 · [book](https://interviewing.io/dashboard) · prereq: 25 E+M, axu1-4, axu1-5, axu1-6
 - [x] [mock-3] Pramp · DP · ✅ 2026-05-08 · note: Weak on memoization — practice top-down vs bottom-up
+- [ ] [mock-4] Hello Interview · Design URL Shortener · _pending_ · [book](https://www.hellointerview.com/mock-interviews) · prereq: 10 SD
+- [ ] [mock-5] Hello Interview · Design Twitter · _pending_ · [book](https://www.hellointerview.com/mock-interviews) · prereq: 50 E+M, 16 SD
 
 ## Behavioral
 

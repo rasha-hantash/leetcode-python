@@ -121,10 +121,11 @@ Each `[x]` is a logged touch; `[ ]` is empty padding to 5 slots. Untouched probl
 - State lives in `curriculum.md`'s `## Mocks` section: `pending → scheduled (📅 DATE) → completed (✅ DATE)`
 - Each mock carries a `prereq:` clause (count thresholds like `15 E+M, 2 SD` or specific chapter IDs); the engine evaluates it against ledger state and surfaces met/unmet in `today.md`. **Suggested mocks are unlocked by ledger state, not the calendar.**
 
-**Platforms — sequenced by signal quality and cost:**
+**Platforms — algo mocks sequenced by signal quality and cost; SD mocks gated on chapter coverage:**
 
-- **Pramp** (free, peer-to-peer) — your "interviewer" is another candidate, so feedback quality varies. Use **first half** to get cheap reps, normalize live coding under another person's eyes, and surface low-hanging weaknesses before paying for stronger feedback.
-- **Interviewing.io** (paid, vetted ex-FAANG interviewers) — higher-fidelity feedback at a price. Use **second half** when you need realistic difficulty and actionable critique closer to real screens, after Pramp has cleared the obvious gaps.
+- **Pramp** (free, peer-to-peer · algo) — your "interviewer" is another candidate, so feedback quality varies. Use **first half** to get cheap reps, normalize live coding under another person's eyes, and surface low-hanging weaknesses before paying for stronger feedback.
+- **Interviewing.io** (paid, vetted ex-FAANG interviewers · algo) — higher-fidelity feedback at a price. Use **second half** when you need realistic difficulty and actionable critique closer to real screens, after Pramp has cleared the obvious gaps. Skip for SD — peer/algo platforms can't reliably grade a system design.
+- **Hello Interview** (paid, ex-FAANG SD specialists · SD-only) — curated SD curriculum (Design Twitter / Uber / Top-K, etc.) plus mocks with interviewers who do nothing but SD. **Gate: ≥10 Alex Xu chapters before your first booking** — earlier and you'll discover you can't talk through a design yet, wasting the slot.
 
 ## Setup (one-time, ~4 hr)
 
