@@ -65,45 +65,32 @@ _Engine pre-fills the "this-week's-hardest" sub-block from your weekday hardest 
 
 Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budget). Recall budget for H: **90 min** — give each Hard the full 90 even on first solve.
 
-### Phase 8 — Post-Acquisition · M–F
+### Phase 8 — Post-Acquisition · Mon–Sat
 
-All 194 problems touched. **Zero new acquisition.** Same daily skeleton as Acquisition, minus the DSA New afternoon block — that slot becomes mocks + behavioral + applications. What changes between bands is _intensity_ and _what fills each block_, not the structure.
+All 194 problems touched. **Zero new acquisition.** Three bands escalate in order; each column in the table below is one band.
 
-| Time        | Block                                           |
-| ----------- | ----------------------------------------------- |
-| 9:00–13:00  | Recall drain                                    |
-| 14:00–15:30 | System Design (today's chapter from `today.md`) |
-| 15:30–18:00 | Mocks + behavioral practice + applications      |
-| 18:00–19:00 | Anki                                            |
+- **Decompression** — _first 3–7 days of Phase 8_
+- **Mock-heavy** — _trigger: ≥20 SD chapters + ≥8 mocks done_
+- **Interview** — _trigger: real screens landing on the calendar_
 
-**Three bands — each one layers changes on top of the daily skeleton above. Bands escalate in order:**
+**Mon–Fri schedule (read columns left-to-right as you escalate through the bands):**
 
-**Decompression** — _first 3–7 days of Phase 8._
+| Block (time)                                | Decompression                     | Mock-heavy                                                               | Interview                                                             |
+| ------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| **Recall** (9:00–13:00)                     | Passive maintenance, no extras    | + 30-min timed re-solve + Pythonic refactor¹ + retention spot-check²     | Shrinks: 1 timed mock (blank file, no notes) + 30 min anchored Recall |
+| **SD** (14:00–15:30)                        | Today's chapter from `today.md`   | DDIA Ch 8–9 deep-dives                                                   | Per calendar                                                          |
+| **Mocks / Behavioral / Apps** (15:30–18:00) | Free Pramp peer · safety-net apps | Paid Interviewing.io / Hello Interview · daily STAR drill³ · target apps | Real screens / paid mocks · dream apps                                |
+| **Anki** (18:00–19:00)                      | **Joins here** · 15 min/day       | Sustains                                                                 | Sustains                                                              |
 
-- Morning Recall: passive maintenance, no extras
-- Mocks: free Pramp peer
-- Applications: safety-net companies only
-- **Anki joins here** (15 min/day) — fact-level cards complement the SM-2 problem queue (see _Where Anki fits_ above)
+¹ _Pythonic refactor: rewrite using `Counter`, `defaultdict`, comprehensions, `enumerate`, `zip`, `bisect`. Doubles each re-solve's value (memory + stdlib fluency)._
+² _Retention spot-check: 1 random problem (15–20 min, drawn from "solved >14d ago")._
+³ _STAR drill: Situation / Task / Action / Result — replaces casual story practice._
 
-**Mock-heavy** — _trigger: ≥20 SD chapters + ≥8 mocks done._
+Interview-band ethos: **performance over coverage** — you've already drilled the volume.
 
-- **Morning Recall** — add a 30-min timed re-solve + Pythonic refactor (rewrite using `Counter`, `defaultdict`, comprehensions, `enumerate`, `zip`, `bisect`). Doubles each re-solve's value: you re-test memory AND drill idiomatic stdlib at the same time
-- **Mocks** — switch from free Pramp to paid Interviewing.io / Hello Interview
-- **SD** — focus on DDIA Ch 8–9 deep-dives
-- **Behavioral** — daily STAR drill (Situation / Task / Action / Result) replaces casual story practice
-- **Retention spot-check** — 1 random problem (15–20 min, drawn from "solved >14d ago") added to morning block
-- **Applications** — open up to target companies
+**Saturday schedule (Mock-heavy / Interview bands — Behavioral Intensive):**
 
-**Interview** — _trigger: real screens landing on the calendar._
-
-- **Morning** — Recall drain shrinks to: 1-problem timed mock (blank file, no notes) + 30 min anchored Recall
-- **Afternoon** — whatever the calendar dictates (real screens / paid mocks)
-- Goal: **performance over coverage** — you've already drilled the volume
-- **Applications** — open up to dream / aspirational companies
-
-### Saturdays after Phase 8 mock-heavy band begins — Behavioral Intensive
-
-(Phase 8 decompression-band Saturdays inherit the Phase 1–7 format.)
+_Decompression-band Saturdays inherit the Phase 1–7 Saturday format above._
 
 | Time        | Block                                                                                  |
 | ----------- | -------------------------------------------------------------------------------------- |
