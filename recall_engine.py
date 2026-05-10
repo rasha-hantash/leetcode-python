@@ -231,24 +231,13 @@ class CategoryProgress:
 
 @dataclass(frozen=True)
 class Readiness:
-    """Three category bars + tiers (ordered fallback → target → stretch)."""
+    """Raw progress counts for the three trackable categories. Rendered as
+    bars in `today.md`'s `## Progress` section. No tier labels — application
+    timing is the user's call (see _When to apply_ in README's Sequencing)."""
 
     em: CategoryProgress
     sd: CategoryProgress
     mocks: CategoryProgress
-    tiers: list["ReadinessTier"]
-
-
-@dataclass(frozen=True)
-class ReadinessTier:
-    """One application-readiness gate as a list of (label, met) criteria."""
-
-    name: str
-    criteria: list[tuple[str, bool]]
-
-    @property
-    def met(self) -> bool:
-        return all(ok for _, ok in self.criteria)
 
 
 @dataclass(frozen=True)
@@ -1607,13 +1596,7 @@ def _format_mock_line(mock: Mock) -> str:
     return f"- [ ] {mock.descriptor} · _pending_"
 
 
-# ─── Application-readiness gates ─────────────────────────────────────────────
-
-
-# Target-ready partial thresholds. Stretch-ready demands everything (no constant
-# needed). Tweak in code if you want a stricter target gate.
-_TARGET_READY_MIN_MOCKS = 8
-_TARGET_READY_MIN_SD_CHAPTERS = 20
+# ─── Progress bars ───────────────────────────────────────────────────────────
 
 
 def compute_readiness(
@@ -1622,30 +1605,13 @@ def compute_readiness(
     sd_chapters: list[SDChapter],
     mocks: list[Mock],
 ) -> Readiness:
-    """Roll up the three ledgers into category bars + tiered application gates."""
+    """Roll up the three ledgers into category progress bars (E+M / SD / Mocks)."""
     touched = {t.problem for t in ledger}
     em_curr = [p for p in curriculum if p.difficulty in ("E", "M")]
     em = CategoryProgress("E+M problems", sum(1 for p in em_curr if p.text in touched), len(em_curr))
     sd = CategoryProgress("System Design", sum(1 for c in sd_chapters if c.status == "completed"), len(sd_chapters))
     mp = CategoryProgress("Mocks", sum(1 for m in mocks if m.status == "completed"), len(mocks))
-    all_done = bool(curriculum) and all(p.text in touched for p in curriculum)
-
-    tiers = [
-        ReadinessTier("Fallback-ready", [("All E+M problems touched", em.complete)]),
-        ReadinessTier("Target-ready", [
-            ("All E+M problems touched", em.complete),
-            (f"≥{_TARGET_READY_MIN_SD_CHAPTERS} SD chapters complete",
-             sd.done >= _TARGET_READY_MIN_SD_CHAPTERS),
-            (f"≥{_TARGET_READY_MIN_MOCKS} mocks completed",
-             mp.done >= _TARGET_READY_MIN_MOCKS),
-        ]),
-        ReadinessTier("Stretch-ready", [
-            ("All curriculum problems touched", all_done),
-            ("All SD chapters complete", sd.complete),
-            ("All mocks completed", mp.complete),
-        ]),
-    ]
-    return Readiness(em=em, sd=sd, mocks=mp, tiers=tiers)
+    return Readiness(em=em, sd=sd, mocks=mp)
 
 
 def _render_category_line(cat: CategoryProgress) -> str:
@@ -1654,15 +1620,11 @@ def _render_category_line(cat: CategoryProgress) -> str:
 
 
 def render_readiness_block(readiness: Readiness) -> list[str]:
-    """`## Readiness` block: three category bars + per-tier criteria."""
-    lines = ["## Readiness", ""]
+    """`## Progress` block: three category bars (E+M / SD / Mocks). No tier
+    gates — application timing is the user's judgment call, not the engine's."""
+    lines = ["## Progress", ""]
     lines += [_render_category_line(c) for c in (readiness.em, readiness.sd, readiness.mocks)]
     lines.append("")
-    for tier in readiness.tiers:
-        lines.append(f"**{tier.name}: {_check(tier.met)}**")
-        for label, ok in tier.criteria:
-            lines.append(f"  - {_check(ok)} {label}")
-        lines.append("")
     return lines
 
 

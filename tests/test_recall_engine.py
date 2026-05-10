@@ -21,7 +21,6 @@ from recall_engine import (
     Phase,
     Problem,
     Readiness,
-    ReadinessTier,
     SDChapter,
     Touch,
     aggregate_touches,
@@ -962,7 +961,7 @@ def test_parse_mocks_extracts_pending_scheduled_completed_states() -> None:
 
 
 def test_recompute_renders_next_mock_in_today_md(tmp_path: Path) -> None:
-    """today.md gets a single 'Next mock' block between Readiness and Recall.
+    """today.md gets a single 'Next mock' block between Progress and Recall.
     Mocks live in curriculum.md."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
@@ -976,10 +975,10 @@ def test_recompute_renders_next_mock_in_today_md(tmp_path: Path) -> None:
     recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
     today_text = today_md.read_text()
     assert "## Next mock" in today_text
-    readiness_pos = today_text.find("## Readiness")
+    progress_pos = today_text.find("## Progress")
     next_pos = today_text.find("## Next mock")
     recall_pos = today_text.find("## Recall")
-    assert 0 <= readiness_pos < next_pos < recall_pos
+    assert 0 <= progress_pos < next_pos < recall_pos
 
 
 # ─── System Design chapter tracking ───────────────────────────────────────────
@@ -1078,65 +1077,6 @@ def _h(text: str) -> Problem:
     return Problem(text, difficulty="H")
 
 
-def test_readiness_fallback_tier_clears_when_all_em_problems_touched() -> None:
-    curriculum = [_em("[A] x"), _em("[A] y"), _h("[A] z")]
-    ledger = [Touch("[A] x", date(2026, 5, 11)), Touch("[A] y", date(2026, 5, 12))]
-    r = compute_readiness(curriculum, ledger, sd_chapters=[], mocks=[])
-    fallback = next(t for t in r.tiers if t.name == "Fallback-ready")
-    assert fallback.met is True
-    # Hard ledger gap doesn't block fallback
-    stretch = next(t for t in r.tiers if t.name == "Stretch-ready")
-    assert stretch.met is False
-
-
-def test_readiness_target_tier_requires_em_plus_partial_sd_plus_partial_mocks() -> None:
-    curriculum = [_em("[A] x")]
-    ledger = [Touch("[A] x", date(2026, 5, 11))]
-    sd = [
-        SDChapter(id=f"ch-{i}", title=f"T{i}", book="B", status="completed",
-                  completed_date=date(2026, 5, 11)) for i in range(20)
-    ]
-    mocks = [Mock(id=f"m{i}", status="completed",
-                  completed_date=date(2026, 5, 11)) for i in range(8)]
-    r = compute_readiness(curriculum, ledger, sd, mocks)
-    target = next(t for t in r.tiers if t.name == "Target-ready")
-    assert target.met is True
-
-
-def test_readiness_target_tier_blocks_when_below_sd_threshold() -> None:
-    curriculum = [_em("[A] x")]
-    ledger = [Touch("[A] x", date(2026, 5, 11))]
-    too_few_sd = [
-        SDChapter(id=f"ch-{i}", title=f"T{i}", book="B", status="completed",
-                  completed_date=date(2026, 5, 11)) for i in range(10)
-    ]
-    enough_mocks = [
-        Mock(id=f"m{i}", status="completed", completed_date=date(2026, 5, 11))
-        for i in range(8)
-    ]
-    r = compute_readiness(curriculum, ledger, too_few_sd, enough_mocks)
-    target = next(t for t in r.tiers if t.name == "Target-ready")
-    assert target.met is False
-
-
-def test_readiness_stretch_tier_clears_only_when_everything_complete() -> None:
-    curriculum = [_em("[A] x"), _h("[A] z")]
-    ledger = [
-        Touch("[A] x", date(2026, 5, 11)),
-        Touch("[A] z", date(2026, 5, 11)),
-    ]
-    sd_full = [
-        SDChapter(id="ch-1", title="T", book="B", status="completed",
-                  completed_date=date(2026, 5, 11))
-    ]
-    mocks_full = [
-        Mock(id="m1", status="completed", completed_date=date(2026, 5, 11))
-    ]
-    r = compute_readiness(curriculum, ledger, sd_full, mocks_full)
-    stretch = next(t for t in r.tiers if t.name == "Stretch-ready")
-    assert stretch.met is True
-
-
 def test_readiness_category_progress_reports_done_over_total() -> None:
     curriculum = [_em("[A] x"), _em("[A] y")]
     ledger = [Touch("[A] x", date(2026, 5, 11))]
@@ -1145,42 +1085,33 @@ def test_readiness_category_progress_reports_done_over_total() -> None:
     assert r.em.fraction == 0.5
 
 
-def test_render_readiness_block_shows_three_category_bars_and_three_tiers() -> None:
+def test_render_readiness_block_shows_three_category_bars() -> None:
     em = CategoryProgress(name="E+M problems", done=4, total=8)
     sd = CategoryProgress(name="System Design", done=2, total=10)
     mocks = CategoryProgress(name="Mocks", done=1, total=3)
-    tiers = [
-        ReadinessTier(name="Fallback-ready", criteria=[("All E+M done", False)]),
-        ReadinessTier(name="Target-ready", criteria=[("All E+M done", False)]),
-        ReadinessTier(name="Stretch-ready", criteria=[("All curriculum done", False)]),
-    ]
-    out = "\n".join(render_readiness_block(Readiness(em, sd, mocks, tiers)))
-    assert "## Readiness" in out
+    out = "\n".join(render_readiness_block(Readiness(em, sd, mocks)))
+    assert "## Progress" in out
     assert "E+M problems" in out and "50%" in out and "(4/8)" in out
     assert "System Design" in out and "20%" in out
     assert "Mocks" in out
-    assert "**Fallback-ready: ❌**" in out
-    assert "**Target-ready: ❌**" in out
-    assert "**Stretch-ready: ❌**" in out
+    # No tier labels — the engine doesn't gate applications.
+    assert "Fallback-ready" not in out
+    assert "Target-ready" not in out
+    assert "Stretch-ready" not in out
 
 
-def test_render_today_renders_readiness_block_above_recall_section() -> None:
-    """Readiness sits at the top so the user sees apply-state before scrolling."""
+def test_render_today_renders_progress_block_above_recall_section() -> None:
+    """Progress bars sit at the top so the user sees current state before scrolling."""
     em = CategoryProgress(name="E+M problems", done=0, total=1)
     sd = CategoryProgress(name="System Design", done=0, total=1)
     mocks = CategoryProgress(name="Mocks", done=0, total=1)
-    tiers = [
-        ReadinessTier(name="Fallback-ready", criteria=[("x", False)]),
-        ReadinessTier(name="Target-ready", criteria=[("x", False)]),
-        ReadinessTier(name="Stretch-ready", criteria=[("x", False)]),
-    ]
-    readiness = Readiness(em=em, sd=sd, mocks=mocks, tiers=tiers)
+    readiness = Readiness(em=em, sd=sd, mocks=mocks)
     out = render_today(
         today=date(2026, 5, 11), recall=[], new=[], readiness=readiness
     )
-    readiness_pos = out.find("## Readiness")
+    progress_pos = out.find("## Progress")
     recall_pos = out.find("## Recall")
-    assert 0 <= readiness_pos < recall_pos
+    assert 0 <= progress_pos < recall_pos
 
 
 # ─── Coverage.md mocks subsections (folded in from old mocks.md) ──────────────
