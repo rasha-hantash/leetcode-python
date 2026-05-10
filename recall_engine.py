@@ -1325,8 +1325,8 @@ def _render_next_mock_block(
         if url := mock.effective_booking_url:
             lines.append(f"  - Book: [{mock.platform or 'link'}]({url})")
         lines.append(
-            "  - _When booked, append `📅 YYYY-MM-DD` to the line above. "
-            "Recompute folds it into `mock_interviews.json`._"
+            "  - _Booked? Replace `— _pending_` with `· 📅 YYYY-MM-DD` "
+            "(e.g. `· 📅 2026-05-17`). `uv run prep recompute` syncs it to `curriculum.md`._"
         )
     elif mock.status == "scheduled":
         lines.append(

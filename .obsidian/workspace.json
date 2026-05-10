@@ -1,0 +1,224 @@
+{
+  "main": {
+    "id": "c679e5092d659e0c",
+    "type": "split",
+    "children": [
+      {
+        "id": "f59836ecb750ac6a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4dbdcd054933e84e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "today.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "today"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b5054f05479cd75c",
+    "type": "split",
+    "children": [
+      {
+        "id": "feb4f20e4789440e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "83daf97c4ea4b501",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "3566e1b30629c5b8",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "97c28197158c28c8",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "916cb09f4a48f909",
+    "type": "split",
+    "children": [
+      {
+        "id": "1d4b294a97cb3ec6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fc81c5d12e9bcbd9",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "today.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for today"
+            }
+          },
+          {
+            "id": "09b9d9a2e3ebb3b0",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "today.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from today"
+            }
+          },
+          {
+            "id": "15e92d0b23574a01",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "032c46b6fc0ccd3d",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "c7ddbbfa948ed8a4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "today.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of today"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "4dbdcd054933e84e",
+  "lastOpenFiles": [
+    "curriculum.md",
+    "coverage-analysis.md",
+    "today.md",
+    "prep-data/completions.jsonl",
+    "tests/__pycache__/test_recall_engine.cpython-313-pytest-9.0.3.pyc",
+    "problems/company/wordler-random-get-remove-has.md",
+    "problems/company/snakecase-to-camelcase.md",
+    "problems/company/shift-sign-up-with-max-new-constraint.md",
+    "problems/company/referral-bonus-event-correlation.md",
+    "problems/company/prorated-monthly-subscription-charge.md",
+    "problems/company/grid-reachability-within-max-time.md",
+    "problems/company/find-all-possible-recipes.md",
+    "problems/company/employee-free-time.md",
+    "problems/company/customers-with-2-day-2-page-visits.md",
+    "problems/company/build-binary-tree-from-char-frequencies.md",
+    "problems/company",
+    "README.md",
+    "setup.md",
+    "TODO.md",
+    "prep-plan-overview.md",
+    "neetcode-150.md",
+    "random-problems.md",
+    "prep-data/today.md",
+    "prep-data/coverage.md",
+    "plans/touch-sub-bullets-plan.md",
+    "plans/unified-curriculum-refactor-plan.md",
+    "plans/phase-driven-curriculum-plan.md",
+    "plans/interview-coverage-tool-plan.md",
+    "plans",
+    "problems/sliding-window/easy-longest_subarray.py",
+    "problems/sliding-window/easy-close_duplicates.py",
+    "problems/arrays-and-hashing/medium-top-k-frequent-elements.py",
+    "problems/arrays-and-hashing/medium-string-encode-decode.py",
+    "problems/arrays-and-hashing/medium-group-anagrams.py",
+    "phases.json"
+  ]
+}

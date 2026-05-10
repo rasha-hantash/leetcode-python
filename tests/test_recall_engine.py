@@ -1359,7 +1359,7 @@ def test_scheduled_mock_does_not_show_booking_link() -> None:
     assert "Book:" not in out
 
 
-# ─── today.md → mock_interviews.json wiring ───────────────────────────────────
+# ─── today.md → curriculum.md mock wiring ────────────────────────────────────
 
 
 def test_parse_mock_updates_extracts_scheduled_date_from_calendar_emoji() -> None:
