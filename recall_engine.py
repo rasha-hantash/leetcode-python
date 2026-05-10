@@ -409,6 +409,7 @@ _METADATA_SUFFIX = re.compile(r"\s+—\s+.*$")
 _DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
 _SOURCE_TAG = re.compile(r"\s*\((nc-150\+|company question)\)\s*")
 _VARIANT_TAG = re.compile(r"\s*\(variant of:\s*([^)]+)\)\s*")
+_MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^\)]+\)")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")
 
 
@@ -423,6 +424,7 @@ def _canonicalize(text: str) -> str:
     text = _SOURCE_TAG.sub(" ", text)
     text = _VARIANT_TAG.sub(" ", text)
     text = _T_MARKER.sub(" ", text)
+    text = _MARKDOWN_LINK.sub(r"\1", text)
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -481,6 +483,7 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
         name = _T_MARKER.sub(" ", name)
+        name = _MARKDOWN_LINK.sub(r"\1", name)
         name = re.sub(r"\s+", " ", name).strip()
         if not name:
             continue
@@ -571,6 +574,7 @@ def parse_curriculum_dsa_state(curriculum_md: str) -> dict[str, set[date]]:
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
         name = _T_MARKER.sub(" ", name)
+        name = _MARKDOWN_LINK.sub(r"\1", name)
         name = re.sub(r"\s+", " ", name).strip()
         if not name:
             current_key = None
@@ -1085,6 +1089,7 @@ def write_curriculum_dsa(
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
         name = _T_MARKER.sub(" ", name)
+        name = _MARKDOWN_LINK.sub(r"\1", name)
         name = re.sub(r"\s+", " ", name).strip()
         if not name:
             out.append(line)
