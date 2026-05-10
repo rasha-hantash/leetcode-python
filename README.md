@@ -2,19 +2,25 @@
 
 A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **One master file** (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral; a snapshot-mode SM-2 lite engine (SuperMemo-2 spaced-repetition, simplified to fixed intervals — see _Spaced repetition_ below) regenerates `today.md` each morning, and you drain it.
 
-- **Day 1 – Day 45** — all 164 Easy/Medium NC/LC problems solved (Phases 1–6 → Fallback-ready)
-- **Day 1 – Day 60** — all 194 DSA problems solved (Phase 7 Hards added → ready for hard-tier screens)
-- **Coverage:** 194 DSA problems = 150 canonical NC150 + 44 extras (21 NC-150+, 15 LC-only, 8 company-asked) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~24 mocks · ~10 behavioral stories
+- **Day 1 – Day 45** — all 164 Easy/Medium NC/LC problems solved
+- **Day 1 – Day 60** — all 194 DSA problems solved
+- **Coverage:** 194 DSA problems = 150 canonical NC150 + 44 extras (21 NC-150+, 15 LC-only, 8 company-asked) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~24 mocks · ~10 behavioral stories (career anecdotes drilled in STAR format for non-technical screening rounds)
 
 ## Sequencing
 
 - Easies before Mediums within each pattern
 - E+M before Hards across patterns; **no Hards until phase 7**
-- Phases: 1–6 (E+M acquisition) → 7 (Hards) → 8 (Fallback-ready Reinforcement) → 9 (Target-ready Mock-heavy) → 10 (Interview Mode). Phases 1–7 advance by problem-count budgets; Phases 8–10 have **no new acquisition** and advance by readiness tier (ledger-gated, not calendar-gated).
+- Phases: 1–6 (E+M acquisition) → 7 (Hards; applications begin when Fallback-ready triggers) → 8 (Post-Acquisition with three internal bands: Decompression → Mock-heavy → Interview). Phases 1–7 advance by problem-count budgets; Phase 8 has no new acquisition and bands escalate by readiness state + external calendar, not problem count. The engine parks on Phase 7 once all problems are touched — Phase 8 band advancement is your call, not the engine's.
 - Engine picks the lowest-numbered phase with eligible untouched problems
 - Phase budgets live in `curriculum.md`'s `### Phase N — Name (X new/day)` headings; edit if your retention diagnostic says so. **Chronically behind (1+ week of slip)?** Drop the budget by 1/day for the rest of the phase.
 
 **Everything is ledger-driven, not calendar-driven.** Phase advancement, the Recall queue, and **application-readiness gates** (Fallback / Target / Stretch — surfaced in `today.md`'s readiness banner) all fire from ledger state. Mock dates booked on the calendar are user bookkeeping; the engine counts _completed_ mocks toward Target-ready, not their dates.
+
+**Application timing — keyed to readiness tiers, not phases:**
+
+- **Fallback-ready** (~Day 45, start of Phase 7) → fallback-tier applications open (the safety-net rung — companies you'd accept an offer from if higher tiers don't pan out)
+- **Target-ready** (typically mid-Phase 7: all E+M + ≥20 SD chapters + ≥8 mocks) → target-tier applications open
+- **Stretch-ready** (end of Phase 8 mock-heavy band: every problem + all SD + all mocks) → stretch-tier applications
 
 ## Daily flow
 
@@ -46,32 +52,30 @@ _Mock days: afternoon shifts to `14:00–16:00 mock + 16:00–17:30 SD + 17:30�
 
 ### Phase 7 — Hards · M–F
 
+**Start applying here.** Phase 7 begins after all 164 E+M are acquired — Fallback-ready triggers at Day 45. Submit to fallback-tier companies on Day 1 of Phase 7. Hards are mostly an onsite-round signal, not a screen one; the ~15-day Phase 7 run + scheduling buffer gives you time to finish acquiring while early-round screens land on the calendar. Pre-commitment beats willpower — booked screens force the prep to converge.
+
 Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budget). Hards take longer to acquire — give each one the full 90 min that the Recall budget reserves for H, even on first solve.
 
-### Phase 8 — Reinforcement Window (Fallback-ready) · M–F
+### Phase 8 — Post-Acquisition · M–F
 
-- Zero new acquisition; every problem already touched (curriculum phases 1–7 done). This is the **application gate**: start submitting to fallback-tier companies.
-- Morning is all Recall
-- Afternoon: extra mocks + behavioral story practice + fallback-tier company applications (the safety-net rung — companies you'd accept an offer from if higher tiers don't pan out)
-- **Anki joins here** (~15 min/day) — fact-level cards complement the SM-2 problem queue (see _Where Anki fits_ above)
+All 194 problems touched. **Zero new acquisition.** Same daily skeleton as Acquisition, minus the DSA New afternoon block — that slot becomes mocks + behavioral + applications. What changes between bands is _intensity_ and _what fills each block_, not the structure.
 
-### Phase 9 — Mock-heavy Reinforcement (Target-ready) · M–F
+| Time        | Block                                           |
+| ----------- | ----------------------------------------------- |
+| 9:00–13:00  | Recall drain                                    |
+| 14:00–15:30 | System Design (today's chapter from `today.md`) |
+| 15:30–18:00 | Mocks + behavioral practice + applications      |
+| 18:00–19:00 | Anki                                            |
 
-- Mornings: real-clock re-solve + Pythonic refactor (rewrite the working solution using Python idioms — `Counter`, `defaultdict`, comprehensions, `enumerate`, `zip`, `bisect` — to compress code, surface stdlib fluency in screens, and double the retrieval value of each re-solve) + Recall
-- Afternoons: real screens / paid mocks; SD anchored on DDIA Ch 8–9 deep-dives
-- Daily STAR (Situation / Task / Action / Result) story drill; Anki sustains spaced-recall outside the morning block
+**Bands escalate in order, gated by readiness state + external calendar:**
 
-| Time        | Block                                                    |
-| ----------- | -------------------------------------------------------- |
-| 9:00–13:00  | 30-min clock re-solve + Pythonic refactor + Recall drain |
-| 14:00–16:00 | Real screens / paid mocks (SD writeup if empty)          |
-| 16:00–17:00 | SD anchor (DDIA Ch 8–9 deep-dive)                        |
-| 17:00–18:30 | Behavioral practice — 1 STAR story/day                   |
-| 18:30–19:15 | Anki                                                     |
+- **Decompression** — first ~3–7 days (skip entirely if you're already Target-ready when Phase 7 ends). Morning Recall is passive maintenance; mocks are free Pramp peer; apps target fallback-tier. **Anki joins here** (~15 min/day) — fact-level cards complement the SM-2 problem queue (see _Where Anki fits_ above).
+- **Mock-heavy** — Target-ready confirmed (≥20 SD + ≥8 mocks done). Morning Recall extends with a 30-min clock re-solve + Pythonic refactor (rewrite using `Counter`, `defaultdict`, comprehensions, `enumerate`, `zip`, `bisect` — compress code, signal stdlib fluency in screens, double the retrieval value of each re-solve). Afternoon mocks become paid Interviewing.io; SD anchors on DDIA Ch 8–9 deep-dives; daily STAR (Situation / Task / Action / Result) drill replaces casual story practice. Add a 1-problem random retention check (15–20 min, ~20% E / 65% M / 15% H, drawn from "solved >14d ago") to the morning block. Anki sustains.
+- **Interview** — real screens are landing on the calendar. Morning shifts from full Recall drain to a single 1-problem timed mock (blank file) + mock-notes; Recall shrinks to anchored 30 min. Afternoon = whatever the calendar dictates (real screens / paid mocks). Performance over coverage.
 
-_Mid-Mock-heavy onward: add a 1-problem random retention check (15–20 min, ~20% E / 65% M / 15% H, drawn from "solved >14d ago") to the morning block._
+### Saturdays after Phase 8 mock-heavy band begins — Behavioral Intensive
 
-### Saturdays during Phases 9–10 — Behavioral Intensive
+(Phase 8 decompression-band Saturdays inherit the Phase 1–7 format.)
 
 | Time        | Block                                                                                 |
 | ----------- | ------------------------------------------------------------------------------------- |
@@ -80,20 +84,9 @@ _Mid-Mock-heavy onward: add a 1-problem random retention check (15–20 min, ~20
 | 14:00–15:00 | Recall (anchored, 1 hr) + this-week's-hardest section                                 |
 | 15:00–18:00 | Behavioral Intensive — story drafting + recording + 5-story drill (60s → 90s → 3-min) |
 
-### Phase 10 — Interview Mode (when real screens start) · M–F
-
-- Mornings simulate real screens (timed, blank file, 1 problem)
-- Afternoons are real interviews or paid mocks
-- Recall drops to anchored 30 min — goal is performance, not coverage
-
-| Time        | Block                                                        |
-| ----------- | ------------------------------------------------------------ |
-| 9:00–10:30  | DSA mock (1 problem timed, Pramp / Interviewing.io / friend) |
-| 10:30–12:00 | Mock notes + Anki                                            |
-| 14:00–16:00 | Real screens / paid mocks (SD whiteboard if empty)           |
-| 16:00–17:30 | Mock notes + Recall drain + 1 random retention check         |
-
 ## Spaced repetition (SM-2 lite)
+
+**SM-2** = SuperMemo-2 (Wozniak, 1980s) — the spaced-repetition algorithm underpinning Anki and most SRS tools. The original adapts each card's interval via a per-card _ease factor_ updated by your 0–5 difficulty grade after every review. **The "lite" version this engine uses drops the ease factor entirely** — every successful touch just advances the card one rung on a fixed ladder. Same Ebbinghaus/Bjork foundation, simpler engine.
 
 | Touches | Next due |
 | ------- | -------- |
@@ -123,7 +116,7 @@ Each `[x]` is a logged touch; `[ ]` is empty padding to 5 slots. Untouched probl
 
 - Pre-commitment beats willpower — book early-sprint mocks on Day 0
 - Pramp (free, peer) for first half; Interviewing.io (paid, mid/late) for second
-- ~24 total · weekly cadence in Phases 1–6 (acquisition) · every-other-day from Phase 7 (Hards) through Phase 9 (Mock-heavy) · daily in Phase 10 (real interviews)
+- ~24 total · weekly through Phase 6 · every-other-day in Phase 7 + Phase 8 mock-heavy band · daily in Phase 8 interview band
 - State lives in `curriculum.md`'s `## Mocks` section: `pending → scheduled (📅 DATE) → completed (✅ DATE)`
 - Each mock can carry a `prereq:` clause (count thresholds like `15 E+M, 2 SD` or specific chapter IDs); the engine surfaces met/unmet status in `today.md`
 
@@ -195,7 +188,7 @@ Test names ARE the spec — read them top to bottom for a complete description o
 - **Touch** — one successful (re-)solve event. One line in `completions.jsonl`.
 - **Recall** — the most-overdue 10 items in `today.md`, frozen at recompute time.
 - **New** — the next `phase.new_per_day` never-touched problems from the current phase.
-- **Phase** — one entry in `curriculum.md`'s `### Phase N — Name (X new/day)` headings. Advancement is ledger-driven.
+- **Phase** — one entry in `curriculum.md`'s `### Phase N — Name (X new/day)` headings (Phases 1–7). Advancement is ledger-driven via the engine's `current_phase`. Phase 8 is README-only (post-acquisition; no engine-tracked budget); the engine parks on Phase 7 once all problems are touched, and Phase 8's bands escalate manually.
 - **NC-150+** — problems outside NeetCode's canonical 150 list but **inside** NeetCode's full 450-problem dataset (links to neetcode.io). **21 in the curriculum** — gap-fillers from the NC450 coverage analysis (minimax DP, prefix sum + hashmap, cyclic sort, etc — see `coverage-analysis.md`) plus selected heavy patterns (Segment Tree, Bitmask DP, Sweep Line). Distributed by difficulty across phases 1–7 — Es and Ms in their pattern's natural phase, Hs in Phase 7.
 - **LC-only** — problems outside NeetCode's full 450 entirely (links to leetcode.com). **15 in the curriculum** — popular interview practice in two flavors: (1) the **String Transformation** cluster (Valid Word Abbreviation, String Compression, Basic Calculator II, atoi, Count Binary Substrings) which NeetCode underrepresents, and (2) heavy-pattern coverage NeetCode doesn't curate at all (Segment Tree, Sweep Line, BIT, Bitmask DP, Reservoir Sampling, Bit-Trie, Difference Array, Boyer-Moore Majority).
 - **`(variant of: X)` tag** — relationship marker only: "this problem is a follow-up of canonical problem X." Does NOT mean the problem is outside NC150 — most "II" variants (e.g. Combination Sum II, Coin Change II) are themselves on the canonical 150. Combine with `(nc-150+)` or `(lc-only)` for variants that ARE outside it (e.g. Majority Element II is `(lc-only)`).
