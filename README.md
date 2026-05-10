@@ -32,13 +32,15 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
 
 _Mock-week pivot: if a scheduled mock needs an uncovered pattern, prioritize that pattern over Recall for one day._
 
-### Phases 1–6 — Acquisition · M–F
+### Phases 1–6 — Acquisition · Mon–Sat
 
 - **Acquisition** = first-time exposure to new problems, blocked by pattern. Working memory holds one pattern's structure; spaced Recall locks it in over weeks
 - Recall first thing; SD then DSA New in the afternoon
 - Recall time budget: Easy 20m / Medium 40m (no Hards in Recall during 1–6 — they don't enter the queue until Phase 7)
-- **End of day:** jot down your "today's hardest" — feeds Saturday's re-solve sub-block
-- **Saturday: same daily table as M–F.** Morning Recall starts with a "this-week's-hardest" sub-block — re-solve 2–3 problems flagged hardest from Mon–Fri's notes (engine adds the section to `today.md`). Phase 7 Saturdays are identical.
+- **End of day:** mark "today's hardest" — feeds Saturday's re-solve sub-block
+- **Phase 7 uses the same two schedules below** (Mon–Fri table for weekdays, Saturday table for Saturdays). Sundays off across all phases.
+
+**Mon–Fri schedule:**
 
 | Time        | Block                                           |
 | ----------- | ----------------------------------------------- |
@@ -48,7 +50,17 @@ _Mock-week pivot: if a scheduled mock needs an uncovered pattern, prioritize tha
 
 _Mock days: afternoon shifts to `14:00–16:00 mock + 16:00–17:30 SD + 17:30–19:30 DSA New`._
 
-### Phase 7 — Hards · M–F
+**Saturday schedule:**
+
+| Time        | Block                                                                                              |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| 9:00–13:00  | Recall drain — starts with **"this-week's-hardest"** sub-block (re-solve 2–3 hardest from Mon–Fri) |
+| 14:00–15:30 | System Design (today's chapter from `today.md`)                                                    |
+| 15:30–19:30 | DSA New                                                                                            |
+
+_Engine auto-adds the "this-week's-hardest" sub-block to Saturday's `today.md`._
+
+### Phase 7 — Hards · Mon–Sat
 
 **Start applying to new roles / jobs here.** Phase 7 begins after all 164 E+M are acquired (~Day 45). Submit to safety-net companies on Day 1. Hards are mostly an onsite-round signal, not a screen one; the ~15-day Phase 7 run + scheduling buffer gives you time to finish acquiring while early-round screens land on the calendar. Pre-commitment beats willpower — booked screens force the prep to converge.
 
@@ -67,7 +79,7 @@ All 194 problems touched. **Zero new acquisition.** Same daily skeleton as Acqui
 
 **Three bands — each one layers changes on top of the daily skeleton above. Bands escalate in order:**
 
-**Decompression** — _first 3–7 days of Phase 8 (skip if you finished Phase 7 strong)._
+**Decompression** — _first 3–7 days of Phase 8._
 
 - Morning Recall: passive maintenance, no extras
 - Mocks: free Pramp peer
