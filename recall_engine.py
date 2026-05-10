@@ -36,9 +36,14 @@ DEFAULT_RECALL_LIMIT = 10
 DEFAULT_NEW_LIMIT = 3
 
 Difficulty = Literal["E", "M", "H"]
-Source = Literal["nc-150", "nc-150+", "company question"]
+Source = Literal["nc-150", "nc-150+", "lc-only", "company question"]
 
-_SOURCE_RANK: dict[str, int] = {"nc-150": 0, "nc-150+": 1, "company question": 2}
+_SOURCE_RANK: dict[str, int] = {
+    "nc-150": 0,
+    "nc-150+": 1,
+    "lc-only": 1,
+    "company question": 2,
+}
 _DIFFICULTY_RANK: dict[str, int] = {"E": 0, "M": 1, "H": 2}
 
 
@@ -407,7 +412,7 @@ _T_MARKER = re.compile(r"\s*`[A-Z]\d?`\s*")
 _DAY_ANNOTATION = re.compile(r"\s*\(Day\s+\d+\)\s*")
 _METADATA_SUFFIX = re.compile(r"\s+—\s+.*$")
 _DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
-_SOURCE_TAG = re.compile(r"\s*\((nc-150\+|company question)\)\s*")
+_SOURCE_TAG = re.compile(r"\s*\((nc-150\+|lc-only|company question)\)\s*")
 _VARIANT_TAG = re.compile(r"\s*\(variant of:\s*([^)]+)\)\s*")
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^\)]+\)")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")

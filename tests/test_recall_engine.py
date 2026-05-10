@@ -553,6 +553,7 @@ def test_curriculum_parser_canonical_text_omits_difficulty_and_source_tags() -> 
     for t in texts:
         assert "(E)" not in t and "(M)" not in t and "(H)" not in t
         assert "(nc-150+)" not in t and "(company question)" not in t
+        assert "(lc-only)" not in t
 
 
 def test_completion_parser_strips_difficulty_tag_from_canonical() -> None:

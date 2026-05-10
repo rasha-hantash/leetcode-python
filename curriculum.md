@@ -6,7 +6,8 @@ _`today.md` — `prep recompute` keeps both in sync._
 ## Legend
 
 - `(E)` `(M)` `(H)` — LeetCode difficulty.
-- `(nc-150+)` — outside the original NeetCode 150. Untagged → NC150.
+- `(nc-150+)` — outside the original NeetCode 150 but inside NeetCode's full 450-problem dataset (links to neetcode.io). Untagged → NC150.
+- `(lc-only)` — outside NeetCode entirely (links to leetcode.com). Popular interview problems and heavy-pattern coverage NeetCode doesn't curate.
 - `(company question)` — asked in a real interview at a specific company.
 - `(variant of: X)` — relationship marker: this problem is a follow-up of canonical problem X. Does **not** imply it's outside NC150 — most "II" variants (e.g. Combination Sum II, Coin Change II, Word Search II) are themselves on NC150. Tag `(nc-150+)` alongside if it's also outside the canonical 150.
 
@@ -46,7 +47,7 @@ _`today.md` — `prep recompute` keeps both in sync._
 #### Sliding Window
 
 - [Best Time to Buy and Sell Stock](https://neetcode.io/problems/best-time-to-buy-and-sell-stock) (E) · 0/5
-- Count Binary Substrings (E) · 0/5
+- [Count Binary Substrings](https://leetcode.com/problems/count-binary-substrings/) (E) (lc-only) · 0/5
 - [Longest Substring Without Repeating Characters](https://neetcode.io/problems/longest-substring-without-repeating-characters) (M) · 0/5
 - [Longest Repeating Character Replacement](https://neetcode.io/problems/longest-repeating-character-replacement) (M) · 0/5
 - [Permutation in String](https://neetcode.io/problems/permutation-in-string) (M) · 0/5
@@ -228,42 +229,42 @@ _`today.md` — `prep recompute` keeps both in sync._
 #### String Transformation
 
 - [Longest Common Prefix](https://neetcode.io/problems/longest-common-prefix) (E) (nc-150+) · 0/5
-- Valid Word Abbreviation (E) (nc-150+) · 0/5
+- [Valid Word Abbreviation](https://leetcode.com/problems/valid-word-abbreviation/) (E) (lc-only) · 0/5
 - [Roman to Integer](https://neetcode.io/problems/roman-to-integer) (E) (nc-150+) · 0/5
 - [Add Binary](https://neetcode.io/problems/add-binary) (E) (nc-150+) · 0/5
 - [snake_case → camelCase](./problems/company/snakecase-to-camelcase.md) (E) (nc-150+) (company question) · 0/5
-- String Compression (M) (nc-150+) · 0/5
+- [String Compression](https://leetcode.com/problems/string-compression/) (M) (lc-only) · 0/5
 - [Decode String](https://neetcode.io/problems/decode-string) (M) (nc-150+) · 0/5
-- Basic Calculator II (M) (nc-150+) · 0/5
-- String to Integer atoi (M) (nc-150+) · 0/5
+- [Basic Calculator II](https://leetcode.com/problems/basic-calculator-ii/) (M) (lc-only) · 0/5
+- [String to Integer atoi](https://leetcode.com/problems/string-to-integer-atoi/) (M) (lc-only) · 0/5
 
 #### Difference Array
 
 - [Car Pooling](https://neetcode.io/problems/car-pooling) (M) (nc-150+) · 0/5
-- Corporate Flight Bookings (M) (nc-150+) · 0/5
+- [Corporate Flight Bookings](https://leetcode.com/problems/corporate-flight-bookings/) (M) (lc-only) · 0/5
 
 #### Boyer-Moore
 
 - [Majority Element](https://neetcode.io/problems/majority-element) (E) (nc-150+) · 0/5
-- Majority Element II (M) (nc-150+) (variant of: Majority Element) · 0/5
+- [Majority Element II](https://leetcode.com/problems/majority-element-ii/) (M) (lc-only) (variant of: Majority Element) · 0/5
 
 #### Bit-Trie
 
-- Maximum XOR (M) (nc-150+) · 0/5
+- [Maximum XOR](https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/) (M) (lc-only) · 0/5
 
 #### Reservoir Sampling
 
-- Random Pick with Weight (M) (nc-150+) · 0/5
+- [Random Pick with Weight](https://leetcode.com/problems/random-pick-with-weight/) (M) (lc-only) · 0/5
 - [Wordler Random Get/Remove/Has](./problems/company/wordler-random-get-remove-has.md) (M) (nc-150+) (company question) · 0/5
-- Linked List Random Node (M) (nc-150+) · 0/5
+- [Linked List Random Node](https://leetcode.com/problems/linked-list-random-node/) (M) (lc-only) · 0/5
 
 #### Segment Tree
 
-- Range Sum Query - Mutable (M) (nc-150+) · 0/5
+- [Range Sum Query - Mutable](https://leetcode.com/problems/range-sum-query-mutable/) (M) (lc-only) · 0/5
 
 #### Bitmask DP
 
-- Partition K Equal Subsets (M) (nc-150+) · 0/5
+- [Partition to K Equal Sum Subsets](https://neetcode.io/problems/partition-to-k-equal-sum-subsets) (M) (nc-150+) · 0/5
 
 ### Phase 7 — Hard Problems (2 new/day)
 
@@ -299,7 +300,7 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Bitmask DP
 
-- Shortest Path Visiting All Nodes (H) (nc-150+) · 0/5
+- [Shortest Path Visiting All Nodes](https://leetcode.com/problems/shortest-path-visiting-all-nodes/) (H) (lc-only) · 0/5
 
 #### Graphs
 
@@ -322,7 +323,7 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Segment Tree
 
-- Count of Smaller Numbers After Self (H) (nc-150+) · 0/5
+- [Count of Smaller Numbers After Self](https://leetcode.com/problems/count-of-smaller-numbers-after-self/) (H) (lc-only) · 0/5
 
 #### Sliding Window
 
@@ -335,8 +336,8 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Sweep Line
 
-- My Calendar III (H) (nc-150+) · 0/5
-- Skyline (H) (nc-150+) · 0/5
+- [My Calendar III](https://leetcode.com/problems/my-calendar-iii/) (H) (lc-only) · 0/5
+- [Skyline](https://leetcode.com/problems/the-skyline-problem/) (H) (lc-only) · 0/5
 
 #### Trees
 
