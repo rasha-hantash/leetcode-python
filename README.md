@@ -14,7 +14,6 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
   - **1–6** — E+M acquisition (Easies + Mediums, blocked by pattern)
   - **7** — Hards. **Start applying to new roles / jobs here.**
   - **8** — Post-Acquisition (zero new problems; bands: Decompression → Mock-heavy → Interview)
-- Phases 1–7 advance by problem-count budgets; the engine picks the lowest-numbered phase with eligible untouched problems. The engine parks on Phase 7 once all problems are touched — Phase 8 band advancement is your call, not the engine's.
 
 **Everything is ledger-driven, not calendar-driven.** Phase advancement, the Recall queue, and **mock interview unlocks** (each mock's `prereq:` clause is checked against ledger state and surfaced as met/unmet in `today.md`) all fire from ledger state.
 
