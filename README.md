@@ -57,7 +57,7 @@ Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budg
 
 ### Phase 9 — Mock-heavy Reinforcement (Target-ready) · M–F
 
-- Mornings: real-clock re-solve + Pythonic refactor + Recall
+- Mornings: real-clock re-solve + Pythonic refactor (rewrite the working solution using Python idioms — `Counter`, `defaultdict`, comprehensions, `enumerate`, `zip`, `bisect` — to compress code, surface stdlib fluency in screens, and double the retrieval value of each re-solve) + Recall
 - Afternoons: real screens / paid mocks; SD anchored on DDIA Ch 8–9 deep-dives
 - Daily STAR (Situation / Task / Action / Result) story drill; Anki sustains spaced-recall outside the morning block
 
