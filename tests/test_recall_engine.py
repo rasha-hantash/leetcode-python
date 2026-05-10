@@ -15,6 +15,7 @@ import pytest
 from recall_engine import (
     BehavioralTopic,
     CategoryProgress,
+    HardestMark,
     Mock,
     MockPrereq,
     Phase,
@@ -24,6 +25,7 @@ from recall_engine import (
     SDChapter,
     Touch,
     aggregate_touches,
+    append_to_hardest_ledger,
     append_to_ledger,
     avg_new_per_day,
     compute_new,
@@ -34,18 +36,20 @@ from recall_engine import (
     due_date,
     interval_for,
     apply_mock_updates,
+    load_hardest_ledger,
     load_ledger,
     mock_prereq_status,
     next_sd_chapter,
     overdue_days,
     parse_behavioral,
-    parse_mock_updates,
-    parse_mocks,
-    parse_sd_chapters,
     parse_completions,
     parse_curriculum,
     parse_curriculum_dsa_state,
+    parse_hardest_marks,
+    parse_mock_updates,
+    parse_mocks,
     parse_phases,
+    parse_sd_chapters,
     projected_end_date,
     recompute,
     render_readiness_block,
@@ -2034,3 +2038,224 @@ def test_recompute_writes_back_curriculum_md_to_match_ledger(tmp_path: Path) -> 
     assert "- Two Sum (E) · 1/5 (next due 2026-05-12)" in text
     assert "  - [x] ✅ 2026-05-11" in text
     assert text.count("  - [ ]") == 4
+
+
+# ─── Hardest-of-day pick tracking ──────────────────────────────────────────────
+
+
+def test_parse_curriculum_captures_problem_link_from_markdown_link() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n"
+        "- [Two Sum](https://neetcode.io/problems/two-sum) (E) · 0/5\n"
+    )
+    problems = parse_curriculum(md)
+    assert problems[0].link == "https://neetcode.io/problems/two-sum"
+    assert problems[0].text == "[Arrays & Hashing] -> Two Sum"
+
+
+def test_parse_curriculum_drops_relative_paths_for_company_stub_links() -> None:
+    md = (
+        "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
+        "#### Arrays & Hashing\n\n"
+        "- [Foo Stub](./problems/company/foo.md) (M) (company question) · 0/5\n"
+    )
+    assert parse_curriculum(md)[0].link is None
+
+
+def test_parse_hardest_marks_extracts_ticks_under_dated_section() -> None:
+    today_md = (
+        "# Today — Mon May 11, 2026\n\n"
+        "## Today's hardest (2026-05-11) — pick from today's New\n\n"
+        "- [x] [Arrays & Hashing] -> Two Sum (E)\n"
+        "- [ ] [Arrays & Hashing] -> Group Anagrams (M)\n"
+    )
+    marks = parse_hardest_marks(today_md, fallback_date=date(2026, 5, 12))
+    assert marks == [HardestMark("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11))]
+
+
+def test_parse_hardest_marks_falls_back_to_supplied_date_when_heading_undated() -> None:
+    today_md = (
+        "## Today's hardest — pick from today's New\n\n"
+        "- [x] [Heap] -> Task Scheduler (M)\n"
+    )
+    marks = parse_hardest_marks(today_md, fallback_date=date(2026, 5, 11))
+    assert marks == [HardestMark("[Heap] -> Task Scheduler", date(2026, 5, 11))]
+
+
+def test_parse_hardest_marks_ignores_ticks_outside_section() -> None:
+    today_md = (
+        "## Recall — most overdue first\n\n"
+        "- [x] [Arrays & Hashing] -> Two Sum (E) ✅ 2026-05-11\n\n"
+        "## Today's hardest (2026-05-11)\n\n"
+        "- [x] [Heap] -> Task Scheduler (M)\n\n"
+        "## New — next from the curriculum\n\n"
+        "- [x] [Stack] -> Min Stack (E) ✅ 2026-05-11\n"
+    )
+    marks = parse_hardest_marks(today_md, fallback_date=date(2026, 5, 11))
+    assert marks == [HardestMark("[Heap] -> Task Scheduler", date(2026, 5, 11))]
+
+
+def test_parse_completions_skips_ticks_under_hardest_section() -> None:
+    today_md = (
+        "## Recall — most overdue first\n\n"
+        "- [x] [Arrays & Hashing] -> Two Sum (E) ✅ 2026-05-11\n\n"
+        "## Today's hardest (2026-05-11)\n\n"
+        "- [x] [Heap] -> Task Scheduler (M) ✅ 2026-05-11\n"
+    )
+    touches = parse_completions(today_md)
+    assert len(touches) == 1
+    assert touches[0].problem == "[Arrays & Hashing] -> Two Sum"
+
+
+def test_append_to_hardest_ledger_dedupes_existing_entries(tmp_path: Path) -> None:
+    path = tmp_path / "hardest.jsonl"
+    mark = HardestMark("[Heap] -> Task Scheduler", date(2026, 5, 11))
+    assert append_to_hardest_ledger(path, [mark]) == 1
+    # Re-applying the same mark is a no-op.
+    assert append_to_hardest_ledger(path, [mark]) == 0
+    assert load_hardest_ledger(path) == [mark]
+
+
+def test_render_today_renders_hardest_pick_section_on_weekdays_with_links() -> None:
+    new = [
+        Problem(
+            text="[Arrays & Hashing] -> Two Sum",
+            difficulty="E",
+            link="https://neetcode.io/problems/two-sum",
+        ),
+        Problem(
+            text="[Arrays & Hashing] -> Group Anagrams",
+            difficulty="M",
+            link="https://neetcode.io/problems/group-anagrams",
+        ),
+    ]
+    md = render_today(today=date(2026, 5, 11), recall=[], new=new)  # Monday
+    assert "## Today's hardest (2026-05-11) — pick from today's New" in md
+    assert (
+        "- [ ] [Arrays & Hashing] -> [Two Sum](https://neetcode.io/problems/two-sum) (E)"
+        in md
+    )
+    assert (
+        "- [ ] [Arrays & Hashing] -> [Group Anagrams](https://neetcode.io/problems/group-anagrams) (M)"
+        in md
+    )
+
+
+def test_render_today_skips_hardest_pick_section_on_saturday() -> None:
+    new = [Problem(text="[Heap] -> Task Scheduler", difficulty="M")]
+    md = render_today(today=date(2026, 5, 16), recall=[], new=new)  # Saturday
+    assert "## Today's hardest" not in md
+    assert "## This week's hardest" in md
+
+
+def test_render_today_skips_hardest_pick_section_on_sunday() -> None:
+    new = [Problem(text="[Heap] -> Task Scheduler", difficulty="M")]
+    md = render_today(today=date(2026, 5, 17), recall=[], new=new)  # Sunday
+    assert "## Today's hardest" not in md
+
+
+def test_render_today_saturday_falls_back_to_blank_template_when_week_was_empty() -> None:
+    md = render_today(
+        today=date(2026, 5, 16),  # Saturday
+        recall=[],
+        new=[],
+        hardest_marks=[],
+        curriculum=[],
+    )
+    assert "## This week's hardest — your pick" in md
+    assert md.count("- [ ] [Pattern] -> Problem Name") == 3
+
+
+def test_render_today_saturday_prefills_from_past_5_weekdays_hardest_marks() -> None:
+    curriculum = [
+        Problem(
+            text="[Heap] -> Task Scheduler",
+            difficulty="M",
+            link="https://neetcode.io/problems/task-scheduler",
+        ),
+        Problem(
+            text="[Arrays & Hashing] -> Two Sum",
+            difficulty="E",
+            link="https://neetcode.io/problems/two-sum",
+        ),
+    ]
+    marks = [
+        HardestMark("[Heap] -> Task Scheduler", date(2026, 5, 13)),
+        HardestMark("[Arrays & Hashing] -> Two Sum", date(2026, 5, 12)),
+        # Outside the 5-day window — should be filtered.
+        HardestMark("[Heap] -> Task Scheduler", date(2026, 5, 5)),
+    ]
+    md = render_today(
+        today=date(2026, 5, 16),  # Saturday
+        recall=[],
+        new=[],
+        hardest_marks=marks,
+        curriculum=curriculum,
+    )
+    assert "## This week's hardest — your picks" in md
+    assert (
+        "- [ ] [Arrays & Hashing] -> [Two Sum](https://neetcode.io/problems/two-sum) (E) — flagged May 12"
+        in md
+    )
+    assert (
+        "- [ ] [Heap] -> [Task Scheduler](https://neetcode.io/problems/task-scheduler) (M) — flagged May 13"
+        in md
+    )
+    # The 5+ day old entry is filtered.
+    assert md.count("flagged") == 2
+
+
+def test_render_today_saturday_shows_saturday_specific_time_blocks() -> None:
+    md = render_today(today=date(2026, 5, 16), recall=[], new=[])  # Saturday
+    assert "starts with this-week's-hardest sub-block" in md
+
+
+def test_recompute_appends_hardest_marks_to_dedicated_ledger(tmp_path: Path) -> None:
+    """End-to-end: a tick under `## Today's hardest` in today.md gets logged
+    to hardest.jsonl on next recompute, and is NOT double-counted in
+    completions.jsonl."""
+    daily_md = tmp_path / "curriculum.md"
+    daily_md.write_text(_dsa_md(two_sum_touch=None))
+    today_md = tmp_path / "today.md"
+    today_md.write_text(
+        "## Today's hardest (2026-05-11) — pick from today's New\n\n"
+        "- [x] [Arrays & Hashing] -> Two Sum (E)\n"
+    )
+    completions = tmp_path / "completions.jsonl"
+    hardest = tmp_path / "hardest.jsonl"
+    recompute(
+        daily_md, today_md, completions,
+        today=date(2026, 5, 12),
+        hardest_ledger_path=hardest,
+    )
+    assert load_hardest_ledger(hardest) == [
+        HardestMark("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11))
+    ]
+    # The hardest-section tick must NOT also appear in completions.jsonl.
+    assert load_ledger(completions) == []
+
+
+def test_recompute_hardest_logging_is_idempotent(tmp_path: Path) -> None:
+    """Re-running recompute with the same today.md doesn't duplicate marks."""
+    daily_md = tmp_path / "curriculum.md"
+    daily_md.write_text(_dsa_md(two_sum_touch=None))
+    today_md = tmp_path / "today.md"
+    today_md.write_text(
+        "## Today's hardest (2026-05-11)\n\n"
+        "- [x] [Arrays & Hashing] -> Two Sum (E)\n"
+    )
+    completions = tmp_path / "completions.jsonl"
+    hardest = tmp_path / "hardest.jsonl"
+    for _ in range(3):
+        # render_today rewrites today.md each call, so restore the input.
+        today_md.write_text(
+            "## Today's hardest (2026-05-11)\n\n"
+            "- [x] [Arrays & Hashing] -> Two Sum (E)\n"
+        )
+        recompute(
+            daily_md, today_md, completions,
+            today=date(2026, 5, 12),
+            hardest_ledger_path=hardest,
+        )
+    assert len(load_hardest_ledger(hardest)) == 1

@@ -56,13 +56,16 @@ class Problem:
 
     `phase` is the phase number this problem was placed under in
     `curriculum.md` (set by `parse_curriculum`). None means the problem was
-    parsed from a file without phase headings (legacy or test fixtures)."""
+    parsed from a file without phase headings (legacy or test fixtures).
+    `link` is the URL extracted from the markdown link in curriculum.md
+    (e.g. neetcode.io / leetcode.com); preserved so renderers can re-emit it."""
 
     text: str
     difficulty: Difficulty | None = None
     source: Source = "nc-150"
     variant_of: str | None = None
     phase: int | None = None
+    link: str | None = None
 
     @property
     def pattern(self) -> str:
@@ -78,6 +81,16 @@ class Problem:
 @dataclass(frozen=True)
 class Touch:
     """One successful (re-)solve event. The ledger is a list of these."""
+
+    problem: str
+    on: date
+
+
+@dataclass(frozen=True)
+class HardestMark:
+    """User flagged this problem as the day's hardest. Logged from a tick in
+    today.md's `## Today's hardest` section, persisted to hardest.jsonl, and
+    surfaced on Saturday's `## This week's hardest — your picks` pre-fill."""
 
     problem: str
     on: date
@@ -405,6 +418,9 @@ _OTHER_H2 = re.compile(r"^##\s+(.+?)\s*$")
 # `_CHECKED_LINE` patterns are kept for parsing today.md completions.
 _PROBLEM_LINE = re.compile(r"^\s*-\s+\[[ xX]\]\s+(.*)$")
 _CHECKED_LINE = re.compile(r"^\s*-\s+\[[xX]\]\s+(.*)$")
+_HARDEST_HEADING = re.compile(
+    r"^##\s+Today's hardest(?:\s+\((\d{4}-\d{2}-\d{2})\))?(?:\s.*)?$"
+)
 _DSA_PROBLEM_PARENT = re.compile(r"^-\s+(?:\[[ xX]\]\s+)?(.+?)\s*$")
 _DSA_COUNTER_ANNOTATION = re.compile(r"\s+·\s+\d+/5(?:\s+\([^)]+\))?\s*$")
 _DSA_SUBBULLET = re.compile(r"^\s+-\s+\[([ xX])\](?:\s+✅\s*(\S*))?\s*$")
@@ -415,7 +431,7 @@ _METADATA_SUFFIX = re.compile(r"\s+—\s+.*$")
 _DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
 _SOURCE_TAG = re.compile(r"\s*\((nc-150\+|lc-only|company question)\)\s*")
 _VARIANT_TAG = re.compile(r"\s*\(variant of:\s*([^)]+)\)\s*")
-_MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\([^\)]+\)")
+_MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\(([^\)]+)\)")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")
 
 
@@ -485,6 +501,7 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
         diff_m = _DIFFICULTY_TAG.search(raw)
         src_m = _SOURCE_TAG.search(raw)
         var_m = _VARIANT_TAG.search(raw)
+        link_m = _MARKDOWN_LINK.search(raw)
         name = _DIFFICULTY_TAG.sub(" ", raw)
         name = _SOURCE_TAG.sub(" ", name)
         name = _VARIANT_TAG.sub(" ", name)
@@ -493,6 +510,11 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
         name = re.sub(r"\s+", " ", name).strip()
         if not name:
             continue
+        link = link_m.group(2) if link_m else None
+        # Suppress local relative paths like ./problems/company/foo.md — those
+        # are stub-file pointers, not external problem links.
+        if link and link.startswith("."):
+            link = None
         problems.append(
             Problem(
                 text=f"[{pattern}] -> {name}",
@@ -500,6 +522,7 @@ def parse_curriculum(curriculum_md: str) -> list[Problem]:
                 source=src_m.group(1) if src_m else "nc-150",  # type: ignore[arg-type]
                 variant_of=var_m.group(1).strip() if var_m else None,
                 phase=phase_num,
+                link=link,
             )
         )
 
@@ -619,9 +642,20 @@ def parse_phases(curriculum_md: str) -> list[Phase]:
 
 
 def parse_completions(today_md: str) -> list[Touch]:
-    """Pull every checked, dated, problem-shaped line out of a today.md file."""
+    """Pull every checked, dated, problem-shaped line out of a today.md file.
+    Skips ticks under the `## Today's hardest` section — those are flag-only
+    marks, parsed separately by `parse_hardest_marks` and routed to a
+    different ledger file."""
     touches: list[Touch] = []
+    in_hardest = False
     for line in today_md.splitlines():
+        if _HARDEST_HEADING.match(line):
+            in_hardest = True
+            continue
+        if line.startswith("## ") and not _HARDEST_HEADING.match(line):
+            in_hardest = False
+        if in_hardest:
+            continue
         match = _CHECKED_LINE.match(line)
         if not match:
             continue
@@ -635,6 +669,38 @@ def parse_completions(today_md: str) -> list[Touch]:
                 Touch(problem=canonical, on=date.fromisoformat(date_match.group(1)))
             )
     return touches
+
+
+def parse_hardest_marks(today_md: str, fallback_date: date) -> list[HardestMark]:
+    """Pull ticked problems from the `## Today's hardest (YYYY-MM-DD)` section.
+    The section heading carries the date the marks belong to (embedded by the
+    renderer when today.md was generated), so flags survive any recompute
+    timing — morning, evening, or multi-run days. If the heading omits the
+    date (legacy / hand-edited today.md), falls back to `fallback_date`."""
+    marks: list[HardestMark] = []
+    in_hardest = False
+    section_date = fallback_date
+    for line in today_md.splitlines():
+        heading_match = _HARDEST_HEADING.match(line)
+        if heading_match:
+            in_hardest = True
+            stamped = heading_match.group(1)
+            section_date = (
+                date.fromisoformat(stamped) if stamped else fallback_date
+            )
+            continue
+        if line.startswith("## ") and not heading_match:
+            in_hardest = False
+            continue
+        if not in_hardest:
+            continue
+        match = _CHECKED_LINE.match(line)
+        if not match:
+            continue
+        canonical = _canonicalize(match.group(1))
+        if _PROBLEM_TEXT.match(canonical):
+            marks.append(HardestMark(problem=canonical, on=section_date))
+    return marks
 
 
 # ─── Ledger I/O ──────────────────────────────────────────────────────────────
@@ -655,6 +721,33 @@ def load_ledger(path: Path) -> list[Touch]:
         r = json.loads(line)
         touches.append(Touch(problem=r["problem"], on=date.fromisoformat(r["on"])))
     return touches
+
+
+def load_hardest_ledger(path: Path) -> list[HardestMark]:
+    """Read the hardest-marks JSONL ledger. Empty list if the file is missing."""
+    if not path.exists():
+        return []
+    marks: list[HardestMark] = []
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        marks.append(HardestMark(problem=r["problem"], on=date.fromisoformat(r["on"])))
+    return marks
+
+
+def append_to_hardest_ledger(path: Path, marks: list[HardestMark]) -> int:
+    """Append new HardestMark entries, deduped against existing (problem, on)
+    pairs already in the file. Returns the number of new entries written."""
+    existing = {(m.problem, m.on) for m in load_hardest_ledger(path)}
+    fresh = [m for m in marks if (m.problem, m.on) not in existing]
+    if not fresh:
+        return 0
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a") as f:
+        for m in fresh:
+            f.write(json.dumps({"problem": m.problem, "on": m.on.isoformat()}) + "\n")
+    return len(fresh)
 
 
 def next_sd_chapter(chapters: list[SDChapter]) -> SDChapter | None:
@@ -1298,8 +1391,78 @@ def _render_new_line(problem: Problem) -> str:
     return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)}"
 
 
-def _render_time_blocks(mock_today: bool) -> list[str]:
-    """`## Time blocks` section. On mock days, the SD slot shifts after the mock."""
+def _render_hardest_pick_section(new: list[Problem], today: date) -> list[str]:
+    """Mon–Fri `## Today's hardest` section: one pre-rendered checkbox per
+    today's New problem. User ticks the one(s) they found hardest; next
+    recompute appends to hardest.jsonl. No typing — names/links/difficulty
+    are engine-rendered from the curriculum so there's no spelling risk.
+    The date is embedded in the heading so parse_hardest_marks knows which
+    day a tick belongs to regardless of when recompute runs."""
+    if not new:
+        return []
+    lines = [
+        f"## Today's hardest ({today.isoformat()}) — pick from today's New",
+        "",
+        "_Tick the problem you found hardest today. Logged to `hardest.jsonl` on next recompute; pre-fills Saturday's re-solve list._",
+        "",
+    ]
+    for p in new:
+        link_part = f"[{p.name}]({p.link})" if p.link else p.name
+        lines.append(
+            f"- [ ] [{p.pattern}] -> {link_part}{_diff_suffix(p.difficulty)}"
+        )
+    return lines
+
+
+def _render_saturday_hardest_picks(
+    week_marks: list[HardestMark], curriculum: list[Problem], today: date
+) -> list[str]:
+    """Saturday `## This week's hardest` section. Pre-fills with HardestMarks
+    from the past 5 weekdays (Mon–Fri preceding today) joined against the
+    curriculum to recover live links/difficulty. Falls back to the empty
+    3-slot template when nothing was flagged that week."""
+    lookup = {p.text: p for p in curriculum}
+    cutoff = today - timedelta(days=5)
+    relevant = sorted(
+        [m for m in week_marks if cutoff <= m.on < today and m.problem in lookup],
+        key=lambda m: m.on,
+    )
+    if not relevant:
+        return [
+            "## This week's hardest — your pick",
+            "",
+            "_Re-solve 2-3 problems you found hardest this week. Flag them in today.md's `Today's hardest` section each weekday — they'll auto-fill here next Saturday._",
+            "",
+            "- [ ] [Pattern] -> Problem Name",
+            "- [ ] [Pattern] -> Problem Name",
+            "- [ ] [Pattern] -> Problem Name",
+        ]
+    lines = [
+        "## This week's hardest — your picks",
+        "",
+        "_Re-solve each on a 30-min clock. Auto-filled from your weekday hardest flags._",
+        "",
+    ]
+    for m in relevant:
+        p = lookup[m.problem]
+        link_part = f"[{p.name}]({p.link})" if p.link else p.name
+        lines.append(
+            f"- [ ] [{p.pattern}] -> {link_part}{_diff_suffix(p.difficulty)} "
+            f"— flagged {_format_date(m.on)}"
+        )
+    return lines
+
+
+def _render_time_blocks(mock_today: bool, *, saturday: bool = False) -> list[str]:
+    """`## Time blocks` section. On Saturday, morning Recall row notes the
+    this-week's-hardest sub-block. On mock days, SD shifts after the mock."""
+    if saturday:
+        blocks = [
+            "- 9:00–13:00  Recall (starts with this-week's-hardest sub-block)",
+            "- 14:00–15:30 System Design",
+            "- 15:30–19:30 DSA New",
+        ]
+        return ["## Time blocks", "", *blocks, ""]
     blocks = (
         [
             "- 9:00–13:00  Recall",
@@ -1345,6 +1508,8 @@ def render_today(
     sd_done: int = 0,
     sd_chapters: list[SDChapter] | None = None,
     mock_today: bool = False,
+    hardest_marks: list[HardestMark] | None = None,
+    curriculum: list[Problem] | None = None,
 ) -> str:
     """Produce the markdown for today.md."""
     base = f"# Today — {_format_date(today, weekday=True)}, {today.year}"
@@ -1373,7 +1538,8 @@ def render_today(
         lines += _render_next_mock_block(next_up_mock, today, em_done, sd_done, sd_chapters)
         lines.append("")
 
-    lines += _render_time_blocks(mock_today)
+    is_saturday = today.weekday() == calendar.SATURDAY
+    lines += _render_time_blocks(mock_today, saturday=is_saturday)
 
     lines += ["## Recall — most overdue first", ""]
     lines += (
@@ -1389,17 +1555,19 @@ def render_today(
     if sd_next is not None:
         lines += ["", "## Today's SD reading", "", f"- [ ] {sd_next.book} · {sd_next.title}"]
 
-    if today.weekday() == calendar.SATURDAY:
-        lines += [
-            "",
-            "## This week's hardest — your pick",
-            "",
-            "_Re-solve 2-3 problems you found hardest this week (from your daily \"today's hardest\" notes Mon–Fri). Write the canonical `[Pattern] -> Name` form between the brackets so ticking logs a real touch._",
-            "",
-            "- [ ] [Pattern] -> Problem Name",
-            "- [ ] [Pattern] -> Problem Name",
-            "- [ ] [Pattern] -> Problem Name",
-        ]
+    if is_saturday:
+        lines.append("")
+        lines += _render_saturday_hardest_picks(
+            hardest_marks or [], curriculum or [], today
+        )
+    elif new:
+        # Mon–Fri: pre-rendered checkbox list of today's New problems for the
+        # user to flag the day's hardest. Skip on Sundays (weekday 6); the
+        # caller already gates by phase/curriculum so empty `new` skips too.
+        if today.weekday() != calendar.SUNDAY:
+            picks = _render_hardest_pick_section(new, today)
+            if picks:
+                lines += ["", *picks]
 
     lines.append("")
     return "\n".join(lines)
@@ -1508,6 +1676,7 @@ def recompute(
     today: date,
     recall_limit: int = DEFAULT_RECALL_LIMIT,
     dry_run: bool = False,
+    hardest_ledger_path: Path | None = None,
 ) -> RecomputeResult:
     """One full cycle: log new completions, fold mock edits, regenerate today.md.
 
@@ -1563,6 +1732,16 @@ def recompute(
     if plan.additions and not dry_run:
         logged += append_to_ledger(ledger_path, plan.additions)
 
+    # Hardest marks: parse ticks under `## Today's hardest (DATE)`. The date
+    # in the heading (rendered when today.md was generated) tells us which
+    # day each mark belongs to — robust against multi-recompute days or
+    # evening reruns. Fallback to `today` only if the heading is dateless
+    # (legacy / hand-edited).
+    if hardest_ledger_path is not None and not dry_run:
+        marks = parse_hardest_marks(today_md, fallback_date=today)
+        if marks:
+            append_to_hardest_ledger(hardest_ledger_path, marks)
+
     ledger = load_ledger(ledger_path)
     recall = compute_recall(ledger, today=today, limit=recall_limit, curriculum=curriculum)
     phase = current_phase(curriculum, ledger, phases) if phases else None
@@ -1597,6 +1776,10 @@ def recompute(
     em_done, sd_done = readiness.em.done, readiness.sd.done
 
     mock_today = any(m.scheduled_date == today for m in mocks)
+    hardest_marks = (
+        load_hardest_ledger(hardest_ledger_path)
+        if hardest_ledger_path is not None else []
+    )
     today_md_path.write_text(render_today(
         today=today,
         recall=recall,
@@ -1614,6 +1797,8 @@ def recompute(
         sd_done=sd_done,
         sd_chapters=sd_chapters,
         mock_today=mock_today,
+        hardest_marks=hardest_marks,
+        curriculum=curriculum,
     ))
 
     return RecomputeResult(
@@ -1652,6 +1837,13 @@ def cli() -> None:
     help="Append-only completion ledger.",
 )
 @click.option(
+    "--hardest-ledger",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=Path("prep-data/hardest.jsonl"),
+    show_default=True,
+    help="Append-only hardest-of-day flag ledger; pre-fills Saturday's re-solve list.",
+)
+@click.option(
     "--dry-run",
     is_flag=True,
     help="Preview destructive ledger purges (from DSA unchecks in curriculum.md) without applying.",
@@ -1660,6 +1852,7 @@ def recompute_cmd(
     curriculum: Path,
     today_md: Path,
     ledger: Path,
+    hardest_ledger: Path,
     dry_run: bool,
 ) -> None:
     """Fold yesterday's checks into the ledger, then regenerate today.md."""
@@ -1669,6 +1862,7 @@ def recompute_cmd(
         ledger,
         today=date.today(),
         dry_run=dry_run,
+        hardest_ledger_path=hardest_ledger,
     )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "

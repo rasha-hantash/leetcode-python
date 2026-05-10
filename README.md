@@ -37,7 +37,7 @@ _Mock-week pivot: if a scheduled mock needs an uncovered pattern, prioritize tha
 - **Acquisition** = first-time exposure to new problems, blocked by pattern. Working memory holds one pattern's structure; spaced Recall locks it in over weeks
 - Recall first thing; SD then DSA New in the afternoon
 - Recall time budget: Easy 20m / Medium 40m (no Hards in Recall during 1–6 — they don't enter the queue until Phase 7)
-- **End of day:** mark "today's hardest" — feeds Saturday's re-solve sub-block
+- **End of day:** tick the problem you found hardest in today.md's `## Today's hardest` section. Engine logs to `prep-data/hardest.jsonl` on next recompute and pre-fills Saturday's re-solve sub-block — no typing, no spelling, links auto-included.
 - **Phase 7 uses the same two schedules below** (Mon–Fri table for weekdays, Saturday table for Saturdays). Sundays off across all phases.
 
 **Mon–Fri schedule:**
@@ -58,7 +58,7 @@ _Mock days: afternoon shifts to `14:00–16:00 mock + 16:00–17:30 SD + 17:30�
 | 14:00–15:30 | System Design (today's chapter from `today.md`)                                                    |
 | 15:30–19:30 | DSA New                                                                                            |
 
-_Engine auto-adds the "this-week's-hardest" sub-block to Saturday's `today.md`._
+_Engine pre-fills the "this-week's-hardest" sub-block from your weekday hardest flags (auto-resolved to live problem links from the curriculum). Falls back to a 3-slot blank template if you didn't flag anything that week._
 
 ### Phase 7 — Hards · Mon–Sat
 
@@ -206,6 +206,7 @@ Test names ARE the spec — read them top to bottom for a complete description o
 | `curriculum.md`                         | **Master list** — DSA (by phase → pattern), System Design, Mocks, Behavioral. Tick boxes here OR in `today.md`.                                                               |
 | `today.md`                              | _(generated)_ Today's frozen Recall + New queue. Tick boxes here OR in `curriculum.md`.                                                                                       |
 | `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth for DSA touches.                                                                                                 |
+| `prep-data/hardest.jsonl`               | _(generated)_ Append-only "hardest of the day" flag ledger. Pre-fills Saturday's re-solve list.                                                                               |
 | `recall_engine.py`                      | Snapshot-mode SM-2 lite engine. CLI: `uv run prep recompute`.                                                                                                                 |
 | `tests/test_recall_engine.py`           | Narrative tests — also serve as the spec.                                                                                                                                     |
 | `launchd/com.rasha.recall-engine.plist` | LaunchAgent template — daily recompute at 8:30 AM.                                                                                                                            |
