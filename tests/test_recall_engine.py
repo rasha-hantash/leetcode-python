@@ -36,6 +36,8 @@ from recall_engine import (
     interval_for,
     apply_mock_updates,
     complete_mock,
+    ensure_runtime_dirs,
+    init_curriculum_file,
     schedule_mock,
     load_hardest_ledger,
     load_ledger,
@@ -1510,6 +1512,62 @@ def test_complete_mock_rejects_unknown_mock_id() -> None:
     md = "## Mocks\n\n- [ ] [mock-1] Pramp · _pending_\n"
     with pytest.raises(ValueError, match="unknown mock id"):
         complete_mock(md, "mock-99", date(2026, 5, 17))
+
+
+# ─── Init / first-run seeding ─────────────────────────────────────────────────
+
+
+def test_init_curriculum_file_seeds_when_target_missing(tmp_path: Path) -> None:
+    template = tmp_path / "curriculum.template.md"
+    template.write_text("# Curriculum\n\n- [ ] one\n")
+    curriculum = tmp_path / "curriculum.md"
+
+    wrote = init_curriculum_file(template, curriculum)
+
+    assert wrote is True
+    assert curriculum.read_text() == "# Curriculum\n\n- [ ] one\n"
+
+
+def test_init_curriculum_file_is_a_noop_when_target_already_exists(tmp_path: Path) -> None:
+    template = tmp_path / "curriculum.template.md"
+    template.write_text("# pristine template\n")
+    curriculum = tmp_path / "curriculum.md"
+    curriculum.write_text("# my personal state — DO NOT CLOBBER\n- [x] something\n")
+
+    wrote = init_curriculum_file(template, curriculum)
+
+    assert wrote is False
+    assert curriculum.read_text() == "# my personal state — DO NOT CLOBBER\n- [x] something\n"
+
+
+def test_init_curriculum_file_overwrites_with_force(tmp_path: Path) -> None:
+    template = tmp_path / "curriculum.template.md"
+    template.write_text("# fresh\n")
+    curriculum = tmp_path / "curriculum.md"
+    curriculum.write_text("# stale state\n")
+
+    wrote = init_curriculum_file(template, curriculum, force=True)
+
+    assert wrote is True
+    assert curriculum.read_text() == "# fresh\n"
+
+
+def test_init_curriculum_file_raises_when_template_missing(tmp_path: Path) -> None:
+    template = tmp_path / "missing.template.md"
+    curriculum = tmp_path / "curriculum.md"
+
+    with pytest.raises(FileNotFoundError):
+        init_curriculum_file(template, curriculum)
+
+
+def test_ensure_runtime_dirs_is_idempotent(tmp_path: Path) -> None:
+    prep_data = tmp_path / "prep-data"
+    problems = tmp_path / "problems"
+    ensure_runtime_dirs(prep_data, problems)
+    # Second call must not fail even though dirs already exist.
+    ensure_runtime_dirs(prep_data, problems)
+    assert prep_data.is_dir()
+    assert problems.is_dir()
 
 
 def test_write_curriculum_mocks_round_trips_through_parse_mocks() -> None:
