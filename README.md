@@ -9,6 +9,8 @@ one file, `today.md`, with the day's recall queue, new problems, system
 design reading, and mock status — pulled from a single master curriculum and
 your own append-only ledger of completions.
 
+**Curriculum artifact:** [NeetCode 150 gap analysis](coverage-analysis.md) — every extra problem outside NC150, grouped by pattern, with per-problem justification.
+
 <details>
 <summary><b>Preview <code>today.md</code> in Obsidian</b></summary>
 
