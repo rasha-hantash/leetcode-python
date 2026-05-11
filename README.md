@@ -1,5 +1,7 @@
 # Interview Prep
 
+<a href="https://www.buymeacoffee.com/rasha_hantash" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 A local-first interview prep engine for Obsidian.
 
 It combines:
