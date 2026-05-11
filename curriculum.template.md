@@ -19,338 +19,338 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Arrays & Hashing
 
-- [Contains Duplicate](https://neetcode.io/problems/duplicate-integer) (E) · 0/5
-- [Valid Anagram](https://neetcode.io/problems/is-anagram) (E) · 0/5
-- [Two Sum](https://neetcode.io/problems/two-integer-sum) (E) · 0/5
-- [Find Pivot Index](https://neetcode.io/problems/find-pivot-index) (E) (nc-150+) · 0/5
-- [Find All Numbers Disappeared in an Array](https://neetcode.io/problems/find-all-numbers-disappeared-in-an-array) (E) (nc-150+) · 0/5
-- [Group Anagrams](https://neetcode.io/problems/anagram-groups) (M) · 0/5
-- [Top K Frequent Elements](https://neetcode.io/problems/top-k-elements-in-list) (M) · 0/5
-- [Encode and Decode Strings](https://neetcode.io/problems/string-encode-and-decode) (M) · 0/5
-- [Product of Array Except Self](https://neetcode.io/problems/products-of-array-discluding-self) (M) · 0/5
-- [Valid Sudoku](https://neetcode.io/problems/valid-sudoku) (M) · 0/5
-- [Longest Consecutive Sequence](https://neetcode.io/problems/longest-consecutive-sequence) (M) · 0/5
-- [Subarray Sum Equals K](https://neetcode.io/problems/subarray-sum-equals-k) (M) (nc-150+) · 0/5
-- [Continuous Subarray Sum](https://neetcode.io/problems/continuous-subarray-sum) (M) (nc-150+) · 0/5
-- [Range Sum Query 2D Immutable](https://neetcode.io/problems/range-sum-query-2d-immutable) (M) (nc-150+) · 0/5
-- [Customers With 2-Day 2-Page Visits](./problems/company/customers-with-2-day-2-page-visits.md) (M) (company question) · 0/5
-- [Shift Sign-Up With Max-New Constraint](./problems/company/shift-sign-up-with-max-new-constraint.md) (M) (company question) · 0/5
-- [Referral Bonus Event Correlation](./problems/company/referral-bonus-event-correlation.md) (M) (company question) · 0/5
+- [Contains Duplicate](https://neetcode.io/problems/duplicate-integer) (E) · 0/4
+- [Valid Anagram](https://neetcode.io/problems/is-anagram) (E) · 0/4
+- [Two Sum](https://neetcode.io/problems/two-integer-sum) (E) · 0/4
+- [Find Pivot Index](https://neetcode.io/problems/find-pivot-index) (E) (nc-150+) · 0/4
+- [Find All Numbers Disappeared in an Array](https://neetcode.io/problems/find-all-numbers-disappeared-in-an-array) (E) (nc-150+) · 0/4
+- [Group Anagrams](https://neetcode.io/problems/anagram-groups) (M) · 0/4
+- [Top K Frequent Elements](https://neetcode.io/problems/top-k-elements-in-list) (M) · 0/4
+- [Encode and Decode Strings](https://neetcode.io/problems/string-encode-and-decode) (M) · 0/4
+- [Product of Array Except Self](https://neetcode.io/problems/products-of-array-discluding-self) (M) · 0/4
+- [Valid Sudoku](https://neetcode.io/problems/valid-sudoku) (M) · 0/4
+- [Longest Consecutive Sequence](https://neetcode.io/problems/longest-consecutive-sequence) (M) · 0/4
+- [Subarray Sum Equals K](https://neetcode.io/problems/subarray-sum-equals-k) (M) (nc-150+) · 0/4
+- [Continuous Subarray Sum](https://neetcode.io/problems/continuous-subarray-sum) (M) (nc-150+) · 0/4
+- [Range Sum Query 2D Immutable](https://neetcode.io/problems/range-sum-query-2d-immutable) (M) (nc-150+) · 0/4
+- [Customers With 2-Day 2-Page Visits](./problems/company/customers-with-2-day-2-page-visits.md) (M) (company question) · 0/4
+- [Shift Sign-Up With Max-New Constraint](./problems/company/shift-sign-up-with-max-new-constraint.md) (M) (company question) · 0/4
+- [Referral Bonus Event Correlation](./problems/company/referral-bonus-event-correlation.md) (M) (company question) · 0/4
 
 #### Two Pointers
 
-- [Valid Palindrome](https://neetcode.io/problems/is-palindrome) (E) · 0/5
-- [Two Sum II](https://neetcode.io/problems/two-integer-sum-ii) (M) (variant of: Two Sum) · 0/5
-- [3Sum](https://neetcode.io/problems/three-integer-sum) (M) · 0/5
-- [Container With Most Water](https://neetcode.io/problems/max-water-container) (M) · 0/5
+- [Valid Palindrome](https://neetcode.io/problems/is-palindrome) (E) · 0/4
+- [Two Sum II](https://neetcode.io/problems/two-integer-sum-ii) (M) (variant of: Two Sum) · 0/4
+- [3Sum](https://neetcode.io/problems/three-integer-sum) (M) · 0/4
+- [Container With Most Water](https://neetcode.io/problems/max-water-container) (M) · 0/4
 
 #### Sliding Window
 
-- [Best Time to Buy and Sell Stock](https://neetcode.io/problems/buy-and-sell-crypto) (E) · 0/5
-- [Count Binary Substrings](https://leetcode.com/problems/count-binary-substrings/) (E) (lc-only) · 0/5
-- [Longest Substring Without Repeating Characters](https://neetcode.io/problems/longest-substring-without-duplicates) (M) · 0/5
-- [Longest Repeating Character Replacement](https://neetcode.io/problems/longest-repeating-substring-with-replacement) (M) · 0/5
-- [Permutation in String](https://neetcode.io/problems/permutation-string) (M) · 0/5
+- [Best Time to Buy and Sell Stock](https://neetcode.io/problems/buy-and-sell-crypto) (E) · 0/4
+- [Count Binary Substrings](https://leetcode.com/problems/count-binary-substrings/) (E) (lc-only) · 0/4
+- [Longest Substring Without Repeating Characters](https://neetcode.io/problems/longest-substring-without-duplicates) (M) · 0/4
+- [Longest Repeating Character Replacement](https://neetcode.io/problems/longest-repeating-substring-with-replacement) (M) · 0/4
+- [Permutation in String](https://neetcode.io/problems/permutation-string) (M) · 0/4
 
 #### Stack
 
-- [Valid Parentheses](https://neetcode.io/problems/validate-parentheses) (E) · 0/5
-- [Min Stack](https://neetcode.io/problems/minimum-stack) (E) · 0/5
-- [Evaluate Reverse Polish Notation](https://neetcode.io/problems/evaluate-reverse-polish-notation) (M) · 0/5
-- [Daily Temperatures](https://neetcode.io/problems/daily-temperatures) (M) · 0/5
-- [Car Fleet](https://neetcode.io/problems/car-fleet) (M) · 0/5
+- [Valid Parentheses](https://neetcode.io/problems/validate-parentheses) (E) · 0/4
+- [Min Stack](https://neetcode.io/problems/minimum-stack) (E) · 0/4
+- [Evaluate Reverse Polish Notation](https://neetcode.io/problems/evaluate-reverse-polish-notation) (M) · 0/4
+- [Daily Temperatures](https://neetcode.io/problems/daily-temperatures) (M) · 0/4
+- [Car Fleet](https://neetcode.io/problems/car-fleet) (M) · 0/4
 
 #### Binary Search
 
-- [Binary Search](https://neetcode.io/problems/binary-search) (E) · 0/5
-- [Search a 2D Matrix](https://neetcode.io/problems/search-2d-matrix) (M) · 0/5
-- [Koko Eating Bananas](https://neetcode.io/problems/eating-bananas) (M) · 0/5
-- [Find Minimum in Rotated Sorted Array](https://neetcode.io/problems/find-minimum-in-rotated-sorted-array) (M) · 0/5
-- [Search in Rotated Sorted Array](https://neetcode.io/problems/find-target-in-rotated-sorted-array) (M) · 0/5
-- [Time Based Key Value Store](https://neetcode.io/problems/time-based-key-value-store) (M) · 0/5
+- [Binary Search](https://neetcode.io/problems/binary-search) (E) · 0/4
+- [Search a 2D Matrix](https://neetcode.io/problems/search-2d-matrix) (M) · 0/4
+- [Koko Eating Bananas](https://neetcode.io/problems/eating-bananas) (M) · 0/4
+- [Find Minimum in Rotated Sorted Array](https://neetcode.io/problems/find-minimum-in-rotated-sorted-array) (M) · 0/4
+- [Search in Rotated Sorted Array](https://neetcode.io/problems/find-target-in-rotated-sorted-array) (M) · 0/4
+- [Time Based Key Value Store](https://neetcode.io/problems/time-based-key-value-store) (M) · 0/4
 
 ### Phase 2 — Linked List + Trees (4 new/day)
 
 #### Linked List
 
-- [Reverse Linked List](https://neetcode.io/problems/reverse-a-linked-list) (E) · 0/5
-- [Merge Two Sorted Lists](https://neetcode.io/problems/merge-two-sorted-linked-lists) (E) · 0/5
-- [Linked List Cycle](https://neetcode.io/problems/linked-list-cycle-detection) (E) · 0/5
-- [Reorder List](https://neetcode.io/problems/reorder-linked-list) (M) · 0/5
-- [Remove Nth Node From End of List](https://neetcode.io/problems/remove-node-from-end-of-linked-list) (M) · 0/5
-- [Copy List With Random Pointer](https://neetcode.io/problems/copy-linked-list-with-random-pointer) (M) · 0/5
-- [Add Two Numbers](https://neetcode.io/problems/add-two-numbers) (M) · 0/5
-- [Find The Duplicate Number](https://neetcode.io/problems/find-duplicate-integer) (M) · 0/5
-- [LRU Cache](https://neetcode.io/problems/lru-cache) (M) · 0/5
+- [Reverse Linked List](https://neetcode.io/problems/reverse-a-linked-list) (E) · 0/4
+- [Merge Two Sorted Lists](https://neetcode.io/problems/merge-two-sorted-linked-lists) (E) · 0/4
+- [Linked List Cycle](https://neetcode.io/problems/linked-list-cycle-detection) (E) · 0/4
+- [Reorder List](https://neetcode.io/problems/reorder-linked-list) (M) · 0/4
+- [Remove Nth Node From End of List](https://neetcode.io/problems/remove-node-from-end-of-linked-list) (M) · 0/4
+- [Copy List With Random Pointer](https://neetcode.io/problems/copy-linked-list-with-random-pointer) (M) · 0/4
+- [Add Two Numbers](https://neetcode.io/problems/add-two-numbers) (M) · 0/4
+- [Find The Duplicate Number](https://neetcode.io/problems/find-duplicate-integer) (M) · 0/4
+- [LRU Cache](https://neetcode.io/problems/lru-cache) (M) · 0/4
 
 #### Trees
 
-- [Invert Binary Tree](https://neetcode.io/problems/invert-a-binary-tree) (E) · 0/5
-- [Maximum Depth of Binary Tree](https://neetcode.io/problems/depth-of-binary-tree) (E) · 0/5
-- [Diameter of Binary Tree](https://neetcode.io/problems/binary-tree-diameter) (E) · 0/5
-- [Balanced Binary Tree](https://neetcode.io/problems/balanced-binary-tree) (E) · 0/5
-- [Same Tree](https://neetcode.io/problems/same-binary-tree) (E) · 0/5
-- [Subtree of Another Tree](https://neetcode.io/problems/subtree-of-a-binary-tree) (E) · 0/5
-- [Lowest Common Ancestor of a BST](https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree) (E) · 0/5
-- [Binary Tree Level Order Traversal](https://neetcode.io/problems/level-order-traversal-of-binary-tree) (M) · 0/5
-- [Binary Tree Right Side View](https://neetcode.io/problems/binary-tree-right-side-view) (M) · 0/5
-- [Count Good Nodes in Binary Tree](https://neetcode.io/problems/count-good-nodes-in-binary-tree) (M) · 0/5
-- [Validate Binary Search Tree](https://neetcode.io/problems/valid-binary-search-tree) (M) · 0/5
-- [Kth Smallest Element in a BST](https://neetcode.io/problems/kth-smallest-integer-in-bst) (M) · 0/5
-- [Construct Binary Tree from Preorder and Inorder Traversal](https://neetcode.io/problems/binary-tree-from-preorder-and-inorder-traversal) (M) · 0/5
-- [Find Duplicate Subtrees](https://leetcode.com/problems/find-duplicate-subtrees/) (M) (lc-only) · 0/5
-- [Binary Search Tree Iterator](https://neetcode.io/problems/binary-search-tree-iterator) (M) (nc-150+) · 0/5
-- [Build Binary Tree From Char Frequencies](./problems/company/build-binary-tree-from-char-frequencies.md) (M) (company question) · 0/5
+- [Invert Binary Tree](https://neetcode.io/problems/invert-a-binary-tree) (E) · 0/4
+- [Maximum Depth of Binary Tree](https://neetcode.io/problems/depth-of-binary-tree) (E) · 0/4
+- [Diameter of Binary Tree](https://neetcode.io/problems/binary-tree-diameter) (E) · 0/4
+- [Balanced Binary Tree](https://neetcode.io/problems/balanced-binary-tree) (E) · 0/4
+- [Same Tree](https://neetcode.io/problems/same-binary-tree) (E) · 0/4
+- [Subtree of Another Tree](https://neetcode.io/problems/subtree-of-a-binary-tree) (E) · 0/4
+- [Lowest Common Ancestor of a BST](https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree) (E) · 0/4
+- [Binary Tree Level Order Traversal](https://neetcode.io/problems/level-order-traversal-of-binary-tree) (M) · 0/4
+- [Binary Tree Right Side View](https://neetcode.io/problems/binary-tree-right-side-view) (M) · 0/4
+- [Count Good Nodes in Binary Tree](https://neetcode.io/problems/count-good-nodes-in-binary-tree) (M) · 0/4
+- [Validate Binary Search Tree](https://neetcode.io/problems/valid-binary-search-tree) (M) · 0/4
+- [Kth Smallest Element in a BST](https://neetcode.io/problems/kth-smallest-integer-in-bst) (M) · 0/4
+- [Construct Binary Tree from Preorder and Inorder Traversal](https://neetcode.io/problems/binary-tree-from-preorder-and-inorder-traversal) (M) · 0/4
+- [Find Duplicate Subtrees](https://leetcode.com/problems/find-duplicate-subtrees/) (M) (lc-only) · 0/4
+- [Binary Search Tree Iterator](https://neetcode.io/problems/binary-search-tree-iterator) (M) (nc-150+) · 0/4
+- [Build Binary Tree From Char Frequencies](./problems/company/build-binary-tree-from-char-frequencies.md) (M) (company question) · 0/4
 
 ### Phase 3 — Heap + Backtracking (4 new/day)
 
 #### Heap
 
-- [Kth Largest Element in a Stream](https://neetcode.io/problems/kth-largest-integer-in-a-stream) (E) · 0/5
-- [Last Stone Weight](https://neetcode.io/problems/last-stone-weight) (E) · 0/5
-- [K Closest Points to Origin](https://neetcode.io/problems/k-closest-points-to-origin) (M) · 0/5
-- [Kth Largest Element in an Array](https://neetcode.io/problems/kth-largest-element-in-an-array) (M) · 0/5
-- [Task Scheduler](https://neetcode.io/problems/task-scheduling) (M) · 0/5
-- [Design Twitter](https://neetcode.io/problems/design-twitter-feed) (M) · 0/5
+- [Kth Largest Element in a Stream](https://neetcode.io/problems/kth-largest-integer-in-a-stream) (E) · 0/4
+- [Last Stone Weight](https://neetcode.io/problems/last-stone-weight) (E) · 0/4
+- [K Closest Points to Origin](https://neetcode.io/problems/k-closest-points-to-origin) (M) · 0/4
+- [Kth Largest Element in an Array](https://neetcode.io/problems/kth-largest-element-in-an-array) (M) · 0/4
+- [Task Scheduler](https://neetcode.io/problems/task-scheduling) (M) · 0/4
+- [Design Twitter](https://neetcode.io/problems/design-twitter-feed) (M) · 0/4
 
 #### Backtracking
 
-- [Subsets](https://neetcode.io/problems/subsets) (M) · 0/5
-- [Combination Sum](https://neetcode.io/problems/combination-target-sum) (M) · 0/5
-- [Combination Sum II](https://neetcode.io/problems/combination-target-sum-ii) (M) (variant of: Combination Sum) · 0/5
-- [Permutations](https://neetcode.io/problems/permutations) (M) · 0/5
-- [Subsets II](https://neetcode.io/problems/subsets-ii) (M) (variant of: Subsets) · 0/5
-- [Generate Parentheses](https://neetcode.io/problems/generate-parentheses) (M) · 0/5
-- [Word Search](https://neetcode.io/problems/search-for-word) (M) · 0/5
-- [Palindrome Partitioning](https://neetcode.io/problems/palindrome-partitioning) (M) · 0/5
-- [Letter Combinations of a Phone Number](https://neetcode.io/problems/combinations-of-a-phone-number) (M) · 0/5
+- [Subsets](https://neetcode.io/problems/subsets) (M) · 0/4
+- [Combination Sum](https://neetcode.io/problems/combination-target-sum) (M) · 0/4
+- [Combination Sum II](https://neetcode.io/problems/combination-target-sum-ii) (M) (variant of: Combination Sum) · 0/4
+- [Permutations](https://neetcode.io/problems/permutations) (M) · 0/4
+- [Subsets II](https://neetcode.io/problems/subsets-ii) (M) (variant of: Subsets) · 0/4
+- [Generate Parentheses](https://neetcode.io/problems/generate-parentheses) (M) · 0/4
+- [Word Search](https://neetcode.io/problems/search-for-word) (M) · 0/4
+- [Palindrome Partitioning](https://neetcode.io/problems/palindrome-partitioning) (M) · 0/4
+- [Letter Combinations of a Phone Number](https://neetcode.io/problems/combinations-of-a-phone-number) (M) · 0/4
 
 #### Tries
 
-- [Implement Trie Prefix Tree](https://neetcode.io/problems/implement-prefix-tree) (M) · 0/5
-- [Design Add and Search Words Data Structure](https://neetcode.io/problems/design-word-search-data-structure) (M) · 0/5
+- [Implement Trie Prefix Tree](https://neetcode.io/problems/implement-prefix-tree) (M) · 0/4
+- [Design Add and Search Words Data Structure](https://neetcode.io/problems/design-word-search-data-structure) (M) · 0/4
 
 ### Phase 4 — Graphs + DP (4 new/day)
 
 #### Graphs
 
-- [Number of Islands](https://neetcode.io/problems/count-number-of-islands) (M) · 0/5
-- [Max Area of Island](https://neetcode.io/problems/max-area-of-island) (M) · 0/5
-- [Clone Graph](https://neetcode.io/problems/clone-graph) (M) · 0/5
-- [Walls and Gates](https://neetcode.io/problems/islands-and-treasure) (M) · 0/5
-- [Rotting Oranges](https://neetcode.io/problems/rotting-fruit) (M) · 0/5
-- [Pacific Atlantic Water Flow](https://neetcode.io/problems/pacific-atlantic-water-flow) (M) · 0/5
-- [Surrounded Regions](https://neetcode.io/problems/surrounded-regions) (M) · 0/5
-- [Course Schedule](https://neetcode.io/problems/course-schedule) (M) · 0/5
-- [Course Schedule II](https://neetcode.io/problems/course-schedule-ii) (M) (variant of: Course Schedule) · 0/5
-- [Graph Valid Tree](https://neetcode.io/problems/valid-tree) (M) · 0/5
-- [Number of Connected Components in an Undirected Graph](https://neetcode.io/problems/count-connected-components) (M) · 0/5
-- [Redundant Connection](https://neetcode.io/problems/redundant-connection) (M) · 0/5
-- [Find All Possible Recipes](./problems/company/find-all-possible-recipes.md) (M) (company question) · 0/5
-- [Grid Reachability Within Max Time](./problems/company/grid-reachability-within-max-time.md) (M) (company question) · 0/5
+- [Number of Islands](https://neetcode.io/problems/count-number-of-islands) (M) · 0/4
+- [Max Area of Island](https://neetcode.io/problems/max-area-of-island) (M) · 0/4
+- [Clone Graph](https://neetcode.io/problems/clone-graph) (M) · 0/4
+- [Walls and Gates](https://neetcode.io/problems/islands-and-treasure) (M) · 0/4
+- [Rotting Oranges](https://neetcode.io/problems/rotting-fruit) (M) · 0/4
+- [Pacific Atlantic Water Flow](https://neetcode.io/problems/pacific-atlantic-water-flow) (M) · 0/4
+- [Surrounded Regions](https://neetcode.io/problems/surrounded-regions) (M) · 0/4
+- [Course Schedule](https://neetcode.io/problems/course-schedule) (M) · 0/4
+- [Course Schedule II](https://neetcode.io/problems/course-schedule-ii) (M) (variant of: Course Schedule) · 0/4
+- [Graph Valid Tree](https://neetcode.io/problems/valid-tree) (M) · 0/4
+- [Number of Connected Components in an Undirected Graph](https://neetcode.io/problems/count-connected-components) (M) · 0/4
+- [Redundant Connection](https://neetcode.io/problems/redundant-connection) (M) · 0/4
+- [Find All Possible Recipes](./problems/company/find-all-possible-recipes.md) (M) (company question) · 0/4
+- [Grid Reachability Within Max Time](./problems/company/grid-reachability-within-max-time.md) (M) (company question) · 0/4
 
 #### Advanced Graphs
 
-- [Network Delay Time](https://neetcode.io/problems/network-delay-time) (M) · 0/5
-- [Min Cost to Connect All Points](https://neetcode.io/problems/min-cost-to-connect-points) (M) · 0/5
-- [Cheapest Flights Within K Stops](https://neetcode.io/problems/cheapest-flight-path) (M) · 0/5
+- [Network Delay Time](https://neetcode.io/problems/network-delay-time) (M) · 0/4
+- [Min Cost to Connect All Points](https://neetcode.io/problems/min-cost-to-connect-points) (M) · 0/4
+- [Cheapest Flights Within K Stops](https://neetcode.io/problems/cheapest-flight-path) (M) · 0/4
 
 #### 1-D DP
 
-- [Climbing Stairs](https://neetcode.io/problems/climbing-stairs) (E) · 0/5
-- [Min Cost Climbing Stairs](https://neetcode.io/problems/min-cost-climbing-stairs) (E) · 0/5
-- [House Robber](https://neetcode.io/problems/house-robber) (M) · 0/5
-- [House Robber II](https://neetcode.io/problems/house-robber-ii) (M) (variant of: House Robber) · 0/5
-- [Longest Palindromic Substring](https://neetcode.io/problems/longest-palindromic-substring) (M) · 0/5
-- [Palindromic Substrings](https://neetcode.io/problems/palindromic-substrings) (M) · 0/5
-- [Decode Ways](https://neetcode.io/problems/decode-ways) (M) · 0/5
-- [Coin Change](https://neetcode.io/problems/coin-change) (M) · 0/5
-- [Maximum Product Subarray](https://neetcode.io/problems/maximum-product-subarray) (M) · 0/5
-- [Word Break](https://neetcode.io/problems/word-break) (M) · 0/5
-- [Longest Increasing Subsequence](https://neetcode.io/problems/longest-increasing-subsequence) (M) · 0/5
-- [Partition Equal Subset Sum](https://neetcode.io/problems/partition-equal-subset-sum) (M) · 0/5
+- [Climbing Stairs](https://neetcode.io/problems/climbing-stairs) (E) · 0/4
+- [Min Cost Climbing Stairs](https://neetcode.io/problems/min-cost-climbing-stairs) (E) · 0/4
+- [House Robber](https://neetcode.io/problems/house-robber) (M) · 0/4
+- [House Robber II](https://neetcode.io/problems/house-robber-ii) (M) (variant of: House Robber) · 0/4
+- [Longest Palindromic Substring](https://neetcode.io/problems/longest-palindromic-substring) (M) · 0/4
+- [Palindromic Substrings](https://neetcode.io/problems/palindromic-substrings) (M) · 0/4
+- [Decode Ways](https://neetcode.io/problems/decode-ways) (M) · 0/4
+- [Coin Change](https://neetcode.io/problems/coin-change) (M) · 0/4
+- [Maximum Product Subarray](https://neetcode.io/problems/maximum-product-subarray) (M) · 0/4
+- [Word Break](https://neetcode.io/problems/word-break) (M) · 0/4
+- [Longest Increasing Subsequence](https://neetcode.io/problems/longest-increasing-subsequence) (M) · 0/4
+- [Partition Equal Subset Sum](https://neetcode.io/problems/partition-equal-subset-sum) (M) · 0/4
 
 #### 2-D DP
 
-- [Unique Paths](https://neetcode.io/problems/count-paths) (M) · 0/5
-- [Longest Common Subsequence](https://neetcode.io/problems/longest-common-subsequence) (M) · 0/5
-- [Best Time to Buy and Sell Stock With Cooldown](https://neetcode.io/problems/buy-and-sell-crypto-with-cooldown) (M) · 0/5
-- [Coin Change II](https://neetcode.io/problems/coin-change-ii) (M) (variant of: Coin Change) · 0/5
-- [Target Sum](https://neetcode.io/problems/target-sum) (M) · 0/5
-- [Interleaving String](https://neetcode.io/problems/interleaving-string) (M) · 0/5
-- [Stone Game](https://neetcode.io/problems/stone-game) (M) (nc-150+) · 0/5
-- [Stone Game II](https://neetcode.io/problems/stone-game-ii) (M) (nc-150+) · 0/5
+- [Unique Paths](https://neetcode.io/problems/count-paths) (M) · 0/4
+- [Longest Common Subsequence](https://neetcode.io/problems/longest-common-subsequence) (M) · 0/4
+- [Best Time to Buy and Sell Stock With Cooldown](https://neetcode.io/problems/buy-and-sell-crypto-with-cooldown) (M) · 0/4
+- [Coin Change II](https://neetcode.io/problems/coin-change-ii) (M) (variant of: Coin Change) · 0/4
+- [Target Sum](https://neetcode.io/problems/target-sum) (M) · 0/4
+- [Interleaving String](https://neetcode.io/problems/interleaving-string) (M) · 0/4
+- [Stone Game](https://neetcode.io/problems/stone-game) (M) (nc-150+) · 0/4
+- [Stone Game II](https://neetcode.io/problems/stone-game-ii) (M) (nc-150+) · 0/4
 
 ### Phase 5 — Closing Patterns (4 new/day)
 
 #### Greedy
 
-- [Maximum Subarray](https://neetcode.io/problems/maximum-subarray) (M) · 0/5
-- [Jump Game](https://neetcode.io/problems/jump-game) (M) · 0/5
-- [Jump Game II](https://neetcode.io/problems/jump-game-ii) (M) (variant of: Jump Game) · 0/5
-- [Gas Station](https://neetcode.io/problems/gas-station) (M) · 0/5
-- [Hand of Straights](https://neetcode.io/problems/hand-of-straights) (M) · 0/5
-- [Merge Triplets to Form Target Triplet](https://neetcode.io/problems/merge-triplets-to-form-target) (M) · 0/5
-- [Partition Labels](https://neetcode.io/problems/partition-labels) (M) · 0/5
-- [Valid Parenthesis String](https://neetcode.io/problems/valid-parenthesis-string) (M) · 0/5
+- [Maximum Subarray](https://neetcode.io/problems/maximum-subarray) (M) · 0/4
+- [Jump Game](https://neetcode.io/problems/jump-game) (M) · 0/4
+- [Jump Game II](https://neetcode.io/problems/jump-game-ii) (M) (variant of: Jump Game) · 0/4
+- [Gas Station](https://neetcode.io/problems/gas-station) (M) · 0/4
+- [Hand of Straights](https://neetcode.io/problems/hand-of-straights) (M) · 0/4
+- [Merge Triplets to Form Target Triplet](https://neetcode.io/problems/merge-triplets-to-form-target) (M) · 0/4
+- [Partition Labels](https://neetcode.io/problems/partition-labels) (M) · 0/4
+- [Valid Parenthesis String](https://neetcode.io/problems/valid-parenthesis-string) (M) · 0/4
 
 #### Intervals
 
-- [Meeting Rooms](https://neetcode.io/problems/meeting-schedule) (E) · 0/5
-- [Insert Interval](https://neetcode.io/problems/insert-new-interval) (M) · 0/5
-- [Merge Intervals](https://neetcode.io/problems/merge-intervals) (M) · 0/5
-- [Non Overlapping Intervals](https://neetcode.io/problems/non-overlapping-intervals) (M) · 0/5
-- [Meeting Rooms II](https://neetcode.io/problems/meeting-schedule-ii) (M) (variant of: Meeting Rooms) · 0/5
-- [Prorated Monthly Subscription Charge](./problems/company/prorated-monthly-subscription-charge.md) (M) (company question) · 0/5
+- [Meeting Rooms](https://neetcode.io/problems/meeting-schedule) (E) · 0/4
+- [Insert Interval](https://neetcode.io/problems/insert-new-interval) (M) · 0/4
+- [Merge Intervals](https://neetcode.io/problems/merge-intervals) (M) · 0/4
+- [Non Overlapping Intervals](https://neetcode.io/problems/non-overlapping-intervals) (M) · 0/4
+- [Meeting Rooms II](https://neetcode.io/problems/meeting-schedule-ii) (M) (variant of: Meeting Rooms) · 0/4
+- [Prorated Monthly Subscription Charge](./problems/company/prorated-monthly-subscription-charge.md) (M) (company question) · 0/4
 
 #### Math & Geometry
 
-- [Plus One](https://neetcode.io/problems/plus-one) (E) · 0/5
-- [Happy Number](https://neetcode.io/problems/non-cyclical-number) (E) · 0/5
-- [Rotate Image](https://neetcode.io/problems/rotate-matrix) (M) · 0/5
-- [Spiral Matrix](https://neetcode.io/problems/spiral-matrix) (M) · 0/5
-- [Set Matrix Zeroes](https://neetcode.io/problems/set-zeroes-in-matrix) (M) · 0/5
-- [Pow(x, n)](https://neetcode.io/problems/pow-x-n) (M) · 0/5
-- [Multiply Strings](https://neetcode.io/problems/multiply-strings) (M) · 0/5
-- [Detect Squares](https://neetcode.io/problems/count-squares) (M) · 0/5
+- [Plus One](https://neetcode.io/problems/plus-one) (E) · 0/4
+- [Happy Number](https://neetcode.io/problems/non-cyclical-number) (E) · 0/4
+- [Rotate Image](https://neetcode.io/problems/rotate-matrix) (M) · 0/4
+- [Spiral Matrix](https://neetcode.io/problems/spiral-matrix) (M) · 0/4
+- [Set Matrix Zeroes](https://neetcode.io/problems/set-zeroes-in-matrix) (M) · 0/4
+- [Pow(x, n)](https://neetcode.io/problems/pow-x-n) (M) · 0/4
+- [Multiply Strings](https://neetcode.io/problems/multiply-strings) (M) · 0/4
+- [Detect Squares](https://neetcode.io/problems/count-squares) (M) · 0/4
 
 #### Bit Manipulation
 
-- [Single Number](https://neetcode.io/problems/single-number) (E) · 0/5
-- [Number of 1 Bits](https://neetcode.io/problems/number-of-one-bits) (E) · 0/5
-- [Counting Bits](https://neetcode.io/problems/counting-bits) (E) · 0/5
-- [Reverse Bits](https://neetcode.io/problems/reverse-bits) (E) · 0/5
-- [Missing Number](https://neetcode.io/problems/missing-number) (E) · 0/5
-- [Sum of Two Integers](https://neetcode.io/problems/sum-of-two-integers) (M) · 0/5
-- [Reverse Integer](https://neetcode.io/problems/reverse-integer) (M) · 0/5
+- [Single Number](https://neetcode.io/problems/single-number) (E) · 0/4
+- [Number of 1 Bits](https://neetcode.io/problems/number-of-one-bits) (E) · 0/4
+- [Counting Bits](https://neetcode.io/problems/counting-bits) (E) · 0/4
+- [Reverse Bits](https://neetcode.io/problems/reverse-bits) (E) · 0/4
+- [Missing Number](https://neetcode.io/problems/missing-number) (E) · 0/4
+- [Sum of Two Integers](https://neetcode.io/problems/sum-of-two-integers) (M) · 0/4
+- [Reverse Integer](https://neetcode.io/problems/reverse-integer) (M) · 0/4
 
 ### Phase 6 — NC150+ Extras (3 new/day)
 
 #### String Transformation
 
-- [Longest Common Prefix](https://neetcode.io/problems/longest-common-prefix) (E) (nc-150+) · 0/5
-- [Valid Word Abbreviation](https://neetcode.io/problems/valid-word-abbreviation) (E) · 0/5
-- [Roman to Integer](https://neetcode.io/problems/roman-to-integer) (E) (nc-150+) · 0/5
-- [Add Binary](https://neetcode.io/problems/add-binary) (E) (nc-150+) · 0/5
-- [snake_case → camelCase](./problems/company/snakecase-to-camelcase.md) (E) (nc-150+) (company question) · 0/5
-- [String Compression](https://neetcode.io/problems/string-compression) (M) · 0/5
-- [Decode String](https://neetcode.io/problems/decode-string) (M) (nc-150+) · 0/5
-- [Basic Calculator II](https://neetcode.io/problems/basic-calculator-ii) (M) · 0/5
-- [String to Integer atoi](https://leetcode.com/problems/string-to-integer-atoi/) (M) (lc-only) · 0/5
+- [Longest Common Prefix](https://neetcode.io/problems/longest-common-prefix) (E) (nc-150+) · 0/4
+- [Valid Word Abbreviation](https://neetcode.io/problems/valid-word-abbreviation) (E) · 0/4
+- [Roman to Integer](https://neetcode.io/problems/roman-to-integer) (E) (nc-150+) · 0/4
+- [Add Binary](https://neetcode.io/problems/add-binary) (E) (nc-150+) · 0/4
+- [snake_case → camelCase](./problems/company/snakecase-to-camelcase.md) (E) (nc-150+) (company question) · 0/4
+- [String Compression](https://neetcode.io/problems/string-compression) (M) · 0/4
+- [Decode String](https://neetcode.io/problems/decode-string) (M) (nc-150+) · 0/4
+- [Basic Calculator II](https://neetcode.io/problems/basic-calculator-ii) (M) · 0/4
+- [String to Integer atoi](https://leetcode.com/problems/string-to-integer-atoi/) (M) (lc-only) · 0/4
 
 #### Difference Array
 
-- [Car Pooling](https://neetcode.io/problems/car-pooling) (M) (nc-150+) · 0/5
-- [Corporate Flight Bookings](https://leetcode.com/problems/corporate-flight-bookings/) (M) (lc-only) · 0/5
+- [Car Pooling](https://neetcode.io/problems/car-pooling) (M) (nc-150+) · 0/4
+- [Corporate Flight Bookings](https://leetcode.com/problems/corporate-flight-bookings/) (M) (lc-only) · 0/4
 
 #### Boyer-Moore
 
-- [Majority Element](https://neetcode.io/problems/majority-element) (E) (nc-150+) · 0/5
-- [Majority Element II](https://neetcode.io/problems/majority-element-ii) (M) (variant of: Majority Element) · 0/5
+- [Majority Element](https://neetcode.io/problems/majority-element) (E) (nc-150+) · 0/4
+- [Majority Element II](https://neetcode.io/problems/majority-element-ii) (M) (variant of: Majority Element) · 0/4
 
 #### Bit-Trie
 
-- [Maximum XOR](https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/) (M) (lc-only) · 0/5
+- [Maximum XOR](https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/) (M) (lc-only) · 0/4
 
 #### Reservoir Sampling
 
-- [Random Pick with Weight](https://neetcode.io/problems/random-pick-with-weight) (M) · 0/5
-- [Wordler Random Get/Remove/Has](./problems/company/wordler-random-get-remove-has.md) (M) (nc-150+) (company question) · 0/5
-- [Linked List Random Node](https://leetcode.com/problems/linked-list-random-node/) (M) (lc-only) · 0/5
+- [Random Pick with Weight](https://neetcode.io/problems/random-pick-with-weight) (M) · 0/4
+- [Wordler Random Get/Remove/Has](./problems/company/wordler-random-get-remove-has.md) (M) (nc-150+) (company question) · 0/4
+- [Linked List Random Node](https://leetcode.com/problems/linked-list-random-node/) (M) (lc-only) · 0/4
 
 #### Segment Tree
 
-- [Range Sum Query - Mutable](https://leetcode.com/problems/range-sum-query-mutable/) (M) (lc-only) · 0/5
+- [Range Sum Query - Mutable](https://leetcode.com/problems/range-sum-query-mutable/) (M) (lc-only) · 0/4
 
 #### Bitmask DP
 
-- [Partition to K Equal Sum Subsets](https://neetcode.io/problems/partition-to-k-equal-sum-subsets) (M) (nc-150+) · 0/5
+- [Partition to K Equal Sum Subsets](https://neetcode.io/problems/partition-to-k-equal-sum-subsets) (M) (nc-150+) · 0/4
 
 ### Phase 7 — Hard Problems (2 new/day)
 
 #### 1-D DP
 
-- [Stone Game III](https://neetcode.io/problems/stone-game-iii) (H) (nc-150+) · 0/5
+- [Stone Game III](https://neetcode.io/problems/stone-game-iii) (H) (nc-150+) · 0/4
 
 #### 2-D DP
 
-- [Longest Increasing Path In a Matrix](https://neetcode.io/problems/longest-increasing-path-in-matrix) (H) · 0/5
-- [Distinct Subsequences](https://neetcode.io/problems/count-subsequences) (H) · 0/5
-- [Edit Distance](https://neetcode.io/problems/edit-distance) (H) · 0/5
-- [Burst Balloons](https://neetcode.io/problems/burst-balloons) (H) · 0/5
-- [Regular Expression Matching](https://neetcode.io/problems/regular-expression-matching) (H) · 0/5
+- [Longest Increasing Path In a Matrix](https://neetcode.io/problems/longest-increasing-path-in-matrix) (H) · 0/4
+- [Distinct Subsequences](https://neetcode.io/problems/count-subsequences) (H) · 0/4
+- [Edit Distance](https://neetcode.io/problems/edit-distance) (H) · 0/4
+- [Burst Balloons](https://neetcode.io/problems/burst-balloons) (H) · 0/4
+- [Regular Expression Matching](https://neetcode.io/problems/regular-expression-matching) (H) · 0/4
 
 #### Advanced Graphs
 
-- [Reconstruct Itinerary](https://neetcode.io/problems/reconstruct-flight-path) (H) · 0/5
-- [Swim In Rising Water](https://neetcode.io/problems/swim-in-rising-water) (H) · 0/5
-- [Alien Dictionary](https://neetcode.io/problems/foreign-dictionary) (H) · 0/5
+- [Reconstruct Itinerary](https://neetcode.io/problems/reconstruct-flight-path) (H) · 0/4
+- [Swim In Rising Water](https://neetcode.io/problems/swim-in-rising-water) (H) · 0/4
+- [Alien Dictionary](https://neetcode.io/problems/foreign-dictionary) (H) · 0/4
 
 #### Arrays & Hashing
 
-- [First Missing Positive](https://neetcode.io/problems/first-missing-positive) (H) (nc-150+) · 0/5
+- [First Missing Positive](https://neetcode.io/problems/first-missing-positive) (H) (nc-150+) · 0/4
 
 #### Backtracking
 
-- [N Queens](https://neetcode.io/problems/n-queens) (H) · 0/5
+- [N Queens](https://neetcode.io/problems/n-queens) (H) · 0/4
 
 #### Binary Search
 
-- [Median of Two Sorted Arrays](https://neetcode.io/problems/median-of-two-sorted-arrays) (H) · 0/5
+- [Median of Two Sorted Arrays](https://neetcode.io/problems/median-of-two-sorted-arrays) (H) · 0/4
 
 #### Bitmask DP
 
-- [Shortest Path Visiting All Nodes](https://leetcode.com/problems/shortest-path-visiting-all-nodes/) (H) (lc-only) · 0/5
+- [Shortest Path Visiting All Nodes](https://leetcode.com/problems/shortest-path-visiting-all-nodes/) (H) (lc-only) · 0/4
 
 #### Graphs
 
-- [Word Ladder](https://neetcode.io/problems/word-ladder) (H) · 0/5
+- [Word Ladder](https://neetcode.io/problems/word-ladder) (H) · 0/4
 
 #### Heap
 
-- [Find Median From Data Stream](https://neetcode.io/problems/find-median-in-a-data-stream) (H) · 0/5
+- [Find Median From Data Stream](https://neetcode.io/problems/find-median-in-a-data-stream) (H) · 0/4
 
 #### Intervals
 
-- [Minimum Interval to Include Each Query](https://neetcode.io/problems/minimum-interval-including-query) (H) · 0/5
-- [Employee Free Time](./problems/company/employee-free-time.md) (H) (company question) · 0/5
+- [Minimum Interval to Include Each Query](https://neetcode.io/problems/minimum-interval-including-query) (H) · 0/4
+- [Employee Free Time](./problems/company/employee-free-time.md) (H) (company question) · 0/4
 
 #### Linked List
 
-- [Merge K Sorted Lists](https://neetcode.io/problems/merge-k-sorted-linked-lists) (H) · 0/5
-- [Reverse Nodes In K Group](https://neetcode.io/problems/reverse-nodes-in-k-group) (H) · 0/5
-- [LFU Cache](https://neetcode.io/problems/lfu-cache) (H) (nc-150+) · 0/5
+- [Merge K Sorted Lists](https://neetcode.io/problems/merge-k-sorted-linked-lists) (H) · 0/4
+- [Reverse Nodes In K Group](https://neetcode.io/problems/reverse-nodes-in-k-group) (H) · 0/4
+- [LFU Cache](https://neetcode.io/problems/lfu-cache) (H) (nc-150+) · 0/4
 
 #### Segment Tree
 
-- [Count of Smaller Numbers After Self](https://leetcode.com/problems/count-of-smaller-numbers-after-self/) (H) (lc-only) · 0/5
+- [Count of Smaller Numbers After Self](https://leetcode.com/problems/count-of-smaller-numbers-after-self/) (H) (lc-only) · 0/4
 
 #### Sliding Window
 
-- [Minimum Window Substring](https://neetcode.io/problems/minimum-window-with-characters) (H) · 0/5
-- [Sliding Window Maximum](https://neetcode.io/problems/sliding-window-maximum) (H) · 0/5
+- [Minimum Window Substring](https://neetcode.io/problems/minimum-window-with-characters) (H) · 0/4
+- [Sliding Window Maximum](https://neetcode.io/problems/sliding-window-maximum) (H) · 0/4
 
 #### Stack
 
-- [Largest Rectangle in Histogram](https://neetcode.io/problems/largest-rectangle-in-histogram) (H) · 0/5
+- [Largest Rectangle in Histogram](https://neetcode.io/problems/largest-rectangle-in-histogram) (H) · 0/4
 
 #### Sweep Line
 
-- [My Calendar III](https://leetcode.com/problems/my-calendar-iii/) (H) (lc-only) · 0/5
-- [Skyline](https://leetcode.com/problems/the-skyline-problem/) (H) (lc-only) · 0/5
+- [My Calendar III](https://leetcode.com/problems/my-calendar-iii/) (H) (lc-only) · 0/4
+- [Skyline](https://leetcode.com/problems/the-skyline-problem/) (H) (lc-only) · 0/4
 
 #### Trees
 
-- [Binary Tree Maximum Path Sum](https://neetcode.io/problems/binary-tree-maximum-path-sum) (H) · 0/5
-- [Serialize and Deserialize Binary Tree](https://neetcode.io/problems/serialize-and-deserialize-binary-tree) (H) · 0/5
+- [Binary Tree Maximum Path Sum](https://neetcode.io/problems/binary-tree-maximum-path-sum) (H) · 0/4
+- [Serialize and Deserialize Binary Tree](https://neetcode.io/problems/serialize-and-deserialize-binary-tree) (H) · 0/4
 
 #### Tries
 
-- [Word Search II](https://neetcode.io/problems/search-for-word-ii) (H) (variant of: Word Search) · 0/5
+- [Word Search II](https://neetcode.io/problems/search-for-word-ii) (H) (variant of: Word Search) · 0/4
 
 #### Two Pointers
 
-- [Trapping Rain Water](https://neetcode.io/problems/trapping-rain-water) (H) · 0/5
+- [Trapping Rain Water](https://neetcode.io/problems/trapping-rain-water) (H) · 0/4
 
 ## System Design
 
