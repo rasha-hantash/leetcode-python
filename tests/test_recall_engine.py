@@ -35,6 +35,8 @@ from recall_engine import (
     due_date,
     interval_for,
     apply_mock_updates,
+    complete_mock,
+    schedule_mock,
     load_hardest_ledger,
     load_ledger,
     mock_prereq_status,
@@ -1459,6 +1461,55 @@ def test_apply_mock_updates_returns_zero_changes_when_state_already_matches() ->
         mocks, [("m1", "scheduled", date(2026, 5, 20))]
     )
     assert changes == 0
+
+
+def test_schedule_mock_writes_scheduled_date_into_curriculum() -> None:
+    md = (
+        "## Mocks\n\n"
+        "- [ ] [mock-1] Pramp · Arrays & Hashing · _pending_\n"
+    )
+    new_md = schedule_mock(md, "mock-1", date(2026, 5, 17))
+    mocks = parse_mocks(new_md)
+    assert mocks[0].status == "scheduled"
+    assert mocks[0].scheduled_date == date(2026, 5, 17)
+
+
+def test_schedule_mock_can_reschedule_an_already_scheduled_mock() -> None:
+    md = (
+        "## Mocks\n\n"
+        "- [ ] [mock-1] Pramp · Arrays & Hashing · 📅 2026-05-17\n"
+    )
+    new_md = schedule_mock(md, "mock-1", date(2026, 5, 24))
+    assert parse_mocks(new_md)[0].scheduled_date == date(2026, 5, 24)
+
+
+def test_schedule_mock_rejects_unknown_mock_id() -> None:
+    md = "## Mocks\n\n- [ ] [mock-1] Pramp · _pending_\n"
+    with pytest.raises(ValueError, match="unknown mock id"):
+        schedule_mock(md, "mock-99", date(2026, 5, 17))
+
+
+def test_schedule_mock_rejects_already_completed_mock() -> None:
+    md = "## Mocks\n\n- [x] [mock-1] Pramp · ✅ 2026-05-08\n"
+    with pytest.raises(ValueError, match="already completed"):
+        schedule_mock(md, "mock-1", date(2026, 5, 24))
+
+
+def test_complete_mock_marks_completion_date_and_preserves_status() -> None:
+    md = (
+        "## Mocks\n\n"
+        "- [ ] [mock-1] Pramp · Arrays & Hashing · 📅 2026-05-17\n"
+    )
+    new_md = complete_mock(md, "mock-1", date(2026, 5, 17))
+    mocks = parse_mocks(new_md)
+    assert mocks[0].status == "completed"
+    assert mocks[0].completed_date == date(2026, 5, 17)
+
+
+def test_complete_mock_rejects_unknown_mock_id() -> None:
+    md = "## Mocks\n\n- [ ] [mock-1] Pramp · _pending_\n"
+    with pytest.raises(ValueError, match="unknown mock id"):
+        complete_mock(md, "mock-99", date(2026, 5, 17))
 
 
 def test_write_curriculum_mocks_round_trips_through_parse_mocks() -> None:
