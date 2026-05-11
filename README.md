@@ -136,8 +136,8 @@ uv run prep preview                           # preview today's plan
 uv run prep preview --for weekday             # or: --for sat / --for sun
 uv run prep preview --date 2026-05-17         # any specific date
 
-uv run prep mock schedule mock-1 2026-05-17   # book a mock
-uv run prep mock complete mock-1              # mark a mock done (defaults to today)
+uv run prep mock schedule mock-1 2026-05-17   # schedule a mock
+uv run prep mock complete mock-1              # complete a mock (defaults to today)
 uv run prep mock list                         # show every mock and its state
 
 uv run prep init --force                      # reseed curriculum.md from the template
