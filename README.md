@@ -146,15 +146,20 @@ uv run pytest                                 # run the engine's test suite
 
 ### 4. Optional: daily auto-recompute on macOS
 
-Install the LaunchAgent:
+The repo ships a LaunchAgent template at `launchd/com.today-dsa.recompute.plist`. Before loading it, open the file and replace the three `__REPLACE_ME__` markers with:
+
+- `__REPLACE_ME_REPO_PATH__` → absolute path to your clone of this repo
+- `__REPLACE_ME_UV_BINARY_PATH__` → output of `which uv`
+- `__REPLACE_ME_LOG_PATH__` → e.g. `/Users/you/Library/Logs/today-dsa.log`
+
+Then install it:
 
 ```sh
-cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
+cp launchd/com.today-dsa.recompute.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.today-dsa.recompute.plist
 ```
 
-It runs daily at 8:30 AM; logs land at `~/Library/Logs/recall-engine.log`.
-The Mac must be awake at 8:30 — if it sleeps through, run `uv run prep recompute`.
+It runs daily at 8:30 AM. The Mac must be awake at 8:30 — if it sleeps through, run `uv run prep recompute`.
 
 ---
 
@@ -624,7 +629,7 @@ machine). The split keeps your ticks and solutions from leaking into PRs.
 | `problems/company/*.md`                 | template | Company-question prompts referenced by the curriculum.                                |
 | `recall_engine.py`                      | template | SM-2-lite recall engine.                                                              |
 | `tests/test_recall_engine.py`           | template | Narrative tests and engine spec.                                                      |
-| `launchd/com.rasha.recall-engine.plist` | template | macOS daily recompute LaunchAgent.                                                    |
+| `launchd/com.today-dsa.recompute.plist` | template | macOS daily recompute LaunchAgent (edit the three `__REPLACE_ME__` markers first).    |
 | `patterns/*.md`                         | template | Pattern notes and per-problem mistakes.                                               |
 | `python-gotchas.md`                     | template | Python traps found during prep.                                                       |
 | `random-problems.md`                    | template | Extra unscheduled practice problems.                                                  |

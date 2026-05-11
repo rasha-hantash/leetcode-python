@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Daily snapshot of Recall + New. Fires at 8:30 AM in the local timezone.
+
+  BEFORE INSTALLING, replace the three __REPLACE_ME__ markers below with
+  your local paths:
+    - REPO_PATH       → absolute path to your clone of this repo
+    - UV_BINARY_PATH  → output of `which uv` (e.g. /Users/you/.local/bin/uv
+                        or /opt/homebrew/bin/uv)
+    - LOG_PATH        → wherever you want the log; ~/Library/Logs/today-dsa.log
+                        is a sensible default (expand the ~ to an absolute path)
+
+  Install:
+    cp launchd/com.today-dsa.recompute.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.today-dsa.recompute.plist
+
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.today-dsa.recompute.plist
+    rm ~/Library/LaunchAgents/com.today-dsa.recompute.plist
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.today-dsa.recompute</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__REPLACE_ME_UV_BINARY_PATH__</string>
+        <string>run</string>
+        <string>prep</string>
+        <string>recompute</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__REPLACE_ME_REPO_PATH__</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>8</integer>
+        <key>Minute</key>
+        <integer>30</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>__REPLACE_ME_LOG_PATH__</string>
+    <key>StandardErrorPath</key>
+    <string>__REPLACE_ME_LOG_PATH__</string>
+</dict>
+</plist>
