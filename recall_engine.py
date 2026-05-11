@@ -1325,13 +1325,13 @@ def _render_next_mock_block(
         if url := mock.effective_booking_url:
             lines.append(f"  - Book: [{mock.platform or 'link'}]({url})")
         lines.append(
-            "  - _Booked? Replace `— _pending_` with `· 📅 YYYY-MM-DD` "
-            "(e.g. `· 📅 2026-05-17`). `uv run prep recompute` syncs it to `curriculum.md`._"
+            f"  - _Booked? `uv run prep mock schedule {mock.id} YYYY-MM-DD` "
+            f"(e.g. `uv run prep mock schedule {mock.id} 2026-05-17`)._"
         )
     elif mock.status == "scheduled":
         lines.append(
-            "  - _When done, check the box above. The Tasks plugin auto-stamps "
-            "`✅ DATE` and recompute marks this completed._"
+            f"  - _When done, check the box above (Tasks plugin auto-stamps "
+            f"`✅ DATE`) or run `uv run prep mock complete {mock.id}`._"
         )
     return lines
 
@@ -1832,6 +1832,41 @@ def recompute_cmd(
     )
 
 
+def schedule_mock(curriculum_md: str, mock_id: str, dt: date) -> str:
+    """Return curriculum.md with `mock_id` flipped to scheduled on `dt`.
+    Raises ValueError for unknown ids or mocks that are already completed."""
+    mocks = parse_mocks(curriculum_md)
+    by_id = {m.id: m for m in mocks}
+    if mock_id not in by_id:
+        raise ValueError(
+            f"unknown mock id: {mock_id!r}. known: {', '.join(sorted(by_id)) or '(none)'}"
+        )
+    if by_id[mock_id].status == "completed":
+        raise ValueError(f"mock {mock_id!r} is already completed; cannot reschedule.")
+    updated = [
+        replace(m, status="scheduled", scheduled_date=dt) if m.id == mock_id else m
+        for m in mocks
+    ]
+    return write_curriculum_mocks(curriculum_md, updated)
+
+
+def complete_mock(curriculum_md: str, mock_id: str, dt: date) -> str:
+    """Return curriculum.md with `mock_id` marked completed on `dt`.
+    Raises ValueError for unknown ids. Idempotent for already-completed mocks
+    with the same completion date."""
+    mocks = parse_mocks(curriculum_md)
+    by_id = {m.id: m for m in mocks}
+    if mock_id not in by_id:
+        raise ValueError(
+            f"unknown mock id: {mock_id!r}. known: {', '.join(sorted(by_id)) or '(none)'}"
+        )
+    updated = [
+        replace(m, status="completed", completed_date=dt) if m.id == mock_id else m
+        for m in mocks
+    ]
+    return write_curriculum_mocks(curriculum_md, updated)
+
+
 def _next_weekday_of(today: date, kind: str) -> date:
     """Return the next date matching `kind` (`weekday` = Mon–Fri, `sat`, `sun`).
     Returns `today` itself if it already matches."""
@@ -1981,6 +2016,93 @@ def reset_cmd(yes: bool, ledger_dir: Path) -> None:
     if path.exists():
         path.unlink()
     click.echo("Reset complete. Run `prep recompute` to regenerate today.md.")
+
+
+@cli.group(name="mock")
+def mock_cmd() -> None:
+    """Schedule, complete, and list mock interviews."""
+
+
+@mock_cmd.command(name="schedule")
+@click.argument("mock_id")
+@click.argument("scheduled", type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option(
+    "--curriculum",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=Path("curriculum.md"),
+    show_default=True,
+    help="Master curriculum markdown (DSA by phase + SD/Mocks/Behavioral).",
+)
+def mock_schedule_cmd(mock_id: str, scheduled: Any, curriculum: Path) -> None:
+    """Schedule MOCK_ID for SCHEDULED date (YYYY-MM-DD).
+
+    Example: prep mock schedule mock-1 2026-05-17
+    """
+    target = scheduled.date()
+    md = curriculum.read_text()
+    try:
+        new_md = schedule_mock(md, mock_id, target)
+    except ValueError as exc:
+        raise click.UsageError(str(exc))
+    if new_md != md:
+        _atomic_write(curriculum, new_md)
+    click.echo(f"Scheduled {mock_id} for {target.isoformat()}.")
+
+
+@mock_cmd.command(name="complete")
+@click.argument("mock_id")
+@click.option(
+    "--date",
+    "completion_date",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    default=None,
+    help="Completion date (YYYY-MM-DD). Defaults to today.",
+)
+@click.option(
+    "--curriculum",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=Path("curriculum.md"),
+    show_default=True,
+    help="Master curriculum markdown.",
+)
+def mock_complete_cmd(mock_id: str, completion_date: Any | None, curriculum: Path) -> None:
+    """Mark MOCK_ID as completed (defaults to today).
+
+    Example: prep mock complete mock-1
+    """
+    target = completion_date.date() if completion_date is not None else date.today()
+    md = curriculum.read_text()
+    try:
+        new_md = complete_mock(md, mock_id, target)
+    except ValueError as exc:
+        raise click.UsageError(str(exc))
+    if new_md != md:
+        _atomic_write(curriculum, new_md)
+    click.echo(f"Marked {mock_id} complete as of {target.isoformat()}.")
+
+
+@mock_cmd.command(name="list")
+@click.option(
+    "--curriculum",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=Path("curriculum.md"),
+    show_default=True,
+    help="Master curriculum markdown.",
+)
+def mock_list_cmd(curriculum: Path) -> None:
+    """Print every mock and its current state."""
+    mocks = parse_mocks(curriculum.read_text())
+    if not mocks:
+        click.echo("No mocks defined.")
+        return
+    for m in mocks:
+        if m.status == "completed":
+            tail = f"✅ {m.completed_date.isoformat() if m.completed_date else ''}"
+        elif m.status == "scheduled":
+            tail = f"📅 {m.scheduled_date.isoformat() if m.scheduled_date else ''}"
+        else:
+            tail = "_pending_"
+        click.echo(f"{m.id:14} {tail:18} {m.descriptor}")
 
 
 if __name__ == "__main__":

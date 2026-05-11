@@ -1,103 +1,371 @@
 # Interview Prep
 
-A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **One master file** (`curriculum.md`) holds DSA + System Design + Mocks + Behavioral; a snapshot-mode SM-2 lite engine (SuperMemo-2 spaced-repetition, simplified to fixed intervals — see _Spaced repetition_ below) regenerates `today.md` each morning, and you drain it.
+<a href="https://www.buymeacoffee.com/rasha_hantash" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
-- **Day 1 – Day 45** — all 164 Easy/Medium NC/LC problems solved
-- **Day 1 – Day 60** — all 194 DSA problems solved
-- **Coverage:** 194 DSA problems = 150 canonical NC150 + 44 extras (21 NC-150+, 11 LC-only, 8 company-asked) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~24 mocks · ~10 behavioral stories (career anecdotes drilled in STAR format for non-technical screening rounds)
+A local-first interview prep engine for Obsidian.
 
-## What `today.md` looks like
+It combines:
 
-Run `uv run prep recompute` each morning. Output:
+- **NeetCode 150 + 44 gap-filler problems**
+- **SM-2-style spaced repetition** for problem recall
+- **Generated daily Markdown plans** in `today.md`
+- **System design, mocks, and behavioral prep**
+- **Ledger-driven progress** instead of calendar-driven planning
 
-![today.md rendered for a weekday](docs/preview-weekday.svg)
+Built for full-time prep, but adaptive to actual completion.
 
-`prep preview --for sat|sun|weekday` renders any day without touching state.
+---
 
-## Sequencing
+## What this is
 
-- Easies before Mediums within each pattern
-- E+M before Hards across patterns; **no Hards until phase 7**
-- **Phases:**
-  - **1–6** — E+M acquisition (Easies + Mediums, blocked by pattern)
-  - **7** — Hards. **Start applying to new roles / jobs here.**
-  - **8** — Post-Acquisition (zero new problems; daily Recall + SD + mocks/real screens · behavioral on Saturdays)
+Most interview prep plans tell you what to study.
 
-**Everything is ledger-driven, not calendar-driven.** Phase advancement, the Recall queue, and **mock interview unlocks** (each mock's `prereq:` clause is checked against ledger state and surfaced as met/unmet in `today.md`) all fire from ledger state.
+This repo tells you what to do **today**.
 
-**When to apply:** Phase 7 onward — start with safety-net companies on Day 45. Sweep up the tiers as Phase 8 progresses: target companies once paid mocks are landing, dream / aspirational picks once real screens are on the calendar.
+Each morning, the engine regenerates `today.md` from one master file: `curriculum.md`.
+
+`today.md` answers:
+
+- What should I recall before I forget it?
+- What new problems should I solve next?
+- What system design chapter should I read?
+- Which mocks are unlocked?
+- What behavioral work should I drill?
+- What did I find hardest this week?
+
+The goal is to remove the daily planning tax.
+
+Open `today.md`, do the work, check boxes, recompute tomorrow.
+
+---
+
+## Curriculum
+
+The DSA curriculum is:
+
+```txt
+NeetCode 150 + 44 targeted extras = 194 problems
+```
+
+The 44 extras fill patterns that NeetCode 150 under-covers or skips, including:
+
+- Segment tree
+- Sweep line
+- Bitmask DP
+- Prefix sum + hashmap
+- Cyclic sort
+- Difference array
+- Binary indexed tree
+- Bit trie
+- Reservoir sampling
+- Additional interval / parsing / tree-hash variants
+
+Full scope:
+
+- **194 DSA problems**
+  - 150 canonical NeetCode 150
+  - 44 targeted gap-fillers
+- **System design**
+  - DDIA Ch. 5–9
+  - Alex Xu Vol. 1
+  - Alex Xu Vol. 2 Ch. 1–7
+- **Mocks**
+  - Algo mocks
+  - System design mocks
+  - Real screens once scheduled
+- **Behavioral**
+  - STAR-format story drilling
+
+---
+
+## Target pace
+
+The default plan assumes full-time prep:
+
+```txt
+9 hours/day
+Monday–Saturday
+Sundays off
+```
+
+At that pace:
+
+- **Day 45:** Easies + Mediums complete; I should feel confident enough to start applying
+- **Day 60:** Hards complete; full DSA acquisition cycle done
+- **Day 61+:** Recall, mocks, real screens, system design, and behavioral drilling
+
+The engine is not calendar-locked.
+
+If you move slower or faster, phase advancement still comes from completed work, not from the date.
+
+---
 
 ## Daily flow
 
-**Sundays off** — across all phases. Light _Fluent Python_ or DDIA reading is fine.
+The core rule:
 
-**Recall always wins over New.** Recall is knowledge you've already paid for, decaying on an exponential curve — skip a day and the cost compounds (you re-learn from scratch). New is just deferred scope; nothing degrades. When the day runs short, drain **all** of Recall first; let New slip into tomorrow. If even Recall is too long for the morning block, get partway down it — the most-overdue items are at the top, so partial draining still rescues the highest-priority knowledge.
+```txt
+Recall before New.
+```
 
-**Why split Recall and New?** Spaced retrieval (Recall) fights Ebbinghaus's forgetting curve — each gap between reviews is a "desirable difficulty" (Bjork) that strengthens the memory trace more than tight clustering would. Blocked acquisition (New, one pattern at a time) keeps working memory focused on first exposure; interleaving belongs to retention, not initial learning. **Acquire blocked, retain spaced.**
+Recall is knowledge you already paid for. If you skip it, it decays.
 
-**Where Anki fits.** The SM-2 queue in `today.md` handles **problem-level** spaced retrieval. Anki handles **fact-level** retrieval — code templates, pattern cues, Python gotchas, complexity tables (the four decks under `anki/`). Same Ebbinghaus/Bjork foundation, different granularity. Anki stays out of Phases 1–7 on purpose: first-exposure acquisition already saturates working memory, and stacking fact drills on top would crowd out the pattern you're trying to internalize. From **Phase 8 onward** acquisition is done, so Anki joins the daily mix to keep fact-level recall alive while the SM-2 queue keeps problem-level recall alive.
+New problems are just deferred scope. They can move to tomorrow.
 
-_Mock-week pivot: if a scheduled mock needs an uncovered pattern, prioritize that pattern over Recall for one day._
+Default priority:
 
-### Phases 1–6 — Acquisition · Mon–Sat
+1. Recall
+2. System design
+3. New DSA
+4. Mocks / real screens
+5. Behavioral
 
-- **Acquisition** = first-time exposure to new problems, blocked by pattern. Working memory holds one pattern's structure; spaced Recall locks it in over weeks
-- Recall first thing; SD then DSA New in the afternoon
-- Recall time budget: Easy 20m / Medium 40m (no Hards in Recall during 1–6 — they don't enter the queue until Phase 7)
-- **End of day:** tick the problem you found hardest in today.md's `## Today's hardest` section. Engine logs to `prep-data/hardest.jsonl` on next recompute and pre-fills Saturday's re-solve sub-block — no typing, no spelling, links auto-included.
-- **Phase 7 uses the same two schedules below** (Mon–Fri table for weekdays, Saturday table for Saturdays). Sundays off across all phases.
+Exception:
 
-**Mon–Fri schedule:**
+```txt
+If a scheduled mock or interview needs an uncovered pattern, prioritize that pattern for the day.
+```
 
-| Time        | Block                                           |
-| ----------- | ----------------------------------------------- |
-| 9:00–13:00  | Recall drain                                    |
-| 14:00–15:30 | System Design (today's chapter from `today.md`) |
-| 15:30–19:30 | DSA New                                         |
+---
 
-_Mock days: afternoon shifts to `14:00–16:00 mock + 16:00–17:30 SD + 17:30–19:30 DSA New`._
+## How the engine works
 
-**Saturday schedule:**
+The engine is snapshot-based.
 
-| Time        | Block                                                                                              |
-| ----------- | -------------------------------------------------------------------------------------------------- |
-| 9:00–13:00  | Recall drain — starts with **"this-week's-hardest"** sub-block (re-solve 2–3 hardest from Mon–Fri) |
-| 14:00–15:30 | System Design (today's chapter from `today.md`)                                                    |
-| 15:30–19:30 | DSA New                                                                                            |
+Each recompute:
 
-_Engine pre-fills the "this-week's-hardest" sub-block from your weekday hardest flags (auto-resolved to live problem links from the curriculum). Falls back to a 3-slot blank template if you didn't flag anything that week._
+1. Reads completed ticks from `today.md`
+2. Syncs completions into the append-only ledger
+3. Updates mastery state in `curriculum.md`
+4. Recomputes due recall items
+5. Selects the next new problems
+6. Checks which mocks are unlocked
+7. Regenerates `today.md`
 
-### Phase 7 — Hards · Mon–Sat
+Run:
 
-**Start applying to new roles / jobs here.** Phase 7 begins after all 164 E+M are acquired (~Day 45). Submit to safety-net companies on Day 1. Hards are mostly an onsite-round signal, not a screen one; the ~15-day Phase 7 run + scheduling buffer gives you time to finish acquiring while early-round screens land on the calendar. Pre-commitment beats willpower — booked screens force the prep to converge.
+```sh
+uv run prep recompute
+```
 
-Same daily structure as Acquisition; pace drops to 2 New/day (per Phase 7's budget). Recall budget for H: **90 min** — give each Hard the full 90 even on first solve.
+The generated `today.md` is frozen for the day.
 
-### Phase 8 — Post-Acquisition · Mon–Sat
+Checking boxes does not reshuffle the queue until the next recompute.
 
-All 194 problems touched. **Zero new acquisition.** The hard study is done — now you're converting knowledge into performance: Recall to keep DSA sharp, a daily SD chapter, and mocks (or real screens) to drill live execution. Behavioral moves to Saturdays only.
+---
 
-**Mon–Fri schedule:**
+## What `today.md` shows
 
-| Time        | Block                                   |
-| ----------- | --------------------------------------- |
-| 9:00–13:00  | Recall                                  |
-| 14:00–16:00 | System Design (Alex Xu or DDIA chapter) |
-| 16:00–19:00 | Mock interview / real screen            |
+A weekday `today.md` includes:
 
-_Anki: ~15 min/day on mobile during downtime — fact-level recall (templates, patterns, gotchas, complexity)._
+- Progress bars
+- Recall queue
+- New DSA problems
+- System design reading
+- Mock / interview status
+- Today's hardest problem
 
-**Saturday schedule — Behavioral Intensive:**
+Saturday adds:
 
-| Time        | Block                                                                                  |
-| ----------- | -------------------------------------------------------------------------------------- |
-| 9:00–12:00  | Recall (anchored) + this-week's-hardest sub-block (weakness re-solves on 30-min clock) |
-| 12:00–13:00 | SD — Alex Xu or DDIA chapter                                                           |
-| 14:00–17:00 | Behavioral Intensive — story drafting + recording + 5-story drill (60s → 90s → 3-min)  |
+- This week's hardest re-solve block
 
-## Spaced repetition (SM-2 lite)
+Sunday removes required work.
 
-**SM-2** = SuperMemo-2 (Wozniak, 1980s) — the spaced-repetition algorithm underpinning Anki and most SRS tools. The original adapts each card's interval via a per-card _ease factor_ updated by your 0–5 difficulty grade after every review. **The "lite" version this engine uses drops the ease factor entirely** — every successful touch just advances the card one rung on a fixed ladder. Same Ebbinghaus/Bjork foundation, simpler engine.
+You can preview weekday, Saturday, or Sunday layouts without touching state. See the CLI section below.
+
+Example:
+
+![today.md rendered for a weekday in Obsidian](docs/preview-weekday.png)
+
+---
+
+## Phases
+
+Progress is phase-based, but advancement is ledger-driven.
+
+You do not manually move phases forward. The engine advances when the required work is done.
+
+---
+
+### Phases 1–6: Easy / Medium acquisition
+
+Goal:
+
+```txt
+Finish all Easy + Medium problems.
+```
+
+Target:
+
+```txt
+Day 1–45
+164 Easy / Medium problems
+```
+
+Rules:
+
+- Easies before Mediums within each pattern
+- Problems blocked by pattern
+- No Hards yet
+- Recall every day
+- System design every day
+- New DSA Monday–Saturday
+- Saturday re-solves the hardest problems from the week
+
+Schedule, Monday–Friday:
+
+| Time        | Block         |
+| ----------- | ------------- |
+| 9:00–13:00  | Recall        |
+| 14:00–15:30 | System Design |
+| 15:30–19:30 | New DSA       |
+
+On mock days:
+
+| Time        | Block         |
+| ----------- | ------------- |
+| 9:00–13:00  | Recall        |
+| 14:00–16:00 | Mock          |
+| 16:00–17:30 | System Design |
+| 17:30–19:30 | New DSA       |
+
+Saturday:
+
+| Time        | Block                        |
+| ----------- | ---------------------------- |
+| 9:00–13:00  | Recall + this week's hardest |
+| 14:00–15:30 | System Design                |
+| 15:30–19:30 | New DSA                      |
+
+Sunday:
+
+```txt
+Off. Light reading is fine, but no required work is scheduled.
+```
+
+---
+
+### Phase 7: Hards
+
+Goal:
+
+```txt
+Finish all Hard problems.
+```
+
+Target:
+
+```txt
+Day 45–60
+30 Hard problems
+```
+
+Rules:
+
+- Same daily structure as Phases 1–6
+- Pace drops to 2 new Hards/day
+- Hard recall gets a 90-minute budget
+- Algo mocks ramp up
+- Start applying to safety-net companies
+
+Schedule, Monday–Friday:
+
+| Time        | Block         |
+| ----------- | ------------- |
+| 9:00–13:00  | Recall        |
+| 14:00–15:30 | System Design |
+| 15:30–19:30 | New Hards     |
+
+On mock days:
+
+| Time        | Block         |
+| ----------- | ------------- |
+| 9:00–13:00  | Recall        |
+| 14:00–16:00 | Mock          |
+| 16:00–17:30 | System Design |
+| 17:30–19:30 | New Hards     |
+
+Saturday:
+
+| Time        | Block                        |
+| ----------- | ---------------------------- |
+| 9:00–13:00  | Recall + this week's hardest |
+| 14:00–15:30 | System Design                |
+| 15:30–19:30 | New Hards                    |
+
+Sunday:
+
+```txt
+Off.
+```
+
+---
+
+### Phase 8: Post-acquisition
+
+Goal:
+
+```txt
+Convert knowledge into interview performance.
+```
+
+There are no new DSA problems in Phase 8.
+
+The daily loop becomes:
+
+- Recall
+- System design
+- Mock interviews
+- Real screens
+- Behavioral drilling
+- Anki for fact-level recall
+
+This is where prep shifts from acquisition to performance.
+
+Schedule, Monday–Friday:
+
+| Time        | Block              |
+| ----------- | ------------------ |
+| 9:00–13:00  | Recall             |
+| 14:00–16:00 | System Design      |
+| 16:00–19:00 | Mock / real screen |
+
+Saturday:
+
+| Time        | Block                        |
+| ----------- | ---------------------------- |
+| 9:00–12:00  | Recall + this week's hardest |
+| 12:00–13:00 | System Design                |
+| 14:00–17:00 | Behavioral intensive         |
+
+Sunday:
+
+```txt
+Off.
+```
+
+Anki starts in Phase 8:
+
+```txt
+~15 min/day during downtime
+```
+
+It handles fact-level recall:
+
+- Code templates
+- Pattern cues
+- Python gotchas
+- Complexity tables
+
+Problem-level recall stays in `today.md`.
+
+---
+
+## Spaced repetition
+
+The engine uses a simplified SM-2-style ladder.
+
+Each successful solve advances the problem to the next interval:
 
 | Touches | Next due |
 | ------- | -------- |
@@ -107,11 +375,9 @@ _Anki: ~15 min/day on mobile during downtime — fact-level recall (templates, p
 | 4       | +21 days |
 | 5+      | +60 days |
 
-A problem solved once is due 1 day later. Solved 5 times → +60 days, locked there. The more you've drilled it, the longer it can wait.
+Example in `curriculum.md`:
 
-**DSA visual format in `curriculum.md`** — each problem has a parent line and up to 5 mastery slots:
-
-```markdown
+```md
 - Two Sum (E) · 4/5 (next due 2026-06-25)
   - [x] ✅ 2026-05-11
   - [x] ✅ 2026-05-14
@@ -121,100 +387,245 @@ A problem solved once is due 1 day later. Solved 5 times → +60 days, locked th
 - 3Sum (M) · 0/5
 ```
 
-Each `[x]` is a logged touch; `[ ]` is empty padding to 5 slots. Untouched problems render with no sub-bullets (the first tick from `today.md` unlocks them). The annotation flips to `(overdue Nd)` once today passes the due date.
+Untouched problems have no sub-bullets.
 
-## Mocks
+The first tick from `today.md` unlocks the mastery slots.
 
-- **Schedule only after prereqs are met.** Each mock carries a `prereq:` clause; the engine evaluates it against ledger state and surfaces met/unmet in `today.md`. Algo mocks gate on E+M count (e.g. `15 E+M`); SD mocks gate on topic-relevant chapter IDs (e.g. `axu1-1, axu1-2, axu1-3, axu1-5, axu1-6, axu1-7, axu1-8` for the URL Shortener mock — foundations + the topic chapter). Both forms are supported by the parser.
-- ~30 mocks total over the sprint. Cadence ramps: weekly through Phase 6 · every-other-day in Phase 7 · ~daily through Phase 8 (mocks + real screens share the afternoon block).
-- State lives in `curriculum.md`'s `## Mocks` section: `pending → scheduled (📅 DATE) → completed (✅ DATE)`
+---
 
-**Platforms — algo mocks sequenced by signal quality and cost; SD mocks are Hello Interview only:**
+## Mocks and interviews
 
-- **Pramp** (free, peer-to-peer · algo) — your "interviewer" is another candidate, so feedback quality varies. Use **first half** to get cheap reps, normalize live coding under another person's eyes, and surface low-hanging weaknesses before paying for stronger feedback.
-- **Interviewing.io** (paid, vetted ex-FAANG interviewers · algo) — higher-fidelity feedback at a price. Use **second half** when you need realistic difficulty and actionable critique closer to real screens, after Pramp has cleared the obvious gaps. Skip for SD — algo-focused platforms can't reliably grade a system design.
-- **Hello Interview** (paid, ex-FAANG SD specialists · SD-only) — curated SD curriculum (Design Twitter / URL Shortener / etc.) plus mocks with interviewers who do nothing but SD. Each booking gates on topic-relevant chapters: SD foundations (`axu1-1..3`) + the chapter for the specific design problem. See the per-mock `prereq:` in `curriculum.md`.
+Mocks are gated by prereqs.
 
-## Setup (one-time, ~4 hr)
+Each mock has a `prereq:` clause in `curriculum.md`.
 
-**Daily driver:** Obsidian — open this repo as a vault. Install **Tasks** plugin, enable "Set done date on task completion." That's the only setting.
+Examples:
 
-**Python toolchain:**
+```txt
+15 E+M
+axu1-1, axu1-2, axu1-3, axu1-5
+```
+
+The engine checks prereqs against the ledger and shows whether each mock is:
+
+```txt
+pending → bookable → scheduled → completed
+```
+
+### Scheduling a mock or interview
+
+Schedule via the CLI (the date format is validated at entry — typos fail fast):
+
+```sh
+uv run prep mock schedule mock-1 2026-05-17
+```
+
+Mark complete (defaults to today's date):
+
+```sh
+uv run prep mock complete mock-1
+```
+
+You can also tick the checkbox in `today.md` after the mock — the Obsidian Tasks plugin auto-stamps `✅ DATE` and the next recompute folds it into the curriculum.
+
+List every mock and its current state:
+
+```sh
+uv run prep mock list
+```
+
+### Mock platforms
+
+Algo mocks:
+
+- **Pramp** — free peer mocks; useful early
+- **Interviewing.io** — paid, higher-signal algo mocks; useful later
+
+System design mocks:
+
+- **Hello Interview** — paid system design mocks gated by relevant chapters
+
+---
+
+## Quickstart
+
+Open this repo as an Obsidian vault.
+
+Install the Obsidian **Tasks** plugin.
+
+Enable:
+
+```txt
+Set done date on task completion
+```
+
+Install dependencies:
 
 ```sh
 # Python 3.11+ required
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
-uv run pytest                     # confirm engine wired up
-uv run prep recompute             # generates first today.md
+uv run pytest
+uv run prep recompute
 ```
 
-**LaunchAgent (daily auto-recompute at 8:30 AM):**
+Open:
+
+```txt
+today.md
+```
+
+That is your daily plan.
+
+---
+
+## Optional: daily auto-recompute on macOS
+
+Install the LaunchAgent:
 
 ```sh
 cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
 ```
 
-Logs land in `~/Library/Logs/recall-engine.log`. The Mac must be awake at 8:30 to fire; if it sleeps through, run `uv run prep recompute` manually whenever you wake up.
+It runs daily at 8:30 AM.
 
-**Anki (~10–25 min/day, mobile during downtime, Phase 8 onward):** four decks under `anki/` — code-templates, pattern-recognition, python-gotchas, complexity. ~90 cards total. Handles **fact-level** spaced repetition (distinct from `today.md`'s SM-2 queue, which handles problem-level). NOT for full problem re-solves — those live in Obsidian. Rationale for the late entry: see _Where Anki fits_ in Daily flow.
+Logs:
 
-**Books:** DDIA (Ch 5–9), Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7), Fluent Python (Sunday reading). Index DDIA + Alex Xu in `technical-rag` MCP for fast lookup.
+```txt
+~/Library/Logs/recall-engine.log
+```
+
+The Mac must be awake at 8:30. If it sleeps through, run:
+
+```sh
+uv run prep recompute
+```
+
+---
 
 ## CLI
 
-`uv run prep recompute` — the engine entrypoint. Reads `today.md` ticks and `curriculum.md`'s DSA sub-bullets, appends new touches to the ledger, regenerates `today.md`. Atomic and idempotent — safe to re-run any time.
+Recompute today:
 
-- LaunchAgent runs it daily at 8:30 AM
-- Run manually if you wake up to a sleeping Mac (no fresh `today.md`)
-- Forgot to tick yesterday? Add `✅ DATE` to the matching sub-bullet in `curriculum.md` and recompute
-- Removing every sub-bullet for a problem is the destructive "full purge" path — loud stderr warning; preview with `--dry-run`
+```sh
+uv run prep recompute
+```
 
-`uv run prep preview` — read-only render of what `today.md` would look like for a given day. Useful for previewing a weekday vs Saturday vs Sunday layout before you're actually on that day (the schedule differs: Saturday adds the "this week's hardest" re-solve block, Sunday omits the "today's hardest" pick prompt). Does not touch the ledger or overwrite `today.md`.
+Preview a day:
 
-- `--for weekday | sat | sun` — next occurrence of that day kind (today if it already matches)
-- `--date YYYY-MM-DD` — any specific date (mutually exclusive with `--for`)
-- No flags → today's date
+```sh
+uv run prep preview
+uv run prep preview --for weekday
+uv run prep preview --for sat
+uv run prep preview --for sun
+uv run prep preview --date 2026-05-17
+```
 
-## Tests
+Schedule, complete, and list mocks:
+
+```sh
+uv run prep mock schedule mock-1 2026-05-17
+uv run prep mock complete mock-1
+uv run prep mock list
+```
+
+Run tests:
 
 ```sh
 uv run pytest
 ```
 
-Test names ARE the spec — read them top to bottom for a complete description of how the engine behaves.
+---
 
 ## Files
 
-| File                                    | What's in it                                                                                                                                                                  |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `curriculum.md`                         | **Master list** — DSA (by phase → pattern), System Design, Mocks, Behavioral. Tick boxes here OR in `today.md`.                                                               |
-| `today.md`                              | _(generated)_ Today's frozen Recall + New queue. Tick boxes here OR in `curriculum.md`.                                                                                       |
-| `prep-data/completions.jsonl`           | _(generated)_ Append-only completion ledger. Source of truth for DSA touches.                                                                                                 |
-| `prep-data/hardest.jsonl`               | _(generated)_ Append-only "hardest of the day" flag ledger. Pre-fills Saturday's re-solve list.                                                                               |
-| `recall_engine.py`                      | Snapshot-mode SM-2 lite engine. CLI: `uv run prep recompute`.                                                                                                                 |
-| `tests/test_recall_engine.py`           | Narrative tests — also serve as the spec.                                                                                                                                     |
-| `launchd/com.rasha.recall-engine.plist` | LaunchAgent template — daily recompute at 8:30 AM.                                                                                                                            |
-| `python-gotchas.md`                     | Append-only log of Python language traps you hit during the prep (mutable defaults, late binding, etc).                                                                       |
-| `random-problems.md`                    | 92 NeetCode 250 problems outside the curriculum — a draw pile for unscripted practice. **Untracked by the engine** — solve one when you want a problem outside today's queue. |
-| `patterns/*.md`                         | One file per pattern. Per-problem "Mistakes" nested underneath; surface gaps during the Saturday weekly review.                                                               |
-| `anki/`                                 | Four decks: code-templates, pattern-recognition, python-gotchas, complexity (~90 cards).                                                                                      |
-| `problems/<pattern>/<diff>-<n>.py`      | Your actual solution code, organized by pattern + difficulty.                                                                                                                 |
-| `plans/`                                | Living plan files for major refactors.                                                                                                                                        |
-
-## Glossary
-
-- **Touch** — one successful (re-)solve event. One line in `completions.jsonl`.
-- **Recall** — the most-overdue 10 items in `today.md`, frozen at recompute time.
-- **New** — the next `phase.new_per_day` never-touched problems from the current phase.
-- **Phase** — one entry in `curriculum.md`'s `### Phase N — Name (X new/day)` headings (Phases 1–7). Advancement is ledger-driven via the engine's `current_phase`. Phase 8 is README-only (post-acquisition; no engine-tracked budget); the engine parks on Phase 7 once all problems are touched.
-- **NC-150+** — problems outside NeetCode's canonical 150 list but **inside** NeetCode's full 450-problem dataset (links to neetcode.io). **21 in the curriculum** — gap-fillers from the NC450 coverage analysis (minimax DP, prefix sum + hashmap, cyclic sort, etc — see `coverage-analysis.md`) plus selected heavy patterns (Segment Tree, Bitmask DP, Sweep Line). Distributed by difficulty across phases 1–7 — Es and Ms in their pattern's natural phase, Hs in Phase 7.
-- **LC-only** — problems outside NeetCode's full 450 entirely (links to leetcode.com). **11 in the curriculum** — heavy-pattern coverage NeetCode doesn't curate (Segment Tree, Sweep Line, BIT, Bitmask DP, Reservoir Sampling, Bit-Trie, Difference Array) plus two string-parsing holdouts (atoi, Count Binary Substrings) and one tree-hash problem (Find Duplicate Subtrees).
-- **`(variant of: X)` tag** — relationship marker only: "this problem is a follow-up of canonical problem X." Does NOT mean the problem is outside NC150 — most "II" variants (e.g. Combination Sum II, Coin Change II) are themselves on the canonical 150. Combine with `(nc-150+)` or `(lc-only)` for variants that ARE outside it (e.g. Majority Element II is `(lc-only)`).
-- **Snapshot mode** — today's queue is frozen at recompute time. Clicking checkboxes through the day does NOT re-rank. Tomorrow's recompute reflects what you did today.
-- **Progress bars** — engine-rendered counts at the top of `today.md` for the three trackable categories (E+M problems, System Design chapters, Mocks). Raw progress only — application timing is your call (see _When to apply_ in Sequencing).
+| File                                    | What it does                                                   |
+| --------------------------------------- | -------------------------------------------------------------- |
+| `curriculum.md`                         | Master file for DSA, system design, mocks, and behavioral prep |
+| `today.md`                              | Generated daily plan                                           |
+| `prep-data/completions.jsonl`           | Append-only DSA completion ledger                              |
+| `prep-data/hardest.jsonl`               | Append-only hardest-problem ledger                             |
+| `recall_engine.py`                      | SM-2-lite recall engine                                        |
+| `tests/test_recall_engine.py`           | Narrative tests and engine spec                                |
+| `launchd/com.rasha.recall-engine.plist` | macOS daily recompute LaunchAgent                              |
+| `patterns/*.md`                         | Pattern notes and per-problem mistakes                         |
+| `problems/<pattern>/<diff>-<n>.py`      | Solution files                                                 |
+| `python-gotchas.md`                     | Python traps found during prep                                 |
+| `random-problems.md`                    | Extra unscheduled practice problems                            |
+| `anki/`                                 | Fact-level recall decks                                        |
+| `plans/`                                | Refactor and implementation plans                              |
 
 ---
 
-If this saved you time, you can [buy me a coffee](https://buymeacoffee.com/REPLACE-WITH-YOUR-HANDLE). MIT-licensed; the repo stays free.
+## Design rationale
+
+### Why ledger-driven?
+
+Calendar plans break when life happens.
+
+This engine advances based on completed work, not dates.
+
+If you miss a day, the next recompute adapts.
+
+### Why Recall before New?
+
+Recall protects prior work from decay.
+
+New problems can wait.
+
+The rule is:
+
+```txt
+Protect memory first. Add scope second.
+```
+
+### Why blocked acquisition and spaced recall?
+
+First exposure works best when the pattern is blocked.
+
+Retention works best when recall is spaced.
+
+So the engine separates the two:
+
+```txt
+Acquire blocked.
+Retain spaced.
+```
+
+### Why Anki only in Phase 8?
+
+During Phases 1–7, first exposure already saturates working memory.
+
+In Phase 8, acquisition is done, so Anki joins the loop for fact-level recall.
+
+---
+
+## Glossary
+
+**Touch**  
+One successful solve or re-solve event.
+
+**Recall**  
+Previously solved problems that are due again.
+
+**New**  
+Never-touched problems selected from the current phase.
+
+**Phase**  
+A curriculum stage. Phases 1–6 are Easy/Medium acquisition, Phase 7 is Hards, Phase 8 is post-acquisition.
+
+**Snapshot mode**  
+The daily queue is frozen at recompute time. Ticks affect tomorrow's plan, not today's ordering.
+
+**Mock prereq**  
+A condition that must be satisfied before a mock becomes bookable.
+
+**Hardest flag**  
+A daily checkbox for the hardest problem of the day. Saturday uses these to build the weekly re-solve block.
+
+---
+
+## License
+
+MIT.
