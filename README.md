@@ -4,7 +4,7 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
 
 - **Day 1 – Day 45** — all 164 Easy/Medium NC/LC problems solved
 - **Day 1 – Day 60** — all 194 DSA problems solved
-- **Coverage:** 194 DSA problems = 150 canonical NC150 + 44 extras (21 NC-150+, 15 LC-only, 8 company-asked) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~24 mocks · ~10 behavioral stories (career anecdotes drilled in STAR format for non-technical screening rounds)
+- **Coverage:** 194 DSA problems = 150 canonical NC150 + 44 extras (21 NC-150+, 11 LC-only, 8 company-asked) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~24 mocks · ~10 behavioral stories (career anecdotes drilled in STAR format for non-technical screening rounds)
 
 ## Sequencing
 
@@ -163,6 +163,12 @@ Logs land in `~/Library/Logs/recall-engine.log`. The Mac must be awake at 8:30 t
 - Forgot to tick yesterday? Add `✅ DATE` to the matching sub-bullet in `curriculum.md` and recompute
 - Removing every sub-bullet for a problem is the destructive "full purge" path — loud stderr warning; preview with `--dry-run`
 
+`uv run prep preview` — read-only render of what `today.md` would look like for a given day. Useful for previewing a weekday vs Saturday vs Sunday layout before you're actually on that day (the schedule differs: Saturday adds the "this week's hardest" re-solve block, Sunday omits the "today's hardest" pick prompt). Does not touch the ledger or overwrite `today.md`.
+
+- `--for weekday | sat | sun` — next occurrence of that day kind (today if it already matches)
+- `--date YYYY-MM-DD` — any specific date (mutually exclusive with `--for`)
+- No flags → today's date
+
 ## Tests
 
 ```sh
@@ -196,7 +202,7 @@ Test names ARE the spec — read them top to bottom for a complete description o
 - **New** — the next `phase.new_per_day` never-touched problems from the current phase.
 - **Phase** — one entry in `curriculum.md`'s `### Phase N — Name (X new/day)` headings (Phases 1–7). Advancement is ledger-driven via the engine's `current_phase`. Phase 8 is README-only (post-acquisition; no engine-tracked budget); the engine parks on Phase 7 once all problems are touched.
 - **NC-150+** — problems outside NeetCode's canonical 150 list but **inside** NeetCode's full 450-problem dataset (links to neetcode.io). **21 in the curriculum** — gap-fillers from the NC450 coverage analysis (minimax DP, prefix sum + hashmap, cyclic sort, etc — see `coverage-analysis.md`) plus selected heavy patterns (Segment Tree, Bitmask DP, Sweep Line). Distributed by difficulty across phases 1–7 — Es and Ms in their pattern's natural phase, Hs in Phase 7.
-- **LC-only** — problems outside NeetCode's full 450 entirely (links to leetcode.com). **15 in the curriculum** — popular interview practice in two flavors: (1) the **String Transformation** cluster (Valid Word Abbreviation, String Compression, Basic Calculator II, atoi, Count Binary Substrings) which NeetCode underrepresents, and (2) heavy-pattern coverage NeetCode doesn't curate at all (Segment Tree, Sweep Line, BIT, Bitmask DP, Reservoir Sampling, Bit-Trie, Difference Array, Boyer-Moore Majority).
+- **LC-only** — problems outside NeetCode's full 450 entirely (links to leetcode.com). **11 in the curriculum** — heavy-pattern coverage NeetCode doesn't curate (Segment Tree, Sweep Line, BIT, Bitmask DP, Reservoir Sampling, Bit-Trie, Difference Array) plus two string-parsing holdouts (atoi, Count Binary Substrings) and one tree-hash problem (Find Duplicate Subtrees).
 - **`(variant of: X)` tag** — relationship marker only: "this problem is a follow-up of canonical problem X." Does NOT mean the problem is outside NC150 — most "II" variants (e.g. Combination Sum II, Coin Change II) are themselves on the canonical 150. Combine with `(nc-150+)` or `(lc-only)` for variants that ARE outside it (e.g. Majority Element II is `(lc-only)`).
 - **Snapshot mode** — today's queue is frozen at recompute time. Clicking checkboxes through the day does NOT re-rank. Tomorrow's recompute reflects what you did today.
 - **Progress bars** — engine-rendered counts at the top of `today.md` for the three trackable categories (E+M problems, System Design chapters, Mocks). Raw progress only — application timing is your call (see _When to apply_ in Sequencing).
