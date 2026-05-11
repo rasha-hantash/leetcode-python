@@ -36,8 +36,10 @@ from recall_engine import (
     interval_for,
     apply_mock_updates,
     complete_mock,
+    compute_maintenance,
     ensure_runtime_dirs,
     init_curriculum_file,
+    min_touches_in_scope,
     schedule_mock,
     load_hardest_ledger,
     load_ledger,
@@ -185,6 +187,114 @@ def test_recall_item_carries_metadata_for_rendering() -> None:
     assert item.touches == 1
     assert item.last_touched == date(2026, 5, 1)
     assert item.days_overdue == 5
+
+
+# ─── Min-touches trigger + Maintenance (round-robin) selection ────────────────
+
+
+def _easy(text: str) -> Problem:
+    return Problem(text, difficulty="E")
+
+
+def _medium(text: str) -> Problem:
+    return Problem(text, difficulty="M")
+
+
+def _hard(text: str) -> Problem:
+    return Problem(text, difficulty="H")
+
+
+def _five_touches(problem: str, last: date = date(2026, 5, 1)) -> list[Touch]:
+    return [Touch(problem, last - timedelta(days=n)) for n in range(5)]
+
+
+def test_min_touches_returns_zero_when_any_in_scope_problem_is_untouched() -> None:
+    curriculum = [_easy("[A] Two Sum"), _easy("[A] 3Sum")]
+    ledger = _five_touches("[A] Two Sum")
+    assert min_touches_in_scope(curriculum, ledger) == 0
+
+
+def test_min_touches_returns_minimum_touch_count_across_in_scope_problems() -> None:
+    curriculum = [_easy("[A] Two Sum"), _easy("[A] 3Sum")]
+    ledger = _five_touches("[A] Two Sum") + [
+        Touch("[A] 3Sum", date(2026, 5, 1)),
+        Touch("[A] 3Sum", date(2026, 5, 2)),
+        Touch("[A] 3Sum", date(2026, 5, 3)),
+    ]
+    assert min_touches_in_scope(curriculum, ledger) == 3
+
+
+def test_min_touches_ignores_problems_outside_the_requested_difficulties() -> None:
+    """E/M scope sees only the well-touched Easies; an untouched Hard does
+    not pull the minimum down to zero."""
+    curriculum = [_easy("[A] Two Sum"), _hard("[A] N-Queens")]
+    ledger = _five_touches("[A] Two Sum")
+    assert min_touches_in_scope(curriculum, ledger, difficulties=("E", "M")) == 5
+
+
+def test_compute_maintenance_returns_empty_until_every_in_scope_problem_is_mastered() -> None:
+    curriculum = [_easy("[A] Two Sum"), _easy("[A] 3Sum")]
+    ledger = (
+        _five_touches("[A] Two Sum")
+        + [Touch("[A] 3Sum", date(2026, 5, d)) for d in (1, 3, 5)]  # only 3 touches
+    )
+    items = compute_maintenance(curriculum, ledger, today=date(2026, 5, 30))
+    assert items == []
+
+
+def test_compute_maintenance_interleaves_patterns_in_round_robin_order() -> None:
+    """When every in-scope problem is mastered, the section deals one problem
+    from each pattern in rotation rather than draining one pattern at a time."""
+    curriculum = [
+        _easy("[Arrays] A1"), _easy("[Arrays] A2"), _easy("[Arrays] A3"),
+        _easy("[Trees] T1"), _easy("[Trees] T2"),
+        _easy("[Graphs] G1"),
+    ]
+    ledger: list[Touch] = []
+    for p in curriculum:
+        ledger += _five_touches(p.text, last=date(2026, 5, 30))
+    items = compute_maintenance(
+        curriculum, ledger, today=date(2026, 6, 30), limit=6
+    )
+    # Largest bucket (Arrays, 3) first per round, then Trees (2), then Graphs (1);
+    # second round drains the remaining Arrays/Trees items.
+    patterns = [it.problem.split("]")[0] + "]" for it in items]
+    assert patterns == ["[Arrays]", "[Trees]", "[Graphs]", "[Arrays]", "[Trees]", "[Arrays]"]
+
+
+def test_compute_maintenance_orders_least_recently_touched_first_within_a_pattern() -> None:
+    curriculum = [_easy("[A] Two Sum"), _easy("[A] 3Sum")]
+    # Both mastered, but Two Sum was touched more recently than 3Sum.
+    ledger = (
+        _five_touches("[A] Two Sum", last=date(2026, 5, 30))
+        + _five_touches("[A] 3Sum", last=date(2026, 5, 20))
+    )
+    items = compute_maintenance(curriculum, ledger, today=date(2026, 6, 30), limit=2)
+    assert [it.problem for it in items] == ["[A] 3Sum", "[A] Two Sum"]
+
+
+def test_compute_maintenance_caps_at_the_requested_limit() -> None:
+    curriculum = [_easy(f"[A] P{i}") for i in range(20)]
+    ledger: list[Touch] = []
+    for p in curriculum:
+        ledger += _five_touches(p.text)
+    items = compute_maintenance(curriculum, ledger, today=date(2026, 6, 30), limit=7)
+    assert len(items) == 7
+
+
+def test_compute_maintenance_excludes_problems_outside_the_difficulty_scope() -> None:
+    """Hards stay out of the Maintenance bucket even when they're well-touched."""
+    curriculum = [
+        _easy("[A] Two Sum"),
+        _easy("[A] 3Sum"),
+        _hard("[A] N-Queens"),
+    ]
+    ledger: list[Touch] = []
+    for p in curriculum:
+        ledger += _five_touches(p.text)
+    items = compute_maintenance(curriculum, ledger, today=date(2026, 6, 30), limit=10)
+    assert all(it.difficulty in ("E", "M") for it in items)
+    assert "[A] N-Queens" not in [it.problem for it in items]
 
 
 # ─── New (next-up) selection ───────────────────────────────────────────────────
