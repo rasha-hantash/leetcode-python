@@ -1,7 +1,7 @@
 [project]
-name = "neetcode-prep"
+name = "today-dsa"
 version = "0.1.0"
-description = "Spaced-repetition recall engine for the NeetCode 150 sprint."
+description = "Local-first DSA interview prep engine for Obsidian. Tells you what to do today, not what to study this month."
 requires-python = ">=3.11"
 dependencies = [
     "click>=8.1",

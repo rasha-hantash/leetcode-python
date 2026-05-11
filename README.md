@@ -268,10 +268,12 @@ If you move slower or faster, phase advancement still comes from completed work,
 The DSA curriculum is:
 
 ```txt
-NeetCode 150 + 44 targeted extras = 194 problems
+NeetCode 150 + 31 targeted extras + 10 company questions = 194 problems
 ```
 
-The 44 extras fill patterns that NeetCode 150 under-covers or skips.
+The 31 extras fill patterns that NeetCode 150 under-covers or skips. The 10
+company questions are real asks from past interviews, kept for pattern
+exposure to interview-style phrasing.
 
 <details>
 <summary>Patterns added by the gap-fillers</summary>
@@ -633,10 +635,10 @@ machine). The split keeps your ticks and solutions from leaking into PRs.
 | `tests/test_recall_engine.py`           | template | Narrative tests and engine spec.                                                      |
 | `launchd/com.today-dsa.recompute.plist` | template | macOS daily recompute LaunchAgent (edit the three `__REPLACE_ME__` markers first).    |
 | `patterns/*.md`                         | template | Pattern notes and per-problem mistakes.                                               |
-| `python-gotchas.md`                     | template | Python traps found during prep.                                                       |
+| `docs/python-gotchas.md`                | template | Python traps found during prep.                                                       |
 | `random-problems.md`                    | template | Extra unscheduled practice problems.                                                  |
 | `anki/`                                 | template | Fact-level recall decks.                                                              |
-| `plans/`                                | template | Refactor and implementation plans.                                                    |
+| `docs/plans/`                           | template | Refactor and implementation plans.                                                    |
 | `scripts/`                              | template | Sandbox + verification scripts for the engine (Maintenance trigger, Hards scope).     |
 
 ---

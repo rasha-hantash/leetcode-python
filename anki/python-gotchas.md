@@ -4,7 +4,7 @@ Each entry is one Anki card. Front = the trap (often as a code snippet or a "wha
 
 These are **language-level** failure modes — distinct from algorithm cards. The bug isn't the algorithm; it's Python.
 
-Source for additions: append-only `python-gotchas.md` at repo root. As you hit a real one mid-problem, log it there, then promote here as a card if it's likely to recur.
+Source for additions: append-only `docs/python-gotchas.md`. As you hit a real one mid-problem, log it there, then promote here as a card if it's likely to recur.
 
 ---
 
