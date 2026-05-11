@@ -6,6 +6,14 @@ A 90-day NeetCode 150 (+44 extras) + system design + behavioral prep system. **O
 - **Day 1 – Day 60** — all 194 DSA problems solved
 - **Coverage:** 194 DSA problems = 150 canonical NC150 + 44 extras (21 NC-150+, 11 LC-only, 8 company-asked) · DDIA Ch 5–9 · Alex Xu Vol 1 (16 ch) + Vol 2 (Ch 1–7) · ~24 mocks · ~10 behavioral stories (career anecdotes drilled in STAR format for non-technical screening rounds)
 
+## What `today.md` looks like
+
+Run `uv run prep recompute` each morning. Output:
+
+![today.md rendered for a weekday](docs/preview-weekday.svg)
+
+`prep preview --for sat|sun|weekday` renders any day without touching state.
+
 ## Sequencing
 
 - Easies before Mediums within each pattern
@@ -206,3 +214,7 @@ Test names ARE the spec — read them top to bottom for a complete description o
 - **`(variant of: X)` tag** — relationship marker only: "this problem is a follow-up of canonical problem X." Does NOT mean the problem is outside NC150 — most "II" variants (e.g. Combination Sum II, Coin Change II) are themselves on the canonical 150. Combine with `(nc-150+)` or `(lc-only)` for variants that ARE outside it (e.g. Majority Element II is `(lc-only)`).
 - **Snapshot mode** — today's queue is frozen at recompute time. Clicking checkboxes through the day does NOT re-rank. Tomorrow's recompute reflects what you did today.
 - **Progress bars** — engine-rendered counts at the top of `today.md` for the three trackable categories (E+M problems, System Design chapters, Mocks). Raw progress only — application timing is your call (see _When to apply_ in Sequencing).
+
+---
+
+If this saved you time, you can [buy me a coffee](https://buymeacoffee.com/REPLACE-WITH-YOUR-HANDLE). MIT-licensed; the repo stays free.
