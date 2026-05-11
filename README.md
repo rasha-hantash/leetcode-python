@@ -566,6 +566,7 @@ machine). The split keeps your ticks and solutions from leaking into PRs.
 | `random-problems.md`                    | template | Extra unscheduled practice problems.                                                  |
 | `anki/`                                 | template | Fact-level recall decks.                                                              |
 | `plans/`                                | template | Refactor and implementation plans.                                                    |
+| `scripts/`                              | template | Sandbox + verification scripts for the engine (Maintenance trigger, Hards scope).     |
 
 ---
 
