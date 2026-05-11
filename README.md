@@ -2,17 +2,35 @@
 
 <a href="https://www.buymeacoffee.com/rasha_hantash" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
 
-A local-first interview prep engine for Obsidian.
+> **Tells you what to do _today_ — not what to study this month.**
 
-It combines:
+A local-first interview prep engine for Obsidian. Each morning it regenerates
+one file, `today.md`, with the day's recall queue, new problems, system
+design reading, and mock status — pulled from a single master curriculum and
+your own append-only ledger of completions.
 
-- **NeetCode 150 + 44 gap-filler problems**
-- **SM-2-style spaced repetition** for problem recall
-- **Generated daily Markdown plans** in `today.md`
-- **System design, mocks, and behavioral prep**
-- **Ledger-driven progress** instead of calendar-driven planning
+![today.md rendered for a weekday in Obsidian](docs/preview-weekday.png)
 
-Built for full-time prep, but adaptive to actual completion.
+---
+
+## Table of contents
+
+- [What this is](#what-this-is)
+- [Is this for you?](#is-this-for-you)
+- [Why not just…?](#why-not-just)
+- [Quickstart](#quickstart)
+- [What `today.md` shows](#what-todaymd-shows)
+- [How the engine works](#how-the-engine-works)
+- [Daily flow](#daily-flow)
+- [Target pace](#target-pace)
+- [Curriculum](#curriculum)
+- [Phases](#phases)
+- [Spaced repetition](#spaced-repetition)
+- [Mocks and interviews](#mocks-and-interviews)
+- [Files](#files)
+- [Design rationale](#design-rationale)
+- [Glossary](#glossary)
+- [License](#license)
 
 ---
 
@@ -39,64 +57,147 @@ Open `today.md`, do the work, check boxes, recompute tomorrow.
 
 ---
 
-## Curriculum
+## Is this for you?
 
-The DSA curriculum is:
+**This is for you if:**
 
-```txt
-NeetCode 150 + 44 targeted extras = 194 problems
-```
+- You're prepping for SWE interviews and want one file that tells you what to work on each day
+- You're comfortable in Obsidian (or any Markdown editor that supports the Tasks plugin)
+- You can run one CLI command per day
+- You want spaced repetition that survives missed days without thrashing your plan
 
-The 44 extras fill patterns that NeetCode 150 under-covers or skips, including:
+**This isn't for you if:**
 
-- Segment tree
-- Sweep line
-- Bitmask DP
-- Prefix sum + hashmap
-- Cyclic sort
-- Difference array
-- Binary indexed tree
-- Bit trie
-- Reservoir sampling
-- Additional interval / parsing / tree-hash variants
-
-Full scope:
-
-- **194 DSA problems**
-  - 150 canonical NeetCode 150
-  - 44 targeted gap-fillers
-- **System design**
-  - DDIA Ch. 5–9
-  - Alex Xu Vol. 1
-  - Alex Xu Vol. 2 Ch. 1–7
-- **Mocks**
-  - Algo mocks
-  - System design mocks
-  - Real screens once scheduled
-- **Behavioral**
-  - STAR-format story drilling
+- You want a hosted web app or mobile UI
+- You want video walkthroughs, AI hints, or in-editor solutions — this engine plans the day, it doesn't solve problems for you
+- You want a calendar-locked plan that ignores actual completion
+- You don't want to use Obsidian or another local Markdown vault
 
 ---
 
-## Target pace
+## Why not just…?
 
-The default plan assumes full-time prep:
+**Why not Anki?**
+Anki handles fact-level recall well — code templates, complexity tables, Python gotchas. It cannot sequence "do these new problems today, but only after recall, and only if your scheduled mock prereqs are met." This engine plans the day; Anki memorizes facts. Both ship together — Anki joins the loop in Phase 8.
+
+**Why not the NeetCode roadmap site?**
+Static order, no spaced repetition, no daily snapshot. You'd still need a separate scheduler to decide what to revisit and when.
+
+**Why not LeetCode's built-in scheduler?**
+It recommends what to _practice_, not what to _do today_. No mock prereqs, no system design integration, no single daily plan file you can open and start working from.
+
+**Why not a spreadsheet?**
+That was the v0. SM-2 scheduling, ledger replay across phases, and prereq-gated mocks are the parts a spreadsheet can't do. The engine is also snapshot-based: ticking a box today doesn't reshuffle today's plan, which a spreadsheet can't enforce.
+
+---
+
+## Quickstart
+
+### 1. Open the repo as an Obsidian vault
+
+Install the Obsidian **Tasks** plugin and enable:
 
 ```txt
-9 hours/day
-Monday–Saturday
-Sundays off
+Set done date on task completion
 ```
 
-At that pace:
+### 2. Install dependencies and seed your workspace
 
-- **Day 45:** Easies + Mediums complete; I should feel confident enough to start applying
-- **Day 60:** Hards complete; full DSA acquisition cycle done
-- **Day 61+:** Recall, mocks, real screens, system design, and behavioral drilling
+```sh
+# Python 3.11+ required
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv sync
+uv run pytest
+uv run prep init       # copies curriculum.template.md → curriculum.md (your file)
+uv run prep recompute
+```
 
-The engine is not calendar-locked.
+Open `today.md` — that is your daily plan.
 
-If you move slower or faster, phase advancement still comes from completed work, not from the date.
+`curriculum.md`, `problems/`, `prep-data/`, and `today.md` are gitignored —
+they hold your progress and never leave your machine. The committed source
+of truth is `curriculum.template.md`. Re-running `prep init` is a safe
+no-op once `curriculum.md` exists; pass `--force` to reseed from the
+template (and lose your local ticks).
+
+`prep` is the engine's CLI, exposed by `uv sync` via `pyproject.toml` — no
+separate install step.
+
+### 3. Everyday CLI
+
+```sh
+uv run prep recompute                         # regenerate today.md
+uv run prep preview                           # preview today's plan
+uv run prep preview --for weekday             # or: --for sat / --for sun
+uv run prep preview --date 2026-05-17         # any specific date
+
+uv run prep mock schedule mock-1 2026-05-17   # book a mock
+uv run prep mock complete mock-1              # mark a mock done (defaults to today)
+uv run prep mock list                         # show every mock and its state
+
+uv run prep init --force                      # reseed curriculum.md from the template
+uv run pytest                                 # run the engine's test suite
+```
+
+### 4. Optional: daily auto-recompute on macOS
+
+Install the LaunchAgent:
+
+```sh
+cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
+```
+
+It runs daily at 8:30 AM; logs land at `~/Library/Logs/recall-engine.log`.
+The Mac must be awake at 8:30 — if it sleeps through, run `uv run prep recompute`.
+
+---
+
+## What `today.md` shows
+
+A weekday `today.md` includes:
+
+- Progress bars
+- Recall queue
+- New DSA problems
+- System design reading
+- Mock / interview status
+- Today's hardest problem
+- Maintenance queue at the bottom (only after every E/M is touched 4×)
+
+Saturday adds:
+
+- This week's hardest re-solve block
+
+Sunday removes required work.
+
+You can preview weekday, Saturday, or Sunday layouts without touching state. See the CLI section above.
+
+---
+
+## How the engine works
+
+The engine is snapshot-based.
+
+Each recompute:
+
+1. Reads completed ticks from `today.md`
+2. Syncs completions into the append-only ledger
+3. Updates mastery state in `curriculum.md`
+4. Recomputes due recall items
+5. Selects the next new problems
+6. Checks which mocks are unlocked
+7. Regenerates `today.md`
+
+Run:
+
+```sh
+uv run prep recompute
+```
+
+The generated `today.md` is frozen for the day.
+
+Checking boxes does not reshuffle the queue until the next recompute.
 
 ---
 
@@ -128,55 +229,69 @@ If a scheduled mock or interview needs an uncovered pattern, prioritize that pat
 
 ---
 
-## How the engine works
+## Target pace
 
-The engine is snapshot-based.
+The default plan assumes full-time prep:
 
-Each recompute:
-
-1. Reads completed ticks from `today.md`
-2. Syncs completions into the append-only ledger
-3. Updates mastery state in `curriculum.md`
-4. Recomputes due recall items
-5. Selects the next new problems
-6. Checks which mocks are unlocked
-7. Regenerates `today.md`
-
-Run:
-
-```sh
-uv run prep recompute
+```txt
+9 hours/day
+Monday–Saturday
+Sundays off
 ```
 
-The generated `today.md` is frozen for the day.
+At that pace:
 
-Checking boxes does not reshuffle the queue until the next recompute.
+- **Day 45:** Easies + Mediums complete; I should feel confident enough to start applying
+- **Day 60:** Hards complete; full DSA acquisition cycle done
+- **Day 61+:** Recall, mocks, real screens, system design, and behavioral drilling
+
+The engine is not calendar-locked.
+
+If you move slower or faster, phase advancement still comes from completed work, not from the date.
 
 ---
 
-## What `today.md` shows
+## Curriculum
 
-A weekday `today.md` includes:
+The DSA curriculum is:
 
-- Progress bars
-- Recall queue
-- New DSA problems
-- System design reading
-- Mock / interview status
-- Today's hardest problem
-- Maintenance queue at the bottom (only after every E/M is touched 4×)
+```txt
+NeetCode 150 + 44 targeted extras = 194 problems
+```
 
-Saturday adds:
+The 44 extras fill patterns that NeetCode 150 under-covers or skips.
 
-- This week's hardest re-solve block
+<details>
+<summary>Patterns added by the gap-fillers</summary>
 
-Sunday removes required work.
+- Segment tree
+- Sweep line
+- Bitmask DP
+- Prefix sum + hashmap
+- Cyclic sort
+- Difference array
+- Binary indexed tree
+- Bit trie
+- Reservoir sampling
+- Additional interval / parsing / tree-hash variants
 
-You can preview weekday, Saturday, or Sunday layouts without touching state. See the CLI section below.
+</details>
 
-Example:
+Full scope:
 
-![today.md rendered for a weekday in Obsidian](docs/preview-weekday.png)
+- **194 DSA problems**
+  - 150 canonical NeetCode 150
+  - 44 targeted gap-fillers
+- **System design**
+  - DDIA Ch. 5–9
+  - Alex Xu Vol. 1
+  - Alex Xu Vol. 2 Ch. 1–7
+- **Mocks**
+  - Algo mocks
+  - System design mocks
+  - Real screens once scheduled
+- **Behavioral**
+  - STAR-format story drilling
 
 ---
 
@@ -186,9 +301,8 @@ Progress is phase-based, but advancement is ledger-driven.
 
 You do not manually move phases forward. The engine advances when the required work is done.
 
----
-
-### Phases 1–6: Easy / Medium acquisition
+<details>
+<summary><b>Phases 1–6 — Easy / Medium acquisition (Day 1–45)</b></summary>
 
 Goal:
 
@@ -244,9 +358,10 @@ Sunday:
 Off. Light reading is fine, but no required work is scheduled.
 ```
 
----
+</details>
 
-### Phase 7: Hards
+<details>
+<summary><b>Phase 7 — Hards (Day 45–60)</b></summary>
 
 Goal:
 
@@ -300,9 +415,10 @@ Sunday:
 Off.
 ```
 
----
+</details>
 
-### Phase 8: Post-acquisition
+<details>
+<summary><b>Phase 8 — Post-acquisition</b></summary>
 
 Goal:
 
@@ -359,6 +475,8 @@ It handles fact-level recall:
 - Complexity tables
 
 Problem-level recall stays in `today.md`.
+
+</details>
 
 ---
 
@@ -484,65 +602,6 @@ System design mocks:
 
 ---
 
-## Quickstart
-
-### 1. Open the repo as an Obsidian vault
-
-Install the Obsidian **Tasks** plugin and enable:
-
-```txt
-Set done date on task completion
-```
-
-### 2. Install dependencies and seed your workspace
-
-```sh
-# Python 3.11+ required
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv sync
-uv run pytest
-uv run prep init       # copies curriculum.template.md → curriculum.md (your file)
-uv run prep recompute
-```
-
-Open `today.md` — that is your daily plan.
-
-`curriculum.md`, `problems/`, `prep-data/`, and `today.md` are gitignored —
-they hold your progress and never leave your machine. The committed source
-of truth is `curriculum.template.md`. Re-running `prep init` is a safe
-no-op once `curriculum.md` exists; pass `--force` to reseed from the
-template (and lose your local ticks).
-
-### 3. Everyday CLI
-
-```sh
-uv run prep recompute                         # regenerate today.md
-uv run prep preview                           # preview today's plan
-uv run prep preview --for weekday             # or: --for sat / --for sun
-uv run prep preview --date 2026-05-17         # any specific date
-
-uv run prep mock schedule mock-1 2026-05-17   # book a mock
-uv run prep mock complete mock-1              # mark a mock done (defaults to today)
-uv run prep mock list                         # show every mock and its state
-
-uv run prep init --force                      # reseed curriculum.md from the template
-uv run pytest                                 # run the engine's test suite
-```
-
-### 4. Optional: daily auto-recompute on macOS
-
-Install the LaunchAgent:
-
-```sh
-cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
-```
-
-It runs daily at 8:30 AM; logs land at `~/Library/Logs/recall-engine.log`.
-The Mac must be awake at 8:30 — if it sleeps through, run `uv run prep recompute`.
-
----
-
 ## Files
 
 Two roles live in this repo: **shared template** (committed, identical for
@@ -626,6 +685,15 @@ Never-touched problems selected from the current phase.
 
 **Phase**  
 A curriculum stage. Phases 1–6 are Easy/Medium acquisition, Phase 7 is Hards, Phase 8 is post-acquisition.
+
+**SM-2**  
+The spaced repetition algorithm family this engine borrows from. The full SM-2 grades each review on a 0–5 scale and computes an "ease factor"; this engine uses a fixed interval ladder (1 / 3 / 7 / 21 days) keyed only on touch count — simpler, deterministic, and well-suited to a 45–60 day prep horizon.
+
+**Blocked practice**  
+Doing many problems of the same pattern in a row. Best for first acquisition.
+
+**Interleaved practice**  
+Rotating across patterns within a session. Best for retention, transfer, and discrimination — but only after schemas are formed.
 
 **Snapshot mode**  
 The daily queue is frozen at recompute time. Ticks affect tomorrow's plan, not today's ordering.
