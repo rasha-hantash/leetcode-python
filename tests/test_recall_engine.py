@@ -68,15 +68,15 @@ from recall_engine import (
 
 @pytest.mark.parametrize(
     "touches,expected_interval_days",
-    [(1, 1), (2, 3), (3, 7), (4, 21), (5, 60), (6, 60), (10, 60)],
+    [(1, 1), (2, 3), (3, 7), (4, 21), (5, 21), (6, 21), (10, 21)],
     ids=[
         "a problem solved once is due 1 day later",
         "a problem solved twice is due 3 days later",
         "a problem solved three times is due 7 days later",
-        "a problem solved four times is due 21 days later",
-        "a problem solved five times is due 60 days later",
-        "the sixth solve does not extend the interval beyond 60 days",
-        "extra solves past five never push the interval beyond 60 days",
+        "a problem solved four times caps at 21-day mastery interval",
+        "a fifth solve does not extend the interval past the 21-day cap",
+        "the sixth solve does not extend the interval past the 21-day cap",
+        "extra solves past four never push the interval past the 21-day cap",
     ],
 )
 def test_sm2_lite_interval_expansion(touches: int, expected_interval_days: int) -> None:
@@ -92,15 +92,15 @@ def test_sm2_lite_interval_expansion(touches: int, expected_interval_days: int) 
         (1, date(2026, 5, 6), date(2026, 5, 6), -1),
         (1, date(2026, 5, 6), date(2026, 5, 7), 0),
         (1, date(2026, 5, 6), date(2026, 5, 8), 1),
-        (5, date(2026, 4, 1), date(2026, 5, 31), 0),
-        (5, date(2026, 4, 1), date(2026, 6, 30), 30),
+        (4, date(2026, 5, 1), date(2026, 5, 22), 0),
+        (4, date(2026, 5, 1), date(2026, 6, 1), 10),
     ],
     ids=[
         "a problem solved today is not yet due tomorrow",
         "a problem due today reads as zero days overdue",
         "a once-solved problem skipped one day reads as one day overdue",
-        "a five-times-solved problem becomes due exactly sixty days later",
-        "a five-times-solved problem can be ignored two months before going overdue",
+        "a four-times-mastered problem becomes due exactly twenty-one days later",
+        "a four-times-mastered problem can be ignored three weeks before going overdue",
     ],
 )
 def test_overdue_days_calculation(
@@ -1959,9 +1959,10 @@ def test_recompute_skips_purge_on_pristine_all_unchecked_curriculum_migration(
     tmp_path: Path,
 ) -> None:
     """Migration safeguard: when curriculum.md is freshly restructured (every
-    problem at `0/5`, no sub-bullets) but the ledger has entries, treat as a
+    problem at `0/N`, no sub-bullets) but the ledger has entries, treat as a
     migration. Don't purge — recompute's render pass re-syncs the ticks from
-    the ledger."""
+    the ledger. Input fixture uses the legacy `0/5` denominator to prove
+    backwards compatibility; output is re-rendered under the current cap."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n#### Arrays & Hashing\n\n"
@@ -1976,11 +1977,11 @@ def test_recompute_skips_purge_on_pristine_all_unchecked_curriculum_migration(
     assert "Two Sum" in ledger.read_text()
     rendered = daily_md.read_text()
     # curriculum.md re-renders with sub-bullets reflecting the ledger.
-    assert "- Two Sum (E) · 1/5" in rendered
+    assert "- Two Sum (E) · 1/4" in rendered
     assert "  - [x] ✅ 2026-05-09" in rendered
 
 
-def test_write_curriculum_dsa_renders_5_slots_with_padding_for_partial_progress() -> None:
+def test_write_curriculum_dsa_pads_partial_progress_up_to_mastery_slot_count() -> None:
     md = (
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
         "#### Arrays & Hashing\n\n- Two Sum (E)\n"
@@ -1990,14 +1991,14 @@ def test_write_curriculum_dsa_renders_5_slots_with_padding_for_partial_progress(
         Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11)),
     ]
     out = write_curriculum_dsa(md, ledger, today=date(2026, 5, 11))
-    assert "- Two Sum (E) · 2/5 (next due 2026-05-14)" in out
-    # Both ticks render in chronological order, plus 3 empty padding slots.
+    assert "- Two Sum (E) · 2/4 (next due 2026-05-14)" in out
+    # Both ticks render in chronological order, plus 2 empty padding slots.
     assert "  - [x] ✅ 2026-05-09" in out
     assert "  - [x] ✅ 2026-05-11" in out
-    assert out.count("  - [ ]") == 3
+    assert out.count("  - [ ]") == 2
 
 
-def test_write_curriculum_dsa_renders_5_slots_no_padding_at_saturation() -> None:
+def test_write_curriculum_dsa_saturates_at_mastery_cap_with_no_padding() -> None:
     md = (
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
         "#### Arrays & Hashing\n\n- Two Sum (E)\n"
@@ -2007,14 +2008,14 @@ def test_write_curriculum_dsa_renders_5_slots_no_padding_at_saturation() -> None
         for (m, d) in [(5, 9), (5, 12), (5, 19), (6, 9), (8, 8)]
     ]
     out = write_curriculum_dsa(md, ledger, today=date(2026, 8, 8))
-    assert "- Two Sum (E) · 5/5" in out
-    # 5 ticks, no empty padding.
+    # 5 touches; counter saturates at 4/4 (mastery cap), all 5 ticks still render.
+    assert "- Two Sum (E) · 4/4" in out
     assert "  - [ ]" not in out
 
 
-def test_write_curriculum_dsa_renders_all_touches_past_saturation_no_truncation() -> None:
-    """Past 5/5, the counter saturates but every touch still renders — full
-    history is preserved, not truncated."""
+def test_write_curriculum_dsa_renders_all_touches_past_mastery_cap_no_truncation() -> None:
+    """Past the 4-touch mastery cap, the counter saturates at 4/4 but every
+    touch still renders — full history is preserved, not truncated."""
     md = (
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
         "#### Arrays & Hashing\n\n- Two Sum (E)\n"
@@ -2023,7 +2024,7 @@ def test_write_curriculum_dsa_renders_all_touches_past_saturation_no_truncation(
               date(2026, 6, 9), date(2026, 8, 8), date(2026, 10, 7)]
     ledger = [Touch("[Arrays & Hashing] -> Two Sum", d) for d in dates_]
     out = write_curriculum_dsa(md, ledger, today=date(2026, 10, 7))
-    assert "- Two Sum (E) · 5/5" in out  # counter saturates at 5/5
+    assert "- Two Sum (E) · 4/4" in out  # counter saturates at 4/4
     for d in dates_:
         assert f"  - [x] ✅ {d.isoformat()}" in out
     assert "  - [ ]" not in out
@@ -2035,7 +2036,7 @@ def test_write_curriculum_dsa_renders_no_subbullets_for_untouched_problem() -> N
         "#### Arrays & Hashing\n\n- Two Sum (E)\n"
     )
     out = write_curriculum_dsa(md, ledger=[], today=date(2026, 5, 11))
-    assert "- Two Sum (E) · 0/5" in out
+    assert "- Two Sum (E) · 0/4" in out
     assert "✅" not in out
     assert "  - [ ]" not in out  # untouched: no padding slots either
     assert "(next due" not in out
@@ -2050,24 +2051,24 @@ def test_write_curriculum_dsa_renders_overdue_when_today_past_due_date() -> None
     ledger = [Touch("[Arrays & Hashing] -> Two Sum", date(2026, 5, 11))]
     # 1 touch → next due May 12; today May 18 → overdue 6d.
     out = write_curriculum_dsa(md, ledger, today=date(2026, 5, 18))
-    assert "- Two Sum (E) · 1/5 (overdue 6d)" in out
+    assert "- Two Sum (E) · 1/4 (overdue 6d)" in out
 
 
 def test_write_curriculum_dsa_drops_legacy_checked_stamp_in_re_render() -> None:
     """Re-rendering from a ledger that has no entries for a problem strips
-    the legacy `[x] ... ✅ DATE` form and produces the new `· 0/5` shape."""
+    the legacy `[x] ... ✅ DATE` form and produces the new `· 0/4` shape."""
     md = (
         "## DSA\n\n### Phase 1 — Linear (5 new/day)\n\n"
         "#### Arrays & Hashing\n\n- [x] Two Sum (E) ✅ 2026-05-08\n"
     )
     out = write_curriculum_dsa(md, ledger=[], today=date(2026, 5, 11))
-    assert "- Two Sum (E) · 0/5" in out
+    assert "- Two Sum (E) · 0/4" in out
     assert "✅" not in out
 
 
 def test_recompute_writes_back_curriculum_md_to_match_ledger(tmp_path: Path) -> None:
     """After today.md ticks log a touch, curriculum.md's DSA problem becomes
-    `· 1/5` with one ticked sub-bullet + 4 empty padding slots."""
+    `· 1/4` with one ticked sub-bullet + 3 empty padding slots."""
     daily_md = tmp_path / "curriculum.md"
     daily_md.write_text(_dsa_md(two_sum_touch=None))
     today_md = tmp_path / "today.md"
@@ -2075,9 +2076,9 @@ def test_recompute_writes_back_curriculum_md_to_match_ledger(tmp_path: Path) -> 
     ledger = tmp_path / "completions.jsonl"
     recompute(daily_md, today_md, ledger, today=date(2026, 5, 11))
     text = daily_md.read_text()
-    assert "- Two Sum (E) · 1/5 (next due 2026-05-12)" in text
+    assert "- Two Sum (E) · 1/4 (next due 2026-05-12)" in text
     assert "  - [x] ✅ 2026-05-11" in text
-    assert text.count("  - [ ]") == 4
+    assert text.count("  - [ ]") == 3
 
 
 # ─── Hardest-of-day pick tracking ──────────────────────────────────────────────

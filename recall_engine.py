@@ -29,8 +29,13 @@ import click
 
 # ─── Constants ────────────────────────────────────────────────────────────────
 
-INTERVALS_DAYS: list[int] = [1, 3, 7, 21, 60]
-"""SM-2 lite: interval after the Nth touch (1-indexed). 5+ touches stay at 60."""
+INTERVALS_DAYS: list[int] = [1, 3, 7, 21]
+"""SM-2 lite: interval after the Nth touch (1-indexed). 4+ touches stay at 21.
+
+A problem touched 4 times is considered fully mastered for prep purposes —
+post-acquisition retention happens via the interleaved Maintenance section
+(`compute_maintenance`), which surfaces mastered items on a round-robin
+cadence regardless of strict overdue status."""
 
 DEFAULT_RECALL_LIMIT = 10
 DEFAULT_NEW_LIMIT = 3
@@ -402,7 +407,7 @@ _PHASE_HEADING = re.compile(r"^###\s+Phase\s+(\d+)\s+—\s+(.+?)\s+\((\d+)\s+new
 _PATTERN_SUBHEADING = re.compile(r"^####\s+(.+?)\s*$")
 _OTHER_H2 = re.compile(r"^##\s+(.+?)\s*$")
 # Top-level DSA problem line. Accepts the new format (no parent checkbox,
-# `- Two Sum (E) · 4/5 (next due 2026-06-25)`), and tolerates the legacy
+# `- Two Sum (E) · 4/4 (next due 2026-06-25)`), and tolerates the legacy
 # format `- [ ] Two Sum (E)` for migration. The legacy `_PROBLEM_LINE` /
 # `_CHECKED_LINE` patterns are kept for parsing today.md completions.
 _PROBLEM_LINE = re.compile(r"^\s*-\s+\[[ xX]\]\s+(.*)$")
@@ -411,7 +416,9 @@ _HARDEST_HEADING = re.compile(
     r"^##\s+Today's hardest(?:\s+\((\d{4}-\d{2}-\d{2})\))?(?:\s.*)?$"
 )
 _DSA_PROBLEM_PARENT = re.compile(r"^-\s+(?:\[[ xX]\]\s+)?(.+?)\s*$")
-_DSA_COUNTER_ANNOTATION = re.compile(r"\s+·\s+\d+/5(?:\s+\([^)]+\))?\s*$")
+# Accept any `· N/M` denominator so existing curriculum.md files seeded under
+# the old 5-slot mastery scheme still parse cleanly.
+_DSA_COUNTER_ANNOTATION = re.compile(r"\s+·\s+\d+/\d+(?:\s+\([^)]+\))?\s*$")
 _DSA_SUBBULLET = re.compile(r"^\s+-\s+\[([ xX])\](?:\s+✅\s*(\S*))?\s*$")
 _DONE_DATE = re.compile(r"\s*✅\s*(\d{4}-\d{2}-\d{2}).*$")
 _T_MARKER = re.compile(r"\s*`[A-Z]\d?`\s*")
@@ -440,7 +447,7 @@ def _canonicalize(text: str) -> str:
 
 
 def _strip_problem_parent_annotations(body: str) -> str:
-    """Strip the `· N/5 (next due ...)` / `· N/5 (overdue ...)` counter and
+    """Strip the `· N/M (next due ...)` / `· N/M (overdue ...)` counter and
     any `✅ DATE` stamp from a parent problem line body, leaving only the
     name + difficulty/source/variant tags."""
     body = _DSA_COUNTER_ANNOTATION.sub("", body)
@@ -451,9 +458,11 @@ def _strip_problem_parent_annotations(body: str) -> str:
 def parse_curriculum(curriculum_md: str) -> list[Problem]:
     """Walk the `## DSA` section of `curriculum.md`, emit one Problem per
     top-level `- ...` line under `### Phase N — Name (X new/day)` → `#### Pattern`
-    headings. Accepts the new format (`- Two Sum (E) · 4/5`) and the legacy
-    checkbox format (`- [ ] Two Sum (E)`) for migration. Canonical text is
-    reconstructed as `[Pattern] -> Name`."""
+    headings. Accepts the new format (`- Two Sum (E) · 4/4`) and the legacy
+    checkbox format (`- [ ] Two Sum (E)`) for migration. The counter
+    denominator is tolerated as any digit (`/5`, `/4`, etc.) for forward
+    compatibility with curriculum files seeded under earlier mastery caps.
+    Canonical text is reconstructed as `[Pattern] -> Name`."""
     problems: list[Problem] = []
     in_dsa = False
     phase_num: int | None = None
@@ -1134,15 +1143,15 @@ def write_curriculum_dsa(
 
     Each problem becomes:
 
-        - Name (E) · {min(N, 5)}/5 (next due YYYY-MM-DD)
+        - Name (E) · {min(N, _SLOT_LIMIT)}/{_SLOT_LIMIT} (next due YYYY-MM-DD)
           - [x] ✅ DATE        (one per ledger touch, oldest → newest)
-          - [ ]                (empty padding up to 5 slots, only while N < 5)
+          - [ ]                (empty padding up to _SLOT_LIMIT slots, only while N < _SLOT_LIMIT)
 
-    Untouched problems (`N == 0`) render as `- Name (E) · 0/5` with no
-    sub-bullets. Past saturation (`N > 5`), all touches render and there is
-    no padding. Existing sub-bullets in the source are dropped — the ledger
-    is the source of truth. Phase/pattern headings and non-DSA sections are
-    preserved verbatim."""
+    Untouched problems (`N == 0`) render as `- Name (E) · 0/{_SLOT_LIMIT}` with
+    no sub-bullets. Past saturation (`N > _SLOT_LIMIT`), all touches render
+    and there is no padding. Existing sub-bullets in the source are dropped —
+    the ledger is the source of truth. Phase/pattern headings and non-DSA
+    sections are preserved verbatim."""
     by_problem: dict[str, list[date]] = defaultdict(list)
     for t in ledger:
         by_problem[t.problem].append(t.on)
@@ -1202,7 +1211,7 @@ def write_curriculum_dsa(
 
         touches = by_problem.get(f"[{pattern}] -> {name}", [])
         n = len(touches)
-        out.append(f"- {body} · {min(n, _SLOT_LIMIT)}/5{_annotate_due(touches, today)}")
+        out.append(f"- {body} · {min(n, _SLOT_LIMIT)}/{_SLOT_LIMIT}{_annotate_due(touches, today)}")
         for d in touches:
             out.append(f"  - [x] ✅ {d.isoformat()}")
         for _ in range(_SLOT_LIMIT - n if 0 < n < _SLOT_LIMIT else 0):

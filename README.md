@@ -372,24 +372,27 @@ Each successful solve advances the problem to the next interval:
 | 1       | +1 day   |
 | 2       | +3 days  |
 | 3       | +7 days  |
-| 4       | +21 days |
-| 5+      | +60 days |
+| 4+      | +21 days |
+
+Four touches counts as mastered. Anything past the fourth solve stays on
+the 21-day refresh cadence — there's no 60-day "well-learned" bucket
+because, for a 45–60 day interview prep, 21 days is the right outer
+horizon. Retention past 21 days is the job of the Maintenance section
+(see below), not a longer interval.
 
 Example in `curriculum.md`:
 
 ```md
-- Two Sum (E) · 4/5 (next due 2026-06-25)
+- Two Sum (E) · 4/4 (next due 2026-06-25)
   - [x] ✅ 2026-05-11
   - [x] ✅ 2026-05-14
   - [x] ✅ 2026-05-21
   - [x] ✅ 2026-06-04
-  - [ ]
-- 3Sum (M) · 0/5
+- 3Sum (M) · 0/4
 ```
 
-Untouched problems have no sub-bullets.
-
-The first tick from `today.md` unlocks the mastery slots.
+Untouched problems have no sub-bullets. The first tick from `today.md`
+unlocks the mastery slots.
 
 ---
 
