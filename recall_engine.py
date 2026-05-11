@@ -355,6 +355,79 @@ def compute_recall(
     return items[:limit]
 
 
+def min_touches_in_scope(
+    curriculum: list[Problem],
+    ledger: list[Touch],
+    difficulties: tuple[Difficulty, ...] = ("E", "M"),
+) -> int:
+    """Lowest touch count across curriculum problems whose difficulty is in
+    `difficulties`. Returns 0 if any in-scope problem is untouched, and 0
+    if the in-scope set is empty.
+
+    Drives the post-acquisition trigger: once every E/M problem has been
+    touched ≥ `_SLOT_LIMIT` times, the Maintenance section activates."""
+    in_scope = [p for p in curriculum if p.difficulty in difficulties]
+    if not in_scope:
+        return 0
+    summary = aggregate_touches(ledger)
+    return min(summary.get(p.text, (0, date.min))[0] for p in in_scope)
+
+
+def compute_maintenance(
+    curriculum: list[Problem],
+    ledger: list[Touch],
+    today: date,
+    limit: int = DEFAULT_RECALL_LIMIT,
+    difficulties: tuple[Difficulty, ...] = ("E", "M"),
+) -> list[RecallItem]:
+    """Interleaved post-acquisition recall: round-robin across patterns,
+    surfacing in-scope problems regardless of overdue status.
+
+    Returns `[]` until every in-scope problem has reached `_SLOT_LIMIT`
+    touches — at which point urgency-ordered `compute_recall` runs dry
+    (everything sits at the 21-day cap, refreshed often enough never to
+    fall overdue). Maintenance fills the gap by rotating across patterns,
+    which trains the discrimination skill the interview actually rewards.
+
+    Ordering: within each pattern bucket, least-recently-touched first.
+    Across buckets, pattern-by-pattern round-robin starting from the
+    largest bucket. Fully deterministic — no randomness, no seeding."""
+    if min_touches_in_scope(curriculum, ledger, difficulties) < _SLOT_LIMIT:
+        return []
+    summary = aggregate_touches(ledger)
+    buckets: dict[str, list[RecallItem]] = defaultdict(list)
+    for p in curriculum:
+        if p.difficulty not in difficulties:
+            continue
+        touches, last = summary.get(p.text, (0, date.min))
+        buckets[p.pattern].append(
+            RecallItem(
+                problem=p.text,
+                touches=touches,
+                last_touched=last,
+                days_overdue=overdue_days(touches, last, today),
+                difficulty=p.difficulty,
+            )
+        )
+    for pattern in buckets:
+        buckets[pattern].sort(key=lambda r: r.last_touched)
+    ordered_patterns = sorted(buckets, key=lambda p: (-len(buckets[p]), p))
+    result: list[RecallItem] = []
+    indices: dict[str, int] = {p: 0 for p in ordered_patterns}
+    while len(result) < limit:
+        progressed = False
+        for pattern in ordered_patterns:
+            if indices[pattern] < len(buckets[pattern]):
+                result.append(buckets[pattern][indices[pattern]])
+                indices[pattern] += 1
+                progressed = True
+                if len(result) >= limit:
+                    return result
+        if not progressed:
+            return result
+    return result
+
+
 def compute_new(
     curriculum: list[Problem],
     ledger: list[Touch],
