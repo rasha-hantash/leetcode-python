@@ -1005,6 +1005,23 @@ def _atomic_write(path: Path, content: str) -> None:
     os.replace(tmp, path)
 
 
+def init_curriculum_file(template: Path, curriculum: Path, *, force: bool = False) -> bool:
+    """Seed `curriculum` from `template` if missing (or `force=True`).
+
+    Returns True when the file was written, False when an existing curriculum
+    was preserved. Raises FileNotFoundError if `template` doesn't exist."""
+    if curriculum.exists() and not force:
+        return False
+    _atomic_write(curriculum, template.read_text())
+    return True
+
+
+def ensure_runtime_dirs(*dirs: Path) -> None:
+    """Create each directory if missing (idempotent)."""
+    for d in dirs:
+        d.mkdir(parents=True, exist_ok=True)
+
+
 # ─── DSA sync (curriculum.md ↔ ledger) ───────────────────────────────────────
 
 
@@ -2016,6 +2033,44 @@ def reset_cmd(yes: bool, ledger_dir: Path) -> None:
     if path.exists():
         path.unlink()
     click.echo("Reset complete. Run `prep recompute` to regenerate today.md.")
+
+
+@cli.command(name="init")
+@click.option(
+    "--template",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=Path("curriculum.template.md"),
+    show_default=True,
+    help="Pristine curriculum template (committed to the repo).",
+)
+@click.option(
+    "--curriculum",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=Path("curriculum.md"),
+    show_default=True,
+    help="Your local working curriculum (gitignored).",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Overwrite curriculum.md even if it already exists.",
+)
+def init_cmd(template: Path, curriculum: Path, force: bool) -> None:
+    """Seed your local curriculum.md from the pristine template.
+
+    Idempotent: leaves an existing curriculum.md alone unless --force.
+    Also creates prep-data/ and problems/ for the ledgers and your solutions.
+    """
+    ensure_runtime_dirs(Path("prep-data"), Path("problems"))
+    wrote = init_curriculum_file(template, curriculum, force=force)
+    if wrote:
+        click.echo(f"Seeded {curriculum} from {template}.")
+        click.echo("Next: `uv run prep recompute` to generate today.md.")
+    else:
+        click.echo(
+            f"{curriculum} already exists — left untouched. "
+            f"Pass --force to overwrite from the template."
+        )
 
 
 @cli.group(name="mock")

@@ -449,37 +449,50 @@ System design mocks:
 
 ## Quickstart
 
-Open this repo as an Obsidian vault.
+### 1. Open the repo as an Obsidian vault
 
-Install the Obsidian **Tasks** plugin.
-
-Enable:
+Install the Obsidian **Tasks** plugin and enable:
 
 ```txt
 Set done date on task completion
 ```
 
-Install dependencies:
+### 2. Install dependencies and seed your workspace
 
 ```sh
 # Python 3.11+ required
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 uv run pytest
+uv run prep init       # copies curriculum.template.md → curriculum.md (your file)
 uv run prep recompute
 ```
 
-Open:
+Open `today.md` — that is your daily plan.
 
-```txt
-today.md
+`curriculum.md`, `problems/`, `prep-data/`, and `today.md` are gitignored —
+they hold your progress and never leave your machine. The committed source
+of truth is `curriculum.template.md`. Re-running `prep init` is a safe
+no-op once `curriculum.md` exists; pass `--force` to reseed from the
+template (and lose your local ticks).
+
+### 3. Everyday CLI
+
+```sh
+uv run prep recompute                         # regenerate today.md
+uv run prep preview                           # preview today's plan
+uv run prep preview --for weekday             # or: --for sat / --for sun
+uv run prep preview --date 2026-05-17         # any specific date
+
+uv run prep mock schedule mock-1 2026-05-17   # book a mock
+uv run prep mock complete mock-1              # mark a mock done (defaults to today)
+uv run prep mock list                         # show every mock and its state
+
+uv run prep init --force                      # reseed curriculum.md from the template
+uv run pytest                                 # run the engine's test suite
 ```
 
-That is your daily plan.
-
----
-
-## Optional: daily auto-recompute on macOS
+### 4. Optional: daily auto-recompute on macOS
 
 Install the LaunchAgent:
 
@@ -488,73 +501,34 @@ cp launchd/com.rasha.recall-engine.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.rasha.recall-engine.plist
 ```
 
-It runs daily at 8:30 AM.
-
-Logs:
-
-```txt
-~/Library/Logs/recall-engine.log
-```
-
-The Mac must be awake at 8:30. If it sleeps through, run:
-
-```sh
-uv run prep recompute
-```
-
----
-
-## CLI
-
-Recompute today:
-
-```sh
-uv run prep recompute
-```
-
-Preview a day:
-
-```sh
-uv run prep preview
-uv run prep preview --for weekday
-uv run prep preview --for sat
-uv run prep preview --for sun
-uv run prep preview --date 2026-05-17
-```
-
-Schedule, complete, and list mocks:
-
-```sh
-uv run prep mock schedule mock-1 2026-05-17
-uv run prep mock complete mock-1
-uv run prep mock list
-```
-
-Run tests:
-
-```sh
-uv run pytest
-```
+It runs daily at 8:30 AM; logs land at `~/Library/Logs/recall-engine.log`.
+The Mac must be awake at 8:30 — if it sleeps through, run `uv run prep recompute`.
 
 ---
 
 ## Files
 
-| File                                    | What it does                                                   |
-| --------------------------------------- | -------------------------------------------------------------- |
-| `curriculum.md`                         | Master file for DSA, system design, mocks, and behavioral prep |
-| `today.md`                              | Generated daily plan                                           |
-| `prep-data/completions.jsonl`           | Append-only DSA completion ledger                              |
-| `prep-data/hardest.jsonl`               | Append-only hardest-problem ledger                             |
-| `recall_engine.py`                      | SM-2-lite recall engine                                        |
-| `tests/test_recall_engine.py`           | Narrative tests and engine spec                                |
-| `launchd/com.rasha.recall-engine.plist` | macOS daily recompute LaunchAgent                              |
-| `patterns/*.md`                         | Pattern notes and per-problem mistakes                         |
-| `problems/<pattern>/<diff>-<n>.py`      | Solution files                                                 |
-| `python-gotchas.md`                     | Python traps found during prep                                 |
-| `random-problems.md`                    | Extra unscheduled practice problems                            |
-| `anki/`                                 | Fact-level recall decks                                        |
-| `plans/`                                | Refactor and implementation plans                              |
+Two roles live in this repo: **shared template** (committed, identical for
+everyone) and **your personal state** (gitignored, lives only on your
+machine). The split keeps your ticks and solutions from leaking into PRs.
+
+| File                                    | Role     | What it does                                                                          |
+| --------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `curriculum.template.md`                | template | Pristine master list of problems + SD chapters + mocks + behavioral; never has state. |
+| `curriculum.md`                         | personal | Your working copy — `[x]` ticks, ✅ stamps, 📅 schedules. Seeded by `prep init`.      |
+| `today.md`                              | personal | Generated daily plan. Regenerated on every `prep recompute`.                          |
+| `prep-data/completions.jsonl`           | personal | Append-only DSA completion ledger.                                                    |
+| `prep-data/hardest.jsonl`               | personal | Append-only hardest-problem ledger.                                                   |
+| `problems/<pattern>/<diff>-<n>.py`      | personal | Your solution files. The directory is gitignored except for `problems/company/`.      |
+| `problems/company/*.md`                 | template | Company-question prompts referenced by the curriculum.                                |
+| `recall_engine.py`                      | template | SM-2-lite recall engine.                                                              |
+| `tests/test_recall_engine.py`           | template | Narrative tests and engine spec.                                                      |
+| `launchd/com.rasha.recall-engine.plist` | template | macOS daily recompute LaunchAgent.                                                    |
+| `patterns/*.md`                         | template | Pattern notes and per-problem mistakes.                                               |
+| `python-gotchas.md`                     | template | Python traps found during prep.                                                       |
+| `random-problems.md`                    | template | Extra unscheduled practice problems.                                                  |
+| `anki/`                                 | template | Fact-level recall decks.                                                              |
+| `plans/`                                | template | Refactor and implementation plans.                                                    |
 
 ---
 
