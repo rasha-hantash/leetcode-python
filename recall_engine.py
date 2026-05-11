@@ -1832,6 +1832,135 @@ def recompute_cmd(
     )
 
 
+def _next_weekday_of(today: date, kind: str) -> date:
+    """Return the next date matching `kind` (`weekday` = Mon–Fri, `sat`, `sun`).
+    Returns `today` itself if it already matches."""
+    if kind == "sat":
+        target = calendar.SATURDAY
+    elif kind == "sun":
+        target = calendar.SUNDAY
+    elif kind == "weekday":
+        d = today
+        while d.weekday() >= calendar.SATURDAY:
+            d += timedelta(days=1)
+        return d
+    else:
+        raise click.BadParameter(f"unknown day kind: {kind!r}")
+    delta = (target - today.weekday()) % 7
+    return today + timedelta(days=delta)
+
+
+def _render_preview(
+    curriculum_md_path: Path,
+    ledger_path: Path,
+    hardest_ledger_path: Path | None,
+    today: date,
+) -> str:
+    """Read-only render of today.md for a synthetic date. No writes, no ledger
+    mutation, no curriculum tick folding — pure projection of current state."""
+    curriculum_md = curriculum_md_path.read_text()
+    curriculum = parse_curriculum(curriculum_md)
+    phases = parse_phases(curriculum_md)
+    sd_chapters = parse_sd_chapters(curriculum_md)
+    mocks = parse_mocks(curriculum_md)
+
+    ledger = load_ledger(ledger_path) if ledger_path.exists() else []
+    recall = compute_recall(ledger, today=today, limit=DEFAULT_RECALL_LIMIT, curriculum=curriculum)
+    phase = current_phase(curriculum, ledger, phases) if phases else None
+    new = (
+        compute_new(curriculum, ledger, phase=phase) if phase
+        else compute_new(curriculum, ledger)
+    )
+
+    start = start_date(ledger)
+    day_n = day_n_for(today, start) if start else None
+    rate = avg_new_per_day(ledger, today)
+    end = projected_end_date(ledger, curriculum, today)
+    touched = {t.problem for t in ledger}
+    untouched = sum(1 for p in curriculum if p.text not in touched)
+
+    readiness = compute_readiness(curriculum, ledger, sd_chapters, mocks)
+    mock_today = any(m.scheduled_date == today for m in mocks)
+    hardest_marks = (
+        load_hardest_ledger(hardest_ledger_path)
+        if hardest_ledger_path is not None and hardest_ledger_path.exists() else []
+    )
+    return render_today(
+        today=today,
+        recall=recall,
+        new=new,
+        day_n=day_n,
+        phase=phase,
+        total_phases=len(phases) if phases else None,
+        projection=end,
+        projection_rate=rate,
+        projection_untouched=untouched,
+        sd_next=next_sd_chapter(sd_chapters),
+        readiness=readiness,
+        next_up_mock=next_mock(mocks),
+        em_done=readiness.em.done,
+        sd_done=readiness.sd.done,
+        sd_chapters=sd_chapters,
+        mock_today=mock_today,
+        hardest_marks=hardest_marks,
+        curriculum=curriculum,
+    )
+
+
+@cli.command(name="preview")
+@click.option(
+    "--curriculum",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=Path("curriculum.md"),
+    show_default=True,
+    help="Master curriculum markdown (DSA by phase + SD/Mocks/Behavioral).",
+)
+@click.option(
+    "--ledger",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=Path("prep-data/completions.jsonl"),
+    show_default=True,
+    help="Append-only completion ledger.",
+)
+@click.option(
+    "--hardest-ledger",
+    type=click.Path(dir_okay=False, path_type=Path),
+    default=Path("prep-data/hardest.jsonl"),
+    show_default=True,
+    help="Hardest-of-day flag ledger (pre-fills Saturday's re-solve list).",
+)
+@click.option(
+    "--for",
+    "for_day",
+    type=click.Choice(["weekday", "sat", "sun"]),
+    help="Preview the next occurrence of this day. Mutually exclusive with --date.",
+)
+@click.option(
+    "--date",
+    "for_date",
+    type=click.DateTime(formats=["%Y-%m-%d"]),
+    help="Preview for a specific date (YYYY-MM-DD). Mutually exclusive with --for.",
+)
+def preview_cmd(
+    curriculum: Path,
+    ledger: Path,
+    hardest_ledger: Path,
+    for_day: str | None,
+    for_date: Any | None,
+) -> None:
+    """Print what today.md would look like for a given day. Read-only — does not
+    touch the ledger or overwrite today.md."""
+    if for_day and for_date:
+        raise click.UsageError("--for and --date are mutually exclusive.")
+    if for_date is not None:
+        target = for_date.date()
+    elif for_day:
+        target = _next_weekday_of(date.today(), for_day)
+    else:
+        target = date.today()
+    click.echo(_render_preview(curriculum, ledger, hardest_ledger, target))
+
+
 @cli.command(name="reset")
 @click.option("--yes", is_flag=True, help="Skip the confirmation prompt.")
 @click.option(
