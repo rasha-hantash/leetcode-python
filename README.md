@@ -175,7 +175,7 @@ You can preview weekday, Saturday, or Sunday layouts without touching state. See
 
 Example:
 
-![today.md rendered for a weekday](docs/preview-weekday.svg)
+![today.md rendered for a weekday in Obsidian](docs/preview-weekday.png)
 
 ---
 
