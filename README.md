@@ -164,6 +164,7 @@ A weekday `today.md` includes:
 - System design reading
 - Mock / interview status
 - Today's hardest problem
+- Maintenance queue at the bottom (only after every E/M is touched 4×)
 
 Saturday adds:
 
@@ -393,6 +394,39 @@ Example in `curriculum.md`:
 
 Untouched problems have no sub-bullets. The first tick from `today.md`
 unlocks the mastery slots.
+
+### Maintenance — interleaved across patterns
+
+Spacing and interleaving are different ideas. The interval table above
+handles **spacing** (when something resurfaces). The Maintenance section
+in `today.md` handles **interleaving** (how mastered problems mix).
+
+Maintenance activates the moment every E/M problem in the curriculum has
+reached the 4-touch cap. Before that, you'll never see it. Once it
+activates:
+
+- It surfaces ~10 mastered E/M problems per day, drawn round-robin across
+  patterns (Arrays → Trees → Graphs → Arrays → …), not blocked by
+  pattern like the curriculum's natural order.
+- Within each pattern, least-recently-touched leads.
+- Items appear regardless of whether they're "overdue" — the 21-day
+  refresh cadence makes overdue-driven Recall mostly silent once mastery
+  is reached. Maintenance fills the gap.
+- It's deterministic — same ledger and date produce the same daily set.
+
+Why this matters: research on retrieval practice consistently finds
+that _interleaved_ practice beats blocked practice for transfer and
+discrimination, but only after the underlying schemas are formed. During
+Phases 1–6, Recall stays urgency-ordered (correct for acquisition).
+Post-acquisition, Maintenance takes over (correct for retention).
+
+For a 60-day prep starting Day 1, Maintenance activates around **Day 66**
+under perfect adherence (every overdue Recall done on time, no skipped
+working days). Realistic adherence — a few skipped reviews, mock-day
+schedule pressure — pushes it closer to **Day 75**. Either way, well
+before any long-run post-interview maintenance phase but past the
+acquisition phase. By default, only E/M problems flow through
+Maintenance; Hards stay in urgency-ordered Recall.
 
 ---
 

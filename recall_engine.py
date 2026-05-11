@@ -252,6 +252,7 @@ class RecomputeResult:
     new_touches_logged: int
     recall_size: int
     new_size: int
+    maintenance_size: int = 0
 
 
 # ─── SM-2 lite arithmetic ────────────────────────────────────────────────────
@@ -1475,6 +1476,15 @@ def _render_recall_line(item: RecallItem) -> str:
     )
 
 
+def _render_maintenance_line(item: RecallItem) -> str:
+    """Maintenance entries are surfaced by rotation, not urgency, so the line
+    drops the overdue counter that Recall uses."""
+    return (
+        f"- [ ] {item.problem}{_diff_suffix(item.difficulty)} — "
+        f"{item.touches}× · last {_format_date(item.last_touched)}"
+    )
+
+
 def _render_new_line(problem: Problem) -> str:
     return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)}"
 
@@ -1598,6 +1608,7 @@ def render_today(
     mock_today: bool = False,
     hardest_marks: list[HardestMark] | None = None,
     curriculum: list[Problem] | None = None,
+    maintenance: list[RecallItem] | None = None,
 ) -> str:
     """Produce the markdown for today.md."""
     base = f"# Today — {_format_date(today, weekday=True)}, {today.year}"
@@ -1656,6 +1667,19 @@ def render_today(
             picks = _render_hardest_pick_section(new, today)
             if picks:
                 lines += ["", *picks]
+
+    # Maintenance sits at the bottom: ambient post-acquisition rotation,
+    # below the day's prescribed work (Recall / New / SD / Hardest).
+    if maintenance:
+        lines += [
+            "",
+            "## Maintenance — interleaved across patterns",
+            "",
+            "_E/M at the 4-touch mastery cap, rotated by pattern. "
+            "Discrimination drill, not urgency._",
+            "",
+        ]
+        lines += [_render_maintenance_line(i) for i in maintenance]
 
     lines.append("")
     return "\n".join(lines)
@@ -1810,6 +1834,7 @@ def recompute(
         compute_new(curriculum, ledger, phase=phase) if phase
         else compute_new(curriculum, ledger)
     )
+    maintenance = compute_maintenance(curriculum, ledger, today=today, limit=recall_limit)
 
     start = start_date(ledger)
     day_n = day_n_for(today, start) if start else None
@@ -1860,10 +1885,14 @@ def recompute(
         mock_today=mock_today,
         hardest_marks=hardest_marks,
         curriculum=curriculum,
+        maintenance=maintenance,
     ))
 
     return RecomputeResult(
-        new_touches_logged=logged, recall_size=len(recall), new_size=len(new)
+        new_touches_logged=logged,
+        recall_size=len(recall),
+        new_size=len(new),
+        maintenance_size=len(maintenance),
     )
 
 
@@ -1925,9 +1954,12 @@ def recompute_cmd(
         dry_run=dry_run,
         hardest_ledger_path=hardest_ledger,
     )
+    maint_suffix = (
+        f" · maintenance: {result.maintenance_size}" if result.maintenance_size else ""
+    )
     click.echo(
         f"logged {result.new_touches_logged} new touch(es) · "
-        f"recall: {result.recall_size} · new: {result.new_size}"
+        f"recall: {result.recall_size} · new: {result.new_size}{maint_suffix}"
     )
 
 

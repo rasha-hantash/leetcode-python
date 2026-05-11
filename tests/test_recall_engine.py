@@ -21,6 +21,7 @@ from recall_engine import (
     Phase,
     Problem,
     Readiness,
+    RecallItem,
     SDChapter,
     Touch,
     aggregate_touches,
@@ -280,6 +281,73 @@ def test_compute_maintenance_caps_at_the_requested_limit() -> None:
         ledger += _five_touches(p.text)
     items = compute_maintenance(curriculum, ledger, today=date(2026, 6, 30), limit=7)
     assert len(items) == 7
+
+
+def test_render_today_omits_maintenance_section_when_no_items_to_surface() -> None:
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[],
+        maintenance=None,
+    )
+    assert "## Maintenance" not in out
+
+
+def test_render_today_places_maintenance_section_below_todays_hardest() -> None:
+    """Maintenance is ambient/optional; the day's prescribed work (Recall,
+    New, SD, Hardest pick) sits above it. A reader scrolling top-down hits
+    obligation before rotation."""
+    items = [
+        RecallItem(
+            problem="[Arrays] Two Sum",
+            touches=4,
+            last_touched=date(2026, 5, 1),
+            days_overdue=-10,
+            difficulty="E",
+        ),
+    ]
+    out = render_today(
+        today=date(2026, 5, 11),  # a Monday — Mon-Fri renders the hardest pick block
+        recall=[],
+        new=[Problem("[Arrays] -> 3Sum", difficulty="M", phase=1)],
+        maintenance=items,
+    )
+    hardest_idx = out.find("## Today's hardest")
+    maintenance_idx = out.find("## Maintenance")
+    assert hardest_idx != -1, "expected Mon-Fri hardest pick section"
+    assert maintenance_idx != -1, "expected Maintenance section"
+    assert maintenance_idx > hardest_idx
+
+
+def test_render_today_renders_maintenance_section_when_items_present() -> None:
+    items = [
+        RecallItem(
+            problem="[Arrays] Two Sum",
+            touches=4,
+            last_touched=date(2026, 5, 1),
+            days_overdue=-10,
+            difficulty="E",
+        ),
+        RecallItem(
+            problem="[Trees] Invert Binary Tree",
+            touches=4,
+            last_touched=date(2026, 5, 2),
+            days_overdue=-9,
+            difficulty="E",
+        ),
+    ]
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[],
+        maintenance=items,
+    )
+    assert "## Maintenance — interleaved across patterns" in out
+    assert "[Arrays] Two Sum" in out
+    assert "[Trees] Invert Binary Tree" in out
+    # Maintenance lines do NOT show "Xd overdue" — that's a Recall-only annotation.
+    maintenance_block = out.split("## Maintenance")[1]
+    assert "overdue" not in maintenance_block
 
 
 def test_compute_maintenance_excludes_problems_outside_the_difficulty_scope() -> None:
