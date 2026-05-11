@@ -9,7 +9,12 @@ one file, `today.md`, with the day's recall queue, new problems, system
 design reading, and mock status — pulled from a single master curriculum and
 your own append-only ledger of completions.
 
+<details>
+<summary><b>Preview <code>today.md</code> in Obsidian</b></summary>
+
 ![today.md rendered for a weekday in Obsidian](docs/preview-weekday.png)
+
+</details>
 
 ---
 
