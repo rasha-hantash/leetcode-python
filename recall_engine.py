@@ -502,7 +502,22 @@ _DIFFICULTY_TAG = re.compile(r"\s*\((E|M|H)\)\s*")
 _SOURCE_TAG = re.compile(r"\s*\((nc-150\+|lc-only|company question)\)\s*")
 _VARIANT_TAG = re.compile(r"\s*\(variant of:\s*([^)]+)\)\s*")
 _MARKDOWN_LINK = re.compile(r"\[([^\]]+)\]\(([^\)]+)\)")
+_WIKILINK = re.compile(r"\[\[([^|\]]+)\|([^\]]+)\]\]")
 _PROBLEM_TEXT = re.compile(r"^\[[^\]]+\]\s*->\s*.+$")
+
+# Pattern label → pattern-file slug. Generic rule: lowercase, drop `&`,
+# collapse spaces to hyphens. Overrides handle the few cases where the
+# pattern file diverges from the generic rule (1-D DP → 1d-dp).
+_PATTERN_SLUG_OVERRIDES: dict[str, str] = {
+    "1-D DP": "1d-dp",
+    "2-D DP": "2d-dp",
+}
+
+
+def _pattern_to_slug(pattern: str) -> str:
+    if pattern in _PATTERN_SLUG_OVERRIDES:
+        return _PATTERN_SLUG_OVERRIDES[pattern]
+    return pattern.lower().replace(" & ", "-").replace(" ", "-")
 
 
 def _canonicalize(text: str) -> str:
@@ -516,6 +531,7 @@ def _canonicalize(text: str) -> str:
     text = _SOURCE_TAG.sub(" ", text)
     text = _VARIANT_TAG.sub(" ", text)
     text = _T_MARKER.sub(" ", text)
+    text = _WIKILINK.sub(r"[\2]", text)
     text = _MARKDOWN_LINK.sub(r"\1", text)
     return re.sub(r"\s+", " ", text).strip()
 
@@ -1486,7 +1502,9 @@ def _render_maintenance_line(item: RecallItem) -> str:
 
 
 def _render_new_line(problem: Problem) -> str:
-    return f"- [ ] {problem.text}{_diff_suffix(problem.difficulty)}"
+    pattern_link = f"[[{_pattern_to_slug(problem.pattern)}|{problem.pattern}]]"
+    name_part = f"[{problem.name}]({problem.link})" if problem.link else problem.name
+    return f"- [ ] {pattern_link} -> {name_part}{_diff_suffix(problem.difficulty)}"
 
 
 def _render_hardest_pick_section(new: list[Problem], today: date) -> list[str]:
@@ -1505,9 +1523,10 @@ def _render_hardest_pick_section(new: list[Problem], today: date) -> list[str]:
         "",
     ]
     for p in new:
-        link_part = f"[{p.name}]({p.link})" if p.link else p.name
+        pattern_link = f"[[{_pattern_to_slug(p.pattern)}|{p.pattern}]]"
+        name_part = f"[{p.name}]({p.link})" if p.link else p.name
         lines.append(
-            f"- [ ] [{p.pattern}] -> {link_part}{_diff_suffix(p.difficulty)}"
+            f"- [ ] {pattern_link} -> {name_part}{_diff_suffix(p.difficulty)}"
         )
     return lines
 
@@ -1645,7 +1664,13 @@ def render_today(
         [_render_recall_line(i) for i in recall]
         if recall else ["_Empty — no problems are overdue yet._"]
     )
-    lines += ["", "## New — next from the curriculum", ""]
+    new_header = (
+        f"## New — next from the curriculum ({phase.new_per_day}/day, "
+        f"Phase {phase.number} — {phase.name})"
+        if phase is not None
+        else "## New — next from the curriculum"
+    )
+    lines += ["", new_header, ""]
     lines += (
         [_render_new_line(p) for p in new]
         if new else ["_Empty — every curriculum problem has been touched at least once._"]
