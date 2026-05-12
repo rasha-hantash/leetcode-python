@@ -268,12 +268,13 @@ If you move slower or faster, phase advancement still comes from completed work,
 The DSA curriculum is:
 
 ```txt
-NeetCode 150 + 31 targeted extras + 10 company questions = 194 problems
+NeetCode 150 + 44 targeted extras = 194 problems
 ```
 
-The 31 extras fill patterns that NeetCode 150 under-covers or skips. The 10
-company questions are real asks from past interviews, kept for pattern
-exposure to interview-style phrasing.
+The 44 extras fill patterns that NeetCode 150 under-covers or skips. They
+include 31 explicitly tagged pattern-coverage extras (see
+[`coverage-analysis.md`](coverage-analysis.md)) and 10 company-interview
+questions (real asks from past interviews).
 
 <details>
 <summary>Patterns added by the gap-fillers</summary>
