@@ -271,10 +271,9 @@ The DSA curriculum is:
 NeetCode 150 + 44 targeted extras = 194 problems
 ```
 
-The 44 extras fill patterns that NeetCode 150 under-covers or skips. They
-include 31 explicitly tagged pattern-coverage extras (see
-[`coverage-analysis.md`](coverage-analysis.md)) and 10 company-interview
-questions (real asks from past interviews).
+The 44 extras fill patterns that NeetCode 150 under-covers or skips, plus a
+handful of real company-interview questions. The per-pattern justification
+for every extra lives in [`coverage-analysis.md`](coverage-analysis.md).
 
 <details>
 <summary>Patterns added by the gap-fillers</summary>
