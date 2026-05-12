@@ -574,8 +574,8 @@ def test_recompute_creates_today_md_on_first_run(tmp_path: Path) -> None:
 
     assert today_md.exists()
     text = today_md.read_text()
-    assert "[A] -> P1" in text
-    assert "[A] -> P2" in text
+    assert "[[a|A]] -> P1" in text
+    assert "[[a|A]] -> P2" in text
     assert result.new_size >= 1
     assert result.recall_size == 0
     assert result.new_touches_logged == 0
@@ -2352,11 +2352,11 @@ def test_render_today_renders_hardest_pick_section_on_weekdays_with_links() -> N
     md = render_today(today=date(2026, 5, 11), recall=[], new=new)  # Monday
     assert "## Today's hardest (2026-05-11) — pick from today's New" in md
     assert (
-        "- [ ] [Arrays & Hashing] -> [Two Sum](https://neetcode.io/problems/two-sum) (E)"
+        "- [ ] [[arrays-hashing|Arrays & Hashing]] -> [Two Sum](https://neetcode.io/problems/two-sum) (E)"
         in md
     )
     assert (
-        "- [ ] [Arrays & Hashing] -> [Group Anagrams](https://neetcode.io/problems/group-anagrams) (M)"
+        "- [ ] [[arrays-hashing|Arrays & Hashing]] -> [Group Anagrams](https://neetcode.io/problems/group-anagrams) (M)"
         in md
     )
 
@@ -2478,3 +2478,131 @@ def test_recompute_hardest_logging_is_idempotent(tmp_path: Path) -> None:
             hardest_ledger_path=hardest,
         )
     assert len(load_hardest_ledger(hardest)) == 1
+
+
+# ─── Wikilink rendering + phase-aware New header ─────────────────────────────
+
+
+def test_new_section_wikilinks_the_pattern_to_its_pattern_doc() -> None:
+    """Pattern label in `## New` should be an Obsidian wikilink to the
+    corresponding `patterns/<slug>.md` file, so clicking opens the pattern
+    note in Obsidian."""
+    md = render_today(
+        today=date(2026, 5, 12),
+        recall=[],
+        new=[
+            Problem(
+                text="[Arrays & Hashing] -> Contains Duplicate",
+                difficulty="E",
+                link="https://neetcode.io/problems/duplicate-integer",
+            )
+        ],
+    )
+    new_section = md.split("## New")[1].split("## ")[0]
+    assert "[[arrays-hashing|Arrays & Hashing]]" in new_section
+
+
+def test_new_section_hyperlinks_the_problem_name_to_its_external_url() -> None:
+    """The problem name in `## New` should be a markdown link to the URL
+    captured from curriculum.md (preserved on Problem.link)."""
+    md = render_today(
+        today=date(2026, 5, 12),
+        recall=[],
+        new=[
+            Problem(
+                text="[Arrays & Hashing] -> Contains Duplicate",
+                difficulty="E",
+                link="https://neetcode.io/problems/duplicate-integer",
+            )
+        ],
+    )
+    new_section = md.split("## New")[1].split("## ")[0]
+    assert "[Contains Duplicate](https://neetcode.io/problems/duplicate-integer)" in new_section
+
+
+def test_new_section_omits_external_link_when_problem_has_no_url() -> None:
+    """Company-question stubs and other linkless entries should render the
+    bare name (no broken markdown link), so the wikilink-to-pattern stays
+    the only navigable surface."""
+    md = render_today(
+        today=date(2026, 5, 12),
+        recall=[],
+        new=[
+            Problem(
+                text="[Arrays & Hashing] -> Internal Stub Problem",
+                difficulty="M",
+                link=None,
+            )
+        ],
+    )
+    new_section = md.split("## New")[1].split("## ")[0]
+    assert "-> Internal Stub Problem (M)" in new_section
+    assert "Internal Stub Problem]" not in new_section  # not wrapped as a link
+
+
+def test_pattern_slug_handles_1d_dp_and_2d_dp_overrides() -> None:
+    """`1-D DP` and `2-D DP` map to filenames `1d-dp.md` / `2d-dp.md`, not
+    the generic `1-d-dp` / `2-d-dp` slug — pinned via overrides so the
+    wikilinks resolve to the actual pattern files."""
+    md = render_today(
+        today=date(2026, 5, 12),
+        recall=[],
+        new=[
+            Problem(text="[1-D DP] -> Climbing Stairs", difficulty="E", link="https://neetcode.io/problems/climbing-stairs"),
+            Problem(text="[2-D DP] -> Unique Paths", difficulty="M", link="https://neetcode.io/problems/unique-paths"),
+        ],
+    )
+    assert "[[1d-dp|1-D DP]]" in md
+    assert "[[2d-dp|2-D DP]]" in md
+
+
+def test_new_section_header_includes_phase_budget_when_phase_is_passed() -> None:
+    """When the renderer knows the current phase, the `## New` heading
+    surfaces the daily new-problem budget plus phase name — so the reader
+    can verify the served count matches the phase target."""
+    phase = Phase(number=1, name="Linear Patterns E+M", new_per_day=5)
+    md = render_today(
+        today=date(2026, 5, 12),
+        recall=[],
+        new=[Problem("[Arrays & Hashing] -> Two Sum", difficulty="E")],
+        phase=phase,
+    )
+    assert "## New — next from the curriculum (5/day, Phase 1 — Linear Patterns E+M)" in md
+
+
+def test_new_section_header_falls_back_to_plain_when_no_phase_passed() -> None:
+    """No phase context (legacy / test fixtures without a curriculum) →
+    bare heading, no parenthetical."""
+    md = render_today(
+        today=date(2026, 5, 12),
+        recall=[],
+        new=[Problem("[Arrays & Hashing] -> Two Sum", difficulty="E")],
+    )
+    assert "## New — next from the curriculum\n" in md
+
+
+def test_parse_completions_handles_wikilinked_pattern_in_ticked_lines() -> None:
+    """A user ticks a `## New` line in today.md. The line now uses
+    wikilink syntax for the pattern — the parser must canonicalize it
+    back to the `[Pattern] -> Name` form that matches the ledger."""
+    today_md = (
+        "## New — next from the curriculum (5/day, Phase 1 — Linear Patterns E+M)\n\n"
+        "- [x] [[arrays-hashing|Arrays & Hashing]] -> [Two Sum](https://neetcode.io/problems/two-sum) (E) ✅ 2026-05-12\n"
+    )
+    touches = parse_completions(today_md)
+    assert len(touches) == 1
+    assert touches[0].problem == "[Arrays & Hashing] -> Two Sum"
+    assert touches[0].on == date(2026, 5, 12)
+
+
+def test_parse_hardest_marks_handles_wikilinked_pattern_in_ticked_lines() -> None:
+    """Mirror of the above for the hardest section — wikilink-formatted
+    pattern label must canonicalize cleanly."""
+    today_md = (
+        "## Today's hardest (2026-05-12) — pick from today's New\n\n"
+        "- [x] [[arrays-hashing|Arrays & Hashing]] -> [Two Sum](https://neetcode.io/problems/two-sum) (E)\n"
+    )
+    marks = parse_hardest_marks(today_md, fallback_date=date(2026, 5, 12))
+    assert len(marks) == 1
+    assert marks[0].problem == "[Arrays & Hashing] -> Two Sum"
+    assert marks[0].on == date(2026, 5, 12)
