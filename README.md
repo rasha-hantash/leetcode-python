@@ -9,6 +9,8 @@ one file, `today.md`, with the day's recall queue, new problems, system
 design reading, and mock status — pulled from a single master curriculum and
 your own append-only ledger of completions.
 
+**Curriculum artifact:** [NeetCode 150 gap analysis](coverage-analysis.md) — every extra problem outside NC150, grouped by pattern, with per-problem justification.
+
 <details>
 <summary><b>Preview <code>today.md</code> in Obsidian</b></summary>
 
@@ -136,8 +138,8 @@ uv run prep preview                           # preview today's plan
 uv run prep preview --for weekday             # or: --for sat / --for sun
 uv run prep preview --date 2026-05-17         # any specific date
 
-uv run prep mock schedule mock-1 2026-05-17   # book a mock
-uv run prep mock complete mock-1              # mark a mock done (defaults to today)
+uv run prep mock schedule mock-1 2026-05-17   # schedule a mock
+uv run prep mock complete mock-1              # complete a mock (defaults to today)
 uv run prep mock list                         # show every mock and its state
 
 uv run prep init --force                      # reseed curriculum.md from the template
@@ -269,7 +271,10 @@ The DSA curriculum is:
 NeetCode 150 + 44 targeted extras = 194 problems
 ```
 
-The 44 extras fill patterns that NeetCode 150 under-covers or skips.
+The 44 extras fill patterns that NeetCode 150 under-covers or skips. They
+include 31 explicitly tagged pattern-coverage extras (see
+[`coverage-analysis.md`](coverage-analysis.md)) and 10 company-interview
+questions (real asks from past interviews).
 
 <details>
 <summary>Patterns added by the gap-fillers</summary>
@@ -631,10 +636,10 @@ machine). The split keeps your ticks and solutions from leaking into PRs.
 | `tests/test_recall_engine.py`           | template | Narrative tests and engine spec.                                                      |
 | `launchd/com.today-dsa.recompute.plist` | template | macOS daily recompute LaunchAgent (edit the three `__REPLACE_ME__` markers first).    |
 | `patterns/*.md`                         | template | Pattern notes and per-problem mistakes.                                               |
-| `python-gotchas.md`                     | template | Python traps found during prep.                                                       |
+| `docs/python-gotchas.md`                | template | Python traps found during prep.                                                       |
 | `random-problems.md`                    | template | Extra unscheduled practice problems.                                                  |
 | `anki/`                                 | template | Fact-level recall decks.                                                              |
-| `plans/`                                | template | Refactor and implementation plans.                                                    |
+| `docs/plans/`                           | template | Refactor and implementation plans.                                                    |
 | `scripts/`                              | template | Sandbox + verification scripts for the engine (Maintenance trigger, Hards scope).     |
 
 ---
