@@ -27,7 +27,6 @@ DECK_PREFIX = "Interview Prep::"
 FILES_TO_DECKS = {
     "code-templates.md": "Code Templates",
     "pattern-recognition.md": "Pattern Recognition",
-    "python-gotchas.md": "Python Gotchas",
     "complexity.md": "Complexity Reference",
 }
 
