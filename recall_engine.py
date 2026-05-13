@@ -110,6 +110,7 @@ class RecallItem:
     last_touched: date
     days_overdue: int
     difficulty: Difficulty | None = None
+    link: str | None = None
 
 
 @dataclass(frozen=True)
@@ -339,6 +340,9 @@ def compute_recall(
     diff_lookup: dict[str, Difficulty | None] = {
         p.text: p.difficulty for p in (curriculum or [])
     }
+    link_lookup: dict[str, str | None] = {
+        p.text: p.link for p in (curriculum or [])
+    }
     items: list[RecallItem] = []
     for problem, (touches, last) in aggregate_touches(ledger).items():
         overdue = overdue_days(touches, last, today)
@@ -350,6 +354,7 @@ def compute_recall(
                     last_touched=last,
                     days_overdue=overdue,
                     difficulty=diff_lookup.get(problem),
+                    link=link_lookup.get(problem),
                 )
             )
     items.sort(key=lambda r: r.days_overdue, reverse=True)
@@ -408,6 +413,7 @@ def compute_maintenance(
                 last_touched=last,
                 days_overdue=overdue_days(touches, last, today),
                 difficulty=p.difficulty,
+                link=p.link,
             )
         )
     for pattern in buckets:
@@ -1482,12 +1488,27 @@ def _diff_suffix(d: Difficulty | None) -> str:
     return f" ({d})" if d else ""
 
 
+def _render_problem_text(text: str, link: str | None) -> str:
+    """Render canonical `[Pattern] -> Name` as a pattern wikilink plus an
+    optional hyperlinked name, mirroring `_render_new_line`. Falls back to the
+    raw text when the canonical format isn't recognized (legacy ledger entries
+    or test fixtures without a `->` separator)."""
+    match = re.match(r"^\[([^\]]+)\]\s*->\s*(.+)$", text)
+    if not match:
+        return text
+    pattern, name = match.group(1), match.group(2)
+    pattern_link = f"[[{_pattern_to_slug(pattern)}|{pattern}]]"
+    name_part = f"[{name}]({link})" if link else name
+    return f"{pattern_link} -> {name_part}"
+
+
 def _render_recall_line(item: RecallItem) -> str:
     overdue_text = (
         "due today" if item.days_overdue == 0 else f"{item.days_overdue}d overdue"
     )
     return (
-        f"- [ ] {item.problem}{_diff_suffix(item.difficulty)} — {overdue_text} · "
+        f"- [ ] {_render_problem_text(item.problem, item.link)}"
+        f"{_diff_suffix(item.difficulty)} — {overdue_text} · "
         f"{item.touches}× · last {_format_date(item.last_touched)}"
     )
 
@@ -1496,7 +1517,8 @@ def _render_maintenance_line(item: RecallItem) -> str:
     """Maintenance entries are surfaced by rotation, not urgency, so the line
     drops the overdue counter that Recall uses."""
     return (
-        f"- [ ] {item.problem}{_diff_suffix(item.difficulty)} — "
+        f"- [ ] {_render_problem_text(item.problem, item.link)}"
+        f"{_diff_suffix(item.difficulty)} — "
         f"{item.touches}× · last {_format_date(item.last_touched)}"
     )
 

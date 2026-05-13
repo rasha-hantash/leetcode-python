@@ -612,8 +612,11 @@ def test_recompute_surfaces_yesterdays_completion_into_recall_the_next_day(
     text = today_md.read_text()
     assert "## Recall" in text
     # P1 is now overdue 0 days (due exactly today) and should appear in Recall.
+    # The recall line wikilinks the pattern and (when curriculum has a link)
+    # hyperlinks the name — the test curriculum supplies no link so the name
+    # stays plain.
     recall_section = text.split("## New")[0]
-    assert "[A] -> P1" in recall_section
+    assert "[[a|A]] -> P1" in recall_section
 
 
 def test_recompute_does_not_relog_when_run_twice_with_no_new_completions(
@@ -854,6 +857,77 @@ def test_renderer_displays_difficulty_in_new_lines() -> None:
     )
     new_section = out.split("## New")[1]
     assert "(E)" in new_section
+
+
+def test_renderer_recall_line_hyperlinks_problem_name_when_link_available() -> None:
+    """Recall lines mirror New lines: pattern as a wikilink and problem name as
+    a markdown hyperlink so the NeetCode URL is clickable in Obsidian."""
+    out = render_today(
+        today=date(2026, 5, 7),
+        recall=[
+            RecallItem(
+                problem="[Arrays & Hashing] -> Contains Duplicate",
+                touches=1,
+                last_touched=date(2026, 5, 1),
+                days_overdue=5,
+                difficulty="E",
+                link="https://neetcode.io/problems/duplicate-integer",
+            )
+        ],
+        new=[],
+    )
+    recall_section = out.split("## New")[0]
+    assert (
+        "[Contains Duplicate](https://neetcode.io/problems/duplicate-integer)"
+        in recall_section
+    )
+    assert "[[arrays-hashing|Arrays & Hashing]]" in recall_section
+
+
+def test_renderer_maintenance_line_hyperlinks_problem_name_when_link_available() -> None:
+    out = render_today(
+        today=date(2026, 5, 11),
+        recall=[],
+        new=[],
+        maintenance=[
+            RecallItem(
+                problem="[Trees] -> Invert Binary Tree",
+                touches=4,
+                last_touched=date(2026, 5, 1),
+                days_overdue=-10,
+                difficulty="E",
+                link="https://neetcode.io/problems/invert-a-binary-tree",
+            )
+        ],
+    )
+    maintenance_section = out.split("## Maintenance")[1]
+    assert (
+        "[Invert Binary Tree](https://neetcode.io/problems/invert-a-binary-tree)"
+        in maintenance_section
+    )
+    assert "[[trees|Trees]]" in maintenance_section
+
+
+def test_renderer_recall_line_falls_back_to_raw_text_when_no_link() -> None:
+    """Without a link, no markdown hyperlink is emitted. The renderer also
+    tolerates legacy/test fixtures that lack the canonical `[Pattern] -> Name`
+    shape by passing the text through verbatim."""
+    out = render_today(
+        today=date(2026, 5, 7),
+        recall=[
+            RecallItem(
+                problem="[A] Two Sum",
+                touches=1,
+                last_touched=date(2026, 5, 1),
+                days_overdue=5,
+                difficulty="E",
+            )
+        ],
+        new=[],
+    )
+    recall_section = out.split("## New")[0]
+    assert "](http" not in recall_section
+    assert "[A] Two Sum" in recall_section
 
 
 # ─── Saturday "this week's hardest" section ────────────────────────────────────
