@@ -14,7 +14,7 @@ your own append-only ledger of completions.
 <details>
 <summary><b>Preview <code>today.md</code> in Obsidian</b></summary>
 
-![today.md rendered for a weekday in Obsidian](docs/preview-weekday.png)
+![today.md rendered for a weekday in Obsidian](assets/preview-weekday.png)
 
 </details>
 
@@ -622,24 +622,24 @@ Two roles live in this repo: **shared template** (committed, identical for
 everyone) and **your personal state** (gitignored, lives only on your
 machine). The split keeps your ticks and solutions from leaking into PRs.
 
-| File                                    | Role     | What it does                                                                          |
-| --------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `curriculum.template.md`                | template | Pristine master list of problems + SD chapters + mocks + behavioral; never has state. |
-| `curriculum.md`                         | personal | Your working copy — `[x]` ticks, ✅ stamps, 📅 schedules. Seeded by `prep init`.      |
-| `today.md`                              | personal | Generated daily plan. Regenerated on every `prep recompute`.                          |
-| `prep-data/completions.jsonl`           | personal | Append-only DSA completion ledger.                                                    |
-| `prep-data/hardest.jsonl`               | personal | Append-only hardest-problem ledger.                                                   |
-| `problems/<pattern>/<diff>-<n>.py`      | personal | Your solution files. The directory is gitignored except for `problems/company/`.      |
-| `problems/company/*.md`                 | template | Company-question prompts referenced by the curriculum.                                |
-| `recall_engine.py`                      | template | SM-2-lite recall engine.                                                              |
-| `tests/test_recall_engine.py`           | template | Narrative tests and engine spec.                                                      |
-| `launchd/com.today-dsa.recompute.plist` | template | macOS daily recompute LaunchAgent (edit the three `__REPLACE_ME__` markers first).    |
-| `patterns/*.md`                         | template | Pattern notes and per-problem mistakes.                                               |
-| `docs/python-gotchas.md`                | template | Python traps found during prep.                                                       |
-| `random-problems.md`                    | template | Extra unscheduled practice problems.                                                  |
-| `anki/`                                 | template | Fact-level recall decks.                                                              |
-| `docs/plans/`                           | template | Refactor and implementation plans.                                                    |
-| `scripts/`                              | template | Sandbox + verification scripts for the engine (Maintenance trigger, Hards scope).     |
+| File                                    | Role     | What it does                                                                           |
+| --------------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `curriculum.template.md`                | template | Pristine master list of problems + SD chapters + mocks + behavioral; never has state.  |
+| `curriculum.md`                         | personal | Your working copy — `[x]` ticks, ✅ stamps, 📅 schedules. Seeded by `prep init`.       |
+| `today.md`                              | personal | Generated daily plan. Regenerated on every `prep recompute`.                           |
+| `prep-data/completions.jsonl`           | personal | Append-only DSA completion ledger.                                                     |
+| `prep-data/hardest.jsonl`               | personal | Append-only hardest-problem ledger.                                                    |
+| `problems/<pattern>/<diff>-<n>.py`      | personal | Your solution files. The directory is gitignored except for `problems/company/`.       |
+| `problems/company/*.md`                 | template | Company-question prompts referenced by the curriculum.                                 |
+| `recall_engine.py`                      | template | SM-2-lite recall engine.                                                               |
+| `tests/test_recall_engine.py`           | template | Narrative tests and engine spec.                                                       |
+| `launchd/com.today-dsa.recompute.plist` | template | macOS daily recompute LaunchAgent (edit the three `__REPLACE_ME__` markers first).     |
+| `patterns/*.md`                         | template | Pattern notes and per-problem mistakes.                                                |
+| `docs/python-reference.md`              | shared   | Python data-type reference (dict/defaultdict/Counter/list/set methods + cheat sheets). |
+| `random-problems.md`                    | template | Extra unscheduled practice problems.                                                   |
+| `anki/`                                 | template | Fact-level recall decks.                                                               |
+| `docs/plans/`                           | template | Refactor and implementation plans.                                                     |
+| `scripts/`                              | template | Sandbox + verification scripts for the engine (Maintenance trigger, Hards scope).      |
 
 ---
 
