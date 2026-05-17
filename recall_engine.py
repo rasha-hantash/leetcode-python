@@ -2221,6 +2221,9 @@ def init_cmd(template: Path, curriculum: Path, force: bool) -> None:
 
     Idempotent: leaves an existing curriculum.md alone unless --force.
     Also creates prep-data/ and problems/ for the ledgers and your solutions.
+
+    Per-pattern annotations belong in `patterns/<slug>.notes.md` (gitignored,
+    lazy-created). The `patterns/<slug>.md` files stay pristine templates.
     """
     ensure_runtime_dirs(Path("prep-data"), Path("problems"))
     wrote = init_curriculum_file(template, curriculum, force=force)
