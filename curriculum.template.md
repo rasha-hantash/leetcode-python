@@ -15,6 +15,49 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 ## NeetCode 150 (+44 extras)
 
+### Phase 0 — Easy Sweep (5 new/day)
+
+_Front-loaded Easies across new patterns for breadth + confidence before pattern-by-pattern Medium grind. In-progress Easies stay in their home phase._
+
+#### Linked List
+
+- [Reverse Linked List](https://neetcode.io/problems/reverse-a-linked-list) (E) · 0/4
+- [Merge Two Sorted Lists](https://neetcode.io/problems/merge-two-sorted-linked-lists) (E) · 0/4
+- [Linked List Cycle](https://neetcode.io/problems/linked-list-cycle-detection) (E) · 0/4
+
+#### Trees
+
+- [Invert Binary Tree](https://neetcode.io/problems/invert-a-binary-tree) (E) · 0/4
+- [Maximum Depth of Binary Tree](https://neetcode.io/problems/depth-of-binary-tree) (E) · 0/4
+- [Diameter of Binary Tree](https://neetcode.io/problems/binary-tree-diameter) (E) · 0/4
+- [Same Tree](https://neetcode.io/problems/same-binary-tree) (E) · 0/4
+- [Lowest Common Ancestor of a BST](https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree) (E) · 0/4
+
+#### Heap
+
+- [Kth Largest Element in a Stream](https://neetcode.io/problems/kth-largest-integer-in-a-stream) (E) · 0/4
+
+#### 1-D DP
+
+- [Climbing Stairs](https://neetcode.io/problems/climbing-stairs) (E) · 0/4
+
+#### Intervals
+
+- [Meeting Rooms](https://neetcode.io/problems/meeting-schedule) (E) · 0/4
+
+#### Math & Geometry
+
+- [Plus One](https://neetcode.io/problems/plus-one) (E) · 0/4
+
+#### Bit Manipulation
+
+- [Single Number](https://neetcode.io/problems/single-number) (E) · 0/4
+- [Counting Bits](https://neetcode.io/problems/counting-bits) (E) · 0/4
+
+#### String Transformation
+
+- [Roman to Integer](https://neetcode.io/problems/roman-to-integer) (E) (nc-150+) · 0/4
+
 ### Phase 1 — Linear Patterns E+M (5 new/day)
 
 #### Arrays & Hashing
@@ -73,9 +116,6 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Linked List
 
-- [Reverse Linked List](https://neetcode.io/problems/reverse-a-linked-list) (E) · 0/4
-- [Merge Two Sorted Lists](https://neetcode.io/problems/merge-two-sorted-linked-lists) (E) · 0/4
-- [Linked List Cycle](https://neetcode.io/problems/linked-list-cycle-detection) (E) · 0/4
 - [Reorder List](https://neetcode.io/problems/reorder-linked-list) (M) · 0/4
 - [Remove Nth Node From End of List](https://neetcode.io/problems/remove-node-from-end-of-linked-list) (M) · 0/4
 - [Copy List With Random Pointer](https://neetcode.io/problems/copy-linked-list-with-random-pointer) (M) · 0/4
@@ -85,13 +125,8 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Trees
 
-- [Invert Binary Tree](https://neetcode.io/problems/invert-a-binary-tree) (E) · 0/4
-- [Maximum Depth of Binary Tree](https://neetcode.io/problems/depth-of-binary-tree) (E) · 0/4
-- [Diameter of Binary Tree](https://neetcode.io/problems/binary-tree-diameter) (E) · 0/4
 - [Balanced Binary Tree](https://neetcode.io/problems/balanced-binary-tree) (E) · 0/4
-- [Same Tree](https://neetcode.io/problems/same-binary-tree) (E) · 0/4
 - [Subtree of Another Tree](https://neetcode.io/problems/subtree-of-a-binary-tree) (E) · 0/4
-- [Lowest Common Ancestor of a BST](https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree) (E) · 0/4
 - [Binary Tree Level Order Traversal](https://neetcode.io/problems/level-order-traversal-of-binary-tree) (M) · 0/4
 - [Binary Tree Right Side View](https://neetcode.io/problems/binary-tree-right-side-view) (M) · 0/4
 - [Count Good Nodes in Binary Tree](https://neetcode.io/problems/count-good-nodes-in-binary-tree) (M) · 0/4
@@ -106,7 +141,6 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Heap
 
-- [Kth Largest Element in a Stream](https://neetcode.io/problems/kth-largest-integer-in-a-stream) (E) · 0/4
 - [Last Stone Weight](https://neetcode.io/problems/last-stone-weight) (E) · 0/4
 - [K Closest Points to Origin](https://neetcode.io/problems/k-closest-points-to-origin) (M) · 0/4
 - [Kth Largest Element in an Array](https://neetcode.io/problems/kth-largest-element-in-an-array) (M) · 0/4
@@ -157,7 +191,6 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### 1-D DP
 
-- [Climbing Stairs](https://neetcode.io/problems/climbing-stairs) (E) · 0/4
 - [Min Cost Climbing Stairs](https://neetcode.io/problems/min-cost-climbing-stairs) (E) · 0/4
 - [House Robber](https://neetcode.io/problems/house-robber) (M) · 0/4
 - [House Robber II](https://neetcode.io/problems/house-robber-ii) (M) (variant of: House Robber) · 0/4
@@ -196,7 +229,6 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Intervals
 
-- [Meeting Rooms](https://neetcode.io/problems/meeting-schedule) (E) · 0/4
 - [Insert Interval](https://neetcode.io/problems/insert-new-interval) (M) · 0/4
 - [Merge Intervals](https://neetcode.io/problems/merge-intervals) (M) · 0/4
 - [Non Overlapping Intervals](https://neetcode.io/problems/non-overlapping-intervals) (M) · 0/4
@@ -205,7 +237,6 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Math & Geometry
 
-- [Plus One](https://neetcode.io/problems/plus-one) (E) · 0/4
 - [Happy Number](https://neetcode.io/problems/non-cyclical-number) (E) · 0/4
 - [Rotate Image](https://neetcode.io/problems/rotate-matrix) (M) · 0/4
 - [Spiral Matrix](https://neetcode.io/problems/spiral-matrix) (M) · 0/4
@@ -216,9 +247,7 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 #### Bit Manipulation
 
-- [Single Number](https://neetcode.io/problems/single-number) (E) · 0/4
 - [Number of 1 Bits](https://neetcode.io/problems/number-of-one-bits) (E) · 0/4
-- [Counting Bits](https://neetcode.io/problems/counting-bits) (E) · 0/4
 - [Reverse Bits](https://neetcode.io/problems/reverse-bits) (E) · 0/4
 - [Missing Number](https://neetcode.io/problems/missing-number) (E) · 0/4
 - [Sum of Two Integers](https://neetcode.io/problems/sum-of-two-integers) (M) · 0/4
@@ -230,7 +259,6 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 - [Longest Common Prefix](https://neetcode.io/problems/longest-common-prefix) (E) (nc-150+) · 0/4
 - [Valid Word Abbreviation](https://neetcode.io/problems/valid-word-abbreviation) (E) · 0/4
-- [Roman to Integer](https://neetcode.io/problems/roman-to-integer) (E) (nc-150+) · 0/4
 - [Add Binary](https://neetcode.io/problems/add-binary) (E) (nc-150+) · 0/4
 - [snake_case → camelCase](./problems/company/snakecase-to-camelcase.md) (E) (nc-150+) (company question) · 0/4
 - [String Compression](https://neetcode.io/problems/string-compression) (M) · 0/4
@@ -413,4 +441,4 @@ _Self-paced — knock these out in a weekend._
 - [ ] [b12] Most proud-of accomplishment
 - [ ] [b13] Questions to ask the interviewer (per round)
 
-_Total: 182 problems across 41 pattern-phase groups._
+_Total: 182 problems across 49 pattern-phase groups._
