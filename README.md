@@ -634,7 +634,8 @@ machine). The split keeps your ticks and solutions from leaking into PRs.
 | `recall_engine.py`                      | template | SM-2-lite recall engine.                                                               |
 | `tests/test_recall_engine.py`           | template | Narrative tests and engine spec.                                                       |
 | `launchd/com.today-dsa.recompute.plist` | template | macOS daily recompute LaunchAgent (edit the three `__REPLACE_ME__` markers first).     |
-| `patterns/*.md`                         | template | Pattern notes and per-problem mistakes.                                                |
+| `patterns/<slug>.md`                    | template | Pattern templates — algorithm sketch, common Mistakes, per-problem variants.           |
+| `patterns/<slug>.notes.md`              | personal | Your annotations alongside each pattern. Lazy-created when you have something to note. |
 | `docs/python-reference.md`              | shared   | Python data-type reference (dict/defaultdict/Counter/list/set methods + cheat sheets). |
 | `random-problems.md`                    | template | Extra unscheduled practice problems.                                                   |
 | `anki/`                                 | template | Fact-level recall decks.                                                               |

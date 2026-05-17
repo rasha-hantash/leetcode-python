@@ -18,6 +18,11 @@ today.pdf
 # Holds your `[x]` ticks, ✅ stamps, and 📅 schedules; never committed.
 curriculum.md
 
+# Per-pattern personal notes — your annotations next to each `patterns/<slug>.md`
+# template. Lazy-created; live only on your machine. Keeps templates pristine
+# and sync-friendly.
+patterns/*.notes.md
+
 # Your solutions — keep them private. The dir is recreated by `prep init`.
 # Company-question prompts (the .md files under problems/company/) stay tracked
 # because the curriculum links to them; only your code is ignored.
