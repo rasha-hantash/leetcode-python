@@ -17,7 +17,33 @@ _`today.md` — `prep recompute` keeps both in sync._
 
 ### Phase 0 — Easy Sweep (5 new/day)
 
-_Front-loaded Easies across new patterns for breadth + confidence before pattern-by-pattern Medium grind. In-progress Easies stay in their home phase._
+_Front-loaded all Easies for breadth + confidence before pattern-by-pattern Medium grind._
+
+#### Arrays & Hashing
+
+- [Contains Duplicate](https://neetcode.io/problems/duplicate-integer) (E) · 0/4
+- [Valid Anagram](https://neetcode.io/problems/is-anagram) (E) · 0/4
+- [Two Sum](https://neetcode.io/problems/two-integer-sum) (E) · 0/4
+- [Find Pivot Index](https://neetcode.io/problems/find-pivot-index) (E) (nc-150+) · 0/4
+- [Find All Numbers Disappeared in an Array](https://neetcode.io/problems/find-all-numbers-disappeared-in-an-array) (E) (nc-150+) · 0/4
+
+#### Two Pointers
+
+- [Valid Palindrome](https://neetcode.io/problems/is-palindrome) (E) · 0/4
+
+#### Sliding Window
+
+- [Best Time to Buy and Sell Stock](https://neetcode.io/problems/buy-and-sell-crypto) (E) · 0/4
+- [Count Binary Substrings](https://leetcode.com/problems/count-binary-substrings/) (E) (lc-only) · 0/4
+
+#### Stack
+
+- [Valid Parentheses](https://neetcode.io/problems/validate-parentheses) (E) · 0/4
+- [Min Stack](https://neetcode.io/problems/minimum-stack) (E) · 0/4
+
+#### Binary Search
+
+- [Binary Search](https://neetcode.io/problems/binary-search) (E) · 0/4
 
 #### Linked List
 
@@ -32,14 +58,18 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 - [Diameter of Binary Tree](https://neetcode.io/problems/binary-tree-diameter) (E) · 0/4
 - [Same Tree](https://neetcode.io/problems/same-binary-tree) (E) · 0/4
 - [Lowest Common Ancestor of a BST](https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree) (E) · 0/4
+- [Balanced Binary Tree](https://neetcode.io/problems/balanced-binary-tree) (E) · 0/4
+- [Subtree of Another Tree](https://neetcode.io/problems/subtree-of-a-binary-tree) (E) · 0/4
 
 #### Heap
 
 - [Kth Largest Element in a Stream](https://neetcode.io/problems/kth-largest-integer-in-a-stream) (E) · 0/4
+- [Last Stone Weight](https://neetcode.io/problems/last-stone-weight) (E) · 0/4
 
 #### 1-D DP
 
 - [Climbing Stairs](https://neetcode.io/problems/climbing-stairs) (E) · 0/4
+- [Min Cost Climbing Stairs](https://neetcode.io/problems/min-cost-climbing-stairs) (E) · 0/4
 
 #### Intervals
 
@@ -48,25 +78,32 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 #### Math & Geometry
 
 - [Plus One](https://neetcode.io/problems/plus-one) (E) · 0/4
+- [Happy Number](https://neetcode.io/problems/non-cyclical-number) (E) · 0/4
 
 #### Bit Manipulation
 
 - [Single Number](https://neetcode.io/problems/single-number) (E) · 0/4
 - [Counting Bits](https://neetcode.io/problems/counting-bits) (E) · 0/4
+- [Number of 1 Bits](https://neetcode.io/problems/number-of-one-bits) (E) · 0/4
+- [Reverse Bits](https://neetcode.io/problems/reverse-bits) (E) · 0/4
+- [Missing Number](https://neetcode.io/problems/missing-number) (E) · 0/4
 
 #### String Transformation
 
 - [Roman to Integer](https://neetcode.io/problems/roman-to-integer) (E) (nc-150+) · 0/4
+- [Longest Common Prefix](https://neetcode.io/problems/longest-common-prefix) (E) (nc-150+) · 0/4
+- [Valid Word Abbreviation](https://neetcode.io/problems/valid-word-abbreviation) (E) · 0/4
+- [Add Binary](https://neetcode.io/problems/add-binary) (E) (nc-150+) · 0/4
+- [snake_case → camelCase](./problems/company/snakecase-to-camelcase.md) (E) (nc-150+) (company question) · 0/4
+
+#### Boyer-Moore
+
+- [Majority Element](https://neetcode.io/problems/majority-element) (E) (nc-150+) · 0/4
 
 ### Phase 1 — Linear Patterns E+M (5 new/day)
 
 #### Arrays & Hashing
 
-- [Contains Duplicate](https://neetcode.io/problems/duplicate-integer) (E) · 0/4
-- [Valid Anagram](https://neetcode.io/problems/is-anagram) (E) · 0/4
-- [Two Sum](https://neetcode.io/problems/two-integer-sum) (E) · 0/4
-- [Find Pivot Index](https://neetcode.io/problems/find-pivot-index) (E) (nc-150+) · 0/4
-- [Find All Numbers Disappeared in an Array](https://neetcode.io/problems/find-all-numbers-disappeared-in-an-array) (E) (nc-150+) · 0/4
 - [Group Anagrams](https://neetcode.io/problems/anagram-groups) (M) · 0/4
 - [Top K Frequent Elements](https://neetcode.io/problems/top-k-elements-in-list) (M) · 0/4
 - [Encode and Decode Strings](https://neetcode.io/problems/string-encode-and-decode) (M) · 0/4
@@ -82,30 +119,24 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### Two Pointers
 
-- [Valid Palindrome](https://neetcode.io/problems/is-palindrome) (E) · 0/4
 - [Two Sum II](https://neetcode.io/problems/two-integer-sum-ii) (M) (variant of: Two Sum) · 0/4
 - [3Sum](https://neetcode.io/problems/three-integer-sum) (M) · 0/4
 - [Container With Most Water](https://neetcode.io/problems/max-water-container) (M) · 0/4
 
 #### Sliding Window
 
-- [Best Time to Buy and Sell Stock](https://neetcode.io/problems/buy-and-sell-crypto) (E) · 0/4
-- [Count Binary Substrings](https://leetcode.com/problems/count-binary-substrings/) (E) (lc-only) · 0/4
 - [Longest Substring Without Repeating Characters](https://neetcode.io/problems/longest-substring-without-duplicates) (M) · 0/4
 - [Longest Repeating Character Replacement](https://neetcode.io/problems/longest-repeating-substring-with-replacement) (M) · 0/4
 - [Permutation in String](https://neetcode.io/problems/permutation-string) (M) · 0/4
 
 #### Stack
 
-- [Valid Parentheses](https://neetcode.io/problems/validate-parentheses) (E) · 0/4
-- [Min Stack](https://neetcode.io/problems/minimum-stack) (E) · 0/4
 - [Evaluate Reverse Polish Notation](https://neetcode.io/problems/evaluate-reverse-polish-notation) (M) · 0/4
 - [Daily Temperatures](https://neetcode.io/problems/daily-temperatures) (M) · 0/4
 - [Car Fleet](https://neetcode.io/problems/car-fleet) (M) · 0/4
 
 #### Binary Search
 
-- [Binary Search](https://neetcode.io/problems/binary-search) (E) · 0/4
 - [Search a 2D Matrix](https://neetcode.io/problems/search-2d-matrix) (M) · 0/4
 - [Koko Eating Bananas](https://neetcode.io/problems/eating-bananas) (M) · 0/4
 - [Find Minimum in Rotated Sorted Array](https://neetcode.io/problems/find-minimum-in-rotated-sorted-array) (M) · 0/4
@@ -125,8 +156,6 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### Trees
 
-- [Balanced Binary Tree](https://neetcode.io/problems/balanced-binary-tree) (E) · 0/4
-- [Subtree of Another Tree](https://neetcode.io/problems/subtree-of-a-binary-tree) (E) · 0/4
 - [Binary Tree Level Order Traversal](https://neetcode.io/problems/level-order-traversal-of-binary-tree) (M) · 0/4
 - [Binary Tree Right Side View](https://neetcode.io/problems/binary-tree-right-side-view) (M) · 0/4
 - [Count Good Nodes in Binary Tree](https://neetcode.io/problems/count-good-nodes-in-binary-tree) (M) · 0/4
@@ -141,7 +170,6 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### Heap
 
-- [Last Stone Weight](https://neetcode.io/problems/last-stone-weight) (E) · 0/4
 - [K Closest Points to Origin](https://neetcode.io/problems/k-closest-points-to-origin) (M) · 0/4
 - [Kth Largest Element in an Array](https://neetcode.io/problems/kth-largest-element-in-an-array) (M) · 0/4
 - [Task Scheduler](https://neetcode.io/problems/task-scheduling) (M) · 0/4
@@ -191,7 +219,6 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### 1-D DP
 
-- [Min Cost Climbing Stairs](https://neetcode.io/problems/min-cost-climbing-stairs) (E) · 0/4
 - [House Robber](https://neetcode.io/problems/house-robber) (M) · 0/4
 - [House Robber II](https://neetcode.io/problems/house-robber-ii) (M) (variant of: House Robber) · 0/4
 - [Longest Palindromic Substring](https://neetcode.io/problems/longest-palindromic-substring) (M) · 0/4
@@ -237,7 +264,6 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### Math & Geometry
 
-- [Happy Number](https://neetcode.io/problems/non-cyclical-number) (E) · 0/4
 - [Rotate Image](https://neetcode.io/problems/rotate-matrix) (M) · 0/4
 - [Spiral Matrix](https://neetcode.io/problems/spiral-matrix) (M) · 0/4
 - [Set Matrix Zeroes](https://neetcode.io/problems/set-zeroes-in-matrix) (M) · 0/4
@@ -247,9 +273,6 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### Bit Manipulation
 
-- [Number of 1 Bits](https://neetcode.io/problems/number-of-one-bits) (E) · 0/4
-- [Reverse Bits](https://neetcode.io/problems/reverse-bits) (E) · 0/4
-- [Missing Number](https://neetcode.io/problems/missing-number) (E) · 0/4
 - [Sum of Two Integers](https://neetcode.io/problems/sum-of-two-integers) (M) · 0/4
 - [Reverse Integer](https://neetcode.io/problems/reverse-integer) (M) · 0/4
 
@@ -257,10 +280,6 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### String Transformation
 
-- [Longest Common Prefix](https://neetcode.io/problems/longest-common-prefix) (E) (nc-150+) · 0/4
-- [Valid Word Abbreviation](https://neetcode.io/problems/valid-word-abbreviation) (E) · 0/4
-- [Add Binary](https://neetcode.io/problems/add-binary) (E) (nc-150+) · 0/4
-- [snake_case → camelCase](./problems/company/snakecase-to-camelcase.md) (E) (nc-150+) (company question) · 0/4
 - [String Compression](https://neetcode.io/problems/string-compression) (M) · 0/4
 - [Decode String](https://neetcode.io/problems/decode-string) (M) (nc-150+) · 0/4
 - [Basic Calculator II](https://neetcode.io/problems/basic-calculator-ii) (M) · 0/4
@@ -273,7 +292,6 @@ _Front-loaded Easies across new patterns for breadth + confidence before pattern
 
 #### Boyer-Moore
 
-- [Majority Element](https://neetcode.io/problems/majority-element) (E) (nc-150+) · 0/4
 - [Majority Element II](https://neetcode.io/problems/majority-element-ii) (M) (variant of: Majority Element) · 0/4
 
 #### Bit-Trie
@@ -441,4 +459,4 @@ _Self-paced — knock these out in a weekend._
 - [ ] [b12] Most proud-of accomplishment
 - [ ] [b13] Questions to ask the interviewer (per round)
 
-_Total: 182 problems across 49 pattern-phase groups._
+_Total: 182 problems across 57 pattern-phase groups._
